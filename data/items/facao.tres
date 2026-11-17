@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/facao_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"facao"
+display_name = "Facão"
+description = "Rápido e equilibrado. Era do seu avô."
+icon = ExtResource("2")
+category = 7
+max_stack = 1
+sell_price = 20
+buy_price = 80
+damage = 10
+attack_cooldown = 0.3
+reach = 16.0
+arc_width = 22.0
+knockback = 100.0

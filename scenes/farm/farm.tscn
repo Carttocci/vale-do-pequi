@@ -39,7 +39,7 @@ y_sort_enabled = true
 
 [node name="BauDoAvo" parent="Entities" instance=ExtResource("bau")]
 position = Vector2(520, 114)
-starting_items = PackedStringArray("semente_abobora:6", "semente_mandioca:6", "semente_milho:10")
+starting_items = PackedStringArray("facao:1", "semente_abobora:6", "semente_mandioca:6", "semente_milho:10")
 title = "Baú do avô"
 
 [node name="CasaPrincipal" parent="Entities" instance=ExtResource("casa")]

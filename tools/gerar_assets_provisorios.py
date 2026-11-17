@@ -802,6 +802,120 @@ def make_fauna():
     img.save(out("assets/environments/armadilha_armada_placeholder.png"))
 
 
+def make_combat():
+    """Fase 6: inimigos (criaturas corrompidas pelo Silêncio), armas, golpe."""
+    o = C["outline"]
+    sil = (120, 110, 150, 255)       # tom do Silêncio
+    sil_d = (80, 72, 104, 255)
+    glow = (190, 170, 255, 255)
+
+    def raiz(d, ox, f):  # 20x24: tronco retorcido que anda
+        step = (f % 2) * 2 - 1
+        d.ellipse([ox + 3, 21, ox + 17, 23], fill=(0, 0, 0, 60))
+        d.line([(ox + 6, 22), (ox + 5 + step, 15)], fill=C["wood_d"], width=2)
+        d.line([(ox + 14, 22), (ox + 15 - step, 15)], fill=C["wood_d"], width=2)
+        d.polygon([(ox + 4, 16), (ox + 7, 4), (ox + 13, 3), (ox + 16, 16)], fill=(100, 80, 70, 255), outline=o)
+        d.line([(ox + 7, 6), (ox + 2, 1)], fill=C["wood_d"], width=2)
+        d.line([(ox + 13, 5), (ox + 18, 0)], fill=C["wood_d"], width=2)
+        d.point((ox + 8, 9), fill=glow)
+        d.point((ox + 12, 9), fill=glow)
+        d.line([(ox + 6, 12), (ox + 14, 12)], fill=sil_d)
+    sheet("assets/enemies/raiz_torta_placeholder.png", 20, 24, 4, raiz)
+
+    def lodo(d, ox, f):  # 16x12: gosma cinza que pula
+        h = [0, 2, 3, 1][f]
+        d.ellipse([ox + 2, 9, ox + 14, 11], fill=(0, 0, 0, 60))
+        d.ellipse([ox + 1, 3 - h, ox + 15, 11 - h // 2], fill=sil, outline=o)
+        d.ellipse([ox + 4, 4 - h, ox + 8, 6 - h], fill=(170, 160, 200, 255))
+        d.point((ox + 6, 7 - h), fill=o)
+        d.point((ox + 10, 7 - h), fill=o)
+    sheet("assets/enemies/lodo_cinza_placeholder.png", 16, 12, 4, lodo)
+
+    def morcego(d, ox, f):  # 16x12
+        up = f % 2 == 0
+        d.ellipse([ox + 6, 4, ox + 10, 9], fill=sil_d, outline=o)
+        if up:
+            d.polygon([(ox + 6, 6), (ox + 0, 1), (ox + 2, 7)], fill=sil, outline=o)
+            d.polygon([(ox + 10, 6), (ox + 16, 1), (ox + 14, 7)], fill=sil, outline=o)
+        else:
+            d.polygon([(ox + 6, 6), (ox + 0, 10), (ox + 3, 6)], fill=sil, outline=o)
+            d.polygon([(ox + 10, 6), (ox + 16, 10), (ox + 13, 6)], fill=sil, outline=o)
+        d.point((ox + 7, 6), fill=glow)
+        d.point((ox + 9, 6), fill=glow)
+    sheet("assets/enemies/morcego_placeholder.png", 16, 12, 4, morcego)
+
+    # javali corrompido: javali com tom do Silêncio
+    base = Image.open(out("assets/animals/javali_placeholder.png")).convert("RGBA")
+    px = base.load()
+    for y in range(base.height):
+        for x in range(base.width):
+            r, g, b, a = px[x, y]
+            if a and (r, g, b) != (38, 30, 28):
+                px[x, y] = ((r + 90) // 2, (g + 80) // 2, (b + 140) // 2, a)
+    base.save(out("assets/enemies/javali_corrompido_placeholder.png"))
+
+    # golpe (arco branco) 24x24 apontando para a direita, e flecha
+    img = Image.new("RGBA", (24, 24), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.arc([2, 2, 22, 22], -70, 70, fill=(255, 250, 230, 220), width=3)
+    d.arc([5, 5, 19, 19], -50, 50, fill=(255, 250, 230, 120), width=1)
+    img.save(out("assets/effects/golpe_placeholder.png"))
+    img = Image.new("RGBA", (12, 4), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.line([(0, 2), (9, 2)], fill=C["wood_l"])
+    d.polygon([(9, 0), (12, 2), (9, 4)], fill=C["stone"])
+    d.point((0, 1), fill=C["white"]); d.point((0, 3), fill=C["white"])
+    img.save(out("assets/effects/flecha_voo_placeholder.png"))
+
+    def icon(name, draw):
+        im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        draw(ImageDraw.Draw(im))
+        im.save(out(f"assets/items/{name}_placeholder.png"))
+    metal = (200, 205, 215, 255)
+    def blade(length, width, handle=C["wood"]):
+        def f(d):
+            d.line([(2, 14), (5, 11)], fill=handle, width=2)
+            d.line([(4, 10), (6, 12)], fill=C["stone_d"], width=1)
+            d.line([(5, 11), (5 + length, 11 - length)], fill=metal, width=width)
+            d.point((5 + length, 11 - length), fill=C["white"])
+        return f
+    icon("facao", blade(8, 2))
+    icon("espada", blade(9, 2, (120, 60, 40, 255)))
+    def machado(d):
+        d.line([(3, 14), (11, 3)], fill=C["wood"], width=2)
+        d.polygon([(8, 2), (14, 4), (12, 9), (9, 6)], fill=metal, outline=o)
+    def lanca(d):
+        d.line([(1, 15), (12, 4)], fill=C["wood_l"], width=1)
+        d.polygon([(11, 3), (15, 0), (13, 5)], fill=metal, outline=o)
+    def martelo(d):
+        d.line([(4, 14), (9, 6)], fill=C["wood"], width=2)
+        d.rectangle([6, 1, 14, 6], fill=C["stone_d"], outline=o)
+    def arco(d):
+        d.arc([3, 1, 13, 15], 270, 90, fill=C["wood"], width=2)
+        d.line([(8, 1), (8, 15)], fill=C["white"])
+    def flecha(d):
+        d.line([(2, 14), (12, 4)], fill=C["wood_l"])
+        d.polygon([(11, 3), (14, 2), (13, 5)], fill=C["stone"])
+        d.line([(2, 13), (3, 15)], fill=C["white"])
+    def madeira(d):
+        d.rectangle([2, 6, 14, 11], fill=C["wood"], outline=o)
+        d.ellipse([11, 6, 15, 11], fill=C["wood_l"], outline=o)
+    def fragmento(d):
+        d.polygon([(8, 1), (13, 7), (9, 15), (3, 9)], fill=sil, outline=o)
+        d.line([(8, 3), (6, 9)], fill=glow)
+    for n, fn in [("machado", machado), ("lanca", lanca), ("martelo", martelo), ("arco", arco), ("flecha", flecha),
+                  ("madeira", madeira), ("fragmento_silencio", fragmento)]:
+        icon(n, fn)
+
+    # botão de toque: esquiva
+    im = Image.new("RGBA", (30, 30), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.ellipse([0, 0, 29, 29], fill=(60, 90, 140, 170), outline=(226, 206, 168, 200), width=2)
+    for k in range(3):
+        d.line([(8 + k * 5, 10), (13 + k * 5, 15), (8 + k * 5, 20)], fill=C["bege"], width=2)
+    im.save(out("assets/ui/touch_btn_dodge_placeholder.png"))
+
+
 def make_app_icons():
     """Ícones do app web/PWA (pequi sobre terra vermelha)."""
     for size in (144, 180, 512):
@@ -819,6 +933,7 @@ if __name__ == "__main__":
     make_npcs()
     make_village()
     make_fauna()
+    make_combat()
     make_weather()
     make_app_icons()
     make_tileset()

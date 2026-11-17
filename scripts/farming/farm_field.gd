@@ -209,7 +209,7 @@ func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
         ItemData.Category.TOOL:
             match item.tool_type:
                 ItemData.ToolType.HOE:
-                    if till(cell):
+                    if can_till(cell) and GameState.use_energy(2) and till(cell):
                         return true
                     if not cells.has(cell):
                         EventBus.show_message("Aqui não dá pra capinar.", 1.5)
@@ -224,9 +224,12 @@ func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
                         return false
                     if is_watered(cell):
                         return false
-                    if not GameState.use_water():
+                    if GameState.water <= 0:
                         EventBus.show_message("Regador vazio. Encha no poço ou na lagoa.", 2.0)
                         return false
+                    if not GameState.use_energy(1):
+                        return false
+                    GameState.use_water()
                     return water(cell)
         ItemData.Category.SEED:
             if not cells.has(cell):

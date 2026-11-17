@@ -25,6 +25,8 @@ var _anim := 0.0
 var _rng := RandomNumberGenerator.new()
 var sprite: Sprite2D
 var interactable: Interactable
+## Só o javali tem vida (caça de controle de espécie invasora).
+var hp: int = 0
 
 
 func setup(sp: StringName, at: Vector2, lvl: Level) -> WildAnimal:
@@ -48,8 +50,35 @@ func setup(sp: StringName, at: Vector2, lvl: Level) -> WildAnimal:
     interactable.add_child(shape)
     add_child(interactable)
     interactable.interacted.connect(func(_a: Node) -> void: observe())
+    if sp == &"javali":
+        hp = 40
+        add_to_group("huntable")
     _update_prompt()
     return self
+
+
+func is_dead() -> bool:
+    return hp <= 0 and is_in_group("huntable") == false
+
+
+## Golpe de arma (só o javali está no grupo "huntable").
+func take_hit(amount: int, dir: Vector2, _knockback: float, _stun: float = 0.0) -> void:
+    if hp <= 0:
+        return
+    hp -= amount
+    _flee = 1.5
+    _target = global_position + dir.normalized() * 60.0
+    sprite.modulate = Color(2, 2, 2)
+    create_tween().tween_property(sprite, "modulate", Color.WHITE, 0.15)
+    if hp <= 0:
+        remove_from_group("huntable")
+        GameState.add_xp(&"caca", 15)
+        for d in [[&"carne_javali", 2], [&"couro", 1]]:
+            var pk := Pickup.new().setup(d[0], d[1])
+            pk.position = position + Vector2(randf_range(-6, 6), 0)
+            get_parent().add_child(pk)
+        EventBus.show_message("Javali abatido. Um invasor a menos na mata.", 2.5)
+        queue_free()
 
 
 func display_name() -> String:

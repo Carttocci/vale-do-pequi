@@ -44,6 +44,22 @@ ITEMS = [
     ("couro", "Couro", "Couro curtido. Serve para artesanato.", 4, 99, 30, 0, {}),
     ("armadilha", "Armadilha de javali", "Arme na Mata dos Ipês. Na manhã seguinte pode ter javali.", 9, 20, 10, 40,
      {"place_scene": "res://scenes/mata/armadilha.tscn", "place_regions": ["mata"]}),
+    # Fase 6 — combate
+    ("facao", "Facão", "Rápido e equilibrado. Era do seu avô.", 7, 1, 20, 80,
+     {"damage": 10, "attack_cooldown": 0.3, "reach": 16.0, "arc_width": 22.0, "knockback": 100.0}),
+    ("espada", "Espada", "Equilíbrio entre velocidade e dano.", 7, 1, 80, 320,
+     {"damage": 15, "attack_cooldown": 0.4, "reach": 18.0, "arc_width": 24.0, "knockback": 120.0}),
+    ("machado", "Machado", "Golpe pesado que quebra defesas.", 7, 1, 70, 280,
+     {"damage": 22, "attack_cooldown": 0.65, "reach": 16.0, "arc_width": 22.0, "knockback": 170.0}),
+    ("lanca", "Lança", "Alcance maior: mantém o bicho longe.", 7, 1, 70, 280,
+     {"damage": 14, "attack_cooldown": 0.5, "reach": 28.0, "arc_width": 12.0, "knockback": 140.0}),
+    ("martelo", "Martelo", "Impacto que atordoa.", 7, 1, 100, 420,
+     {"damage": 26, "attack_cooldown": 0.8, "reach": 16.0, "arc_width": 26.0, "knockback": 200.0, "stun": 0.8}),
+    ("arco", "Arco", "Ataque de longe. Gasta flechas.", 7, 1, 90, 360,
+     {"damage": 12, "attack_cooldown": 0.55, "reach": 160.0, "ranged": True, "ammo_item": "flecha"}),
+    ("flecha", "Flecha", "Munição para o arco.", 4, 99, 1, 5, {}),
+    ("madeira", "Madeira", "Pedaço de madeira. Serve para artesanato.", 4, 99, 3, 0, {}),
+    ("fragmento_silencio", "Fragmento do Silêncio", "Caco frio e sem som que sobra das criaturas corrompidas.", 11, 99, 0, 0, {}),
 ]
 
 TEMPLATE = """[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]

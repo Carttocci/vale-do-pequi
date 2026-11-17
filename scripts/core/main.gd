@@ -20,6 +20,7 @@ var _fade: ColorRect
 func _ready() -> void:
     _configure_scaling()
     Clock.passed_out.connect(_on_passed_out)
+    GameState.fainted.connect(_on_fainted)
     EventBus.region_change_requested.connect(change_region)
     _build_fade()
     for child in get_children():
@@ -102,6 +103,17 @@ func _on_passed_out() -> void:
     change_region_now(&"farm")
     SaveManager.save_game()
     EventBus.show_message("Você apagou de cansaço e acordou em casa. %s." % Calendar.format_date(GameState.day), 4.0)
+
+
+## Vida zerou: desmaia, acorda em casa no dia seguinte e perde um pouco de dinheiro.
+func _on_fainted() -> void:
+    var lost := mini(GameState.money / 10, 100)
+    GameState.money -= lost
+    GameState.money_changed.emit(GameState.money)
+    GameState.sleep()
+    change_region_now(&"farm")
+    SaveManager.save_game()
+    EventBus.show_message("Você desmaiou... Alguém te levou pra casa. (-R$ %d)" % lost, 4.0)
 
 
 func _build_fade() -> void:

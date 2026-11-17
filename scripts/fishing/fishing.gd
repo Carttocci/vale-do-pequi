@@ -27,6 +27,8 @@ func use_item(item: ItemData, target_pos: Vector2, actor: Node) -> bool:
     if GameState.get_item_count(ISCA) <= 0:
         EventBus.show_message("Sem isca! O João Pedro vende minhoca na lagoa da vila.", 2.5)
         return false
+    if not GameState.use_energy(2):
+        return false
     GameState.inventory.remove(ISCA, 1)
     var fish := roll_fish(current_habitat(), Clock.minutes, Calendar.period(GameState.day), Clock.WEATHER_KEYS[Clock.weather])
     if fish == null:

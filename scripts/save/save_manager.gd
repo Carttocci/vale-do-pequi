@@ -41,6 +41,9 @@ var _MIGRATIONS: Dictionary = {
     # criação de animais. Tudo começa vazio (valores padrão em from_data).
     3: func(d: Dictionary) -> Dictionary:
         return d,
+    # v4 (Fase 5) → v5 (Fase 6): vida, energia e caminhos de combate (padrão: cheios/zerados).
+    4: func(d: Dictionary) -> Dictionary:
+        return d,
 }
 
 

@@ -1,5 +1,15 @@
 # Changelog — Vale do Pequi
 
+## 0.7.0 — Fase 6: Combate (17/11/2026)
+- **Vida e energia** (barras no HUD). Ferramentas, pesca, esquiva e golpe carregado gastam energia; dormir recupera tudo. Vida zero: desmaia, acorda em casa no dia seguinte e perde 10% do dinheiro (máx. R$ 100).
+- **Armas** (Ferraria do Toninho): facão, espada, machado, lança, martelo (atordoa) e arco (flechas). O facão do avô vem no baú em jogos novos.
+- **Golpes**: E/clique/X ataca com a arma na mão; combo de 3 (o 3º é mais forte); segurar e soltar faz o golpe carregado em giro; arco dispara flechas.
+- **Esquiva** (Espaço / B / botão azul no celular) com invulnerabilidade.
+- **Criaturas corrompidas pelo Silêncio**: raiz-torta, lodo-cinza, morcego-de-gruta e javali corrompido — aparecem à noite na Mata dos Ipês e deixam madeira, carne, couro e fragmentos do Silêncio.
+- **Caça com arma** só do javali (espécie invasora); bichos nativos não podem ser atingidos.
+- **Caminhos de combate** (Guerreiro, Caçador, Explorador): 1 ponto por nível de combate, redistribuíveis.
+- Save v5. 37 testes novos (403 no total).
+
 ## 0.6.0 — Fase 5: Atividades (17/11/2026)
 - **Mata dos Ipês + Rio das Araras** (60×34), a leste da vila: mata fechada, campo de capim dourado, pequizeiros nativos, rio com ponte.
 - **Pesca**: vara de bambu + minhoca (loja do João Pedro na lagoa da vila). Minijogo de um botão: esperar, fisgar e acertar a faixa verde. 8 espécies por habitat (lagoa/rio), horário, período e clima — inclusive o lendário dourado-rei em noite de chuva. João compra peixe.

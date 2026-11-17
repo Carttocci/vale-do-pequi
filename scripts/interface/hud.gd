@@ -31,6 +31,7 @@ func _ready() -> void:
     Clock.day_started.connect(func(_d: int, _w: int) -> void: update_clock())
     GameState.money_changed.connect(func(_m: int) -> void: update_clock())
     update_clock()
+    _build_bars()
     save_button.pressed.connect(_on_save_pressed)
     new_game_button.pressed.connect(_on_new_game_pressed)
     message_timer.timeout.connect(_fade_message)
@@ -125,3 +126,34 @@ func _on_new_game_pressed() -> void:
 func update_clock() -> void:
     day_label.text = "%s  %s\n%s · %s\nR$ %d" % [Calendar.format_date(GameState.day), Calendar.format_time(Clock.minutes),
         Clock.weather_name(), Calendar.period_name(GameState.day).trim_prefix("Período "), GameState.money]
+
+
+# --- vida e energia -------------------------------------------------------------
+
+var health_bar: Control
+var energy_bar: Control
+
+
+func _build_bars() -> void:
+    var box := VBoxContainer.new()
+    box.position = Vector2(8, 54)
+    box.add_theme_constant_override("separation", 2)
+    box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    $Root.add_child(box)
+    health_bar = _make_bar(Color(0.85, 0.25, 0.25), func() -> float: return float(GameState.health) / GameState.MAX_HEALTH)
+    energy_bar = _make_bar(Color(0.95, 0.75, 0.2), func() -> float: return float(GameState.energy) / GameState.MAX_ENERGY)
+    box.add_child(health_bar)
+    box.add_child(energy_bar)
+    GameState.health_changed.connect(func(_v: int, _m: int) -> void: health_bar.queue_redraw())
+    GameState.energy_changed.connect(func(_v: int, _m: int) -> void: energy_bar.queue_redraw())
+
+
+func _make_bar(color: Color, value: Callable) -> Control:
+    var c := Control.new()
+    c.custom_minimum_size = Vector2(100, 5)
+    c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    c.draw.connect(func() -> void:
+        c.draw_rect(Rect2(Vector2.ZERO, c.size), Color(0.1, 0.08, 0.07, 0.85))
+        c.draw_rect(Rect2(Vector2.ZERO, Vector2(c.size.x * clampf(value.call(), 0.0, 1.0), c.size.y)), color)
+        c.draw_rect(Rect2(Vector2.ZERO, c.size), Color(0.72, 0.47, 0.22), false, 1.0))
+    return c

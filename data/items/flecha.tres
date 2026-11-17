@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/flecha_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"flecha"
+display_name = "Flecha"
+description = "Munição para o arco."
+icon = ExtResource("2")
+category = 4
+max_stack = 99
+sell_price = 1
+buy_price = 5

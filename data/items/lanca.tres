@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/lanca_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"lanca"
+display_name = "Lança"
+description = "Alcance maior: mantém o bicho longe."
+icon = ExtResource("2")
+category = 7
+max_stack = 1
+sell_price = 70
+buy_price = 280
+damage = 14
+attack_cooldown = 0.5
+reach = 28.0
+arc_width = 12.0
+knockback = 140.0

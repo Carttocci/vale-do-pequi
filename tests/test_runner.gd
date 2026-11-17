@@ -84,6 +84,11 @@ func _run_all() -> void:
     await _test_wildlife_and_traps()
     _test_skills()
     await _test_save_v4()
+    await _test_combat_basics()
+    await _test_enemies_and_damage()
+    await _test_ranged_dodge_hunt()
+    _test_energy_and_paths()
+    await _test_save_v5()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -871,11 +876,12 @@ func _test_weather_rolls() -> void:
     for d in range(2, 72):          # out a abr (chuvoso)
         if Clock.roll_weather(d) in [Clock.Weather.CHUVA, Clock.Weather.TEMPESTADE]:
             rain_wet += 1
-    for d in range(71, 121):        # mai a set (seco)
-        if Clock.roll_weather(d) in [Clock.Weather.CHUVA, Clock.Weather.TEMPESTADE]:
-            rain_dry += 1
+    for year in 3:                  # mai a set (seco) de 3 anos
+        for d in range(71 + year * 120, 121 + year * 120):
+            if Clock.roll_weather(d) in [Clock.Weather.CHUVA, Clock.Weather.TEMPESTADE]:
+                rain_dry += 1
     check(rain_wet >= 20, "chuvoso chove bastante (%d de 70 dias)" % rain_wet)
-    check(rain_dry <= 6, "seco quase não chove (%d de 50 dias)" % rain_dry)
+    check(rain_dry <= 12, "seco quase não chove (%d de 150 dias)" % rain_dry)
     check(Clock.roll_weather(1) == Clock.Weather.ENSOLARADO, "primeiro dia sempre ensolarado")
     check(Clock.roll_weather(17) == Clock.roll_weather(17), "mesmo save, mesmo clima no mesmo dia")
     var seco_tipos := {}
@@ -1492,3 +1498,169 @@ func _test_save_v4() -> void:
     check(SaveManager.load_game() and GameState.money == 50 and GameState.skill_xp.is_empty(), "save v3 migra para v4")
     SaveManager.delete_save()
     _main.change_region_now(&"farm")
+
+
+# --- Fase 6 ----------------------------------------------------------------
+
+func spawn_enemy(kind: StringName, pos: Vector2) -> Enemy:
+    var e := Enemy.new().setup(kind, pos, _main.level)
+    _main.level.get_entities_root().add_child(e)
+    return e
+
+
+func _test_combat_basics() -> void:
+    print("[Fase 6: golpes]")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    GameState.add_item(&"facao", 1)
+    select_item(&"facao")
+    await place_player(Vector2(600, 300))
+    _player.face(2)
+    await frames(2)
+    check(_prompts[-1] == "Atacar", "com o facão na mão o E vira 'Atacar'")
+    var e := spawn_enemy(&"raiz_torta", Vector2(614, 300))
+    e.info = e.info.duplicate()
+    e.info.speed = 0.0  # parado para o teste
+    var combat := _player.combat
+    check(combat.attack(), "golpe acontece")
+    check(e.hp == e.max_hp - 10, "facão tira 10 de vida")
+    check(not combat.attack(), "tempo de recarga entre golpes")
+    combat.cooldown = 0.0
+    combat.attack()
+    combat.cooldown = 0.0
+    combat.attack()
+    check(combat.combo == 3, "terceiro golpe seguido é o combo")
+    await frames(2)
+    check(e.is_dead(), "raiz-torta derrotada em 3 golpes (o 3º é mais forte)")
+    await get_tree().create_timer(0.4).timeout
+    var drops: Array = _main.level.get_entities_root().get_children().filter(func(c: Node) -> bool: return c is Pickup)
+    check(drops.size() >= 1, "inimigo deixa itens (madeira)")
+    check(GameState.skill_xp.get(&"combate", 0) > 0, "XP de combate")
+    for d in drops:
+        d.queue_free()
+    # golpe pelas costas não acerta; giro carregado acerta em volta
+    var back := spawn_enemy(&"lodo_cinza", Vector2(586, 300))
+    back.info = back.info.duplicate()
+    back.info.speed = 0.0
+    combat.cooldown = 0.0
+    combat._since_last = 9.0
+    combat.attack()
+    check(back.hp == back.max_hp, "golpe normal não acerta quem está atrás")
+    combat.cooldown = 0.0
+    combat.begin_charge()
+    combat.charge = CombatComponent.CHARGE_TIME + 0.1
+    check(combat.release_charge() and back.hp <= back.max_hp - 20, "golpe carregado gira e acerta atrás (dano dobrado)")
+    combat.charge = 0.1
+    check(not combat.release_charge(), "soltar cedo não carrega")
+
+
+func _test_enemies_and_damage() -> void:
+    print("[Fase 6: inimigos e dano]")
+    GameState.new_game()
+    await place_player(Vector2(600, 300))
+    var e := spawn_enemy(&"raiz_torta", Vector2(640, 300))
+    for i in 120:
+        await get_tree().physics_frame
+        if GameState.health < GameState.MAX_HEALTH:
+            break
+    check(GameState.health == GameState.MAX_HEALTH - 8, "raiz-torta persegue e bate (8 de dano)")
+    var hp := GameState.health
+    _player.take_damage(10, Vector2.RIGHT)
+    check(GameState.health == hp, "invulnerável logo depois de apanhar")
+    e.queue_free()
+    # desmaio
+    GameState.money = 500
+    _main.change_region_now(&"vila")
+    var day := GameState.day
+    _player._iframes = 0.0
+    GameState.health = 5
+    _player.take_damage(50, Vector2.LEFT)
+    await frames(2)
+    check(GameState.day == day + 1 and _main.level.region_id == &"farm", "vida zero: desmaia e acorda em casa no dia seguinte")
+    check(GameState.health == GameState.MAX_HEALTH and GameState.money == 450, "volta com vida cheia e perde 10% do dinheiro")
+    # inimigos noturnos da mata
+    _main.change_region_now(&"mata")
+    set_time(GameState.day, 12 * 60)
+    mata().respawn()
+    var en := mata().enemies()
+    check(en.size() >= 3 and not en[0].visible, "criaturas corrompidas escondidas de dia")
+    set_time(GameState.day, 20 * 60)
+    check(en[0].visible, "à noite elas aparecem")
+    set_time(GameState.day, 12 * 60)
+    _main.change_region_now(&"farm")
+
+
+func _test_ranged_dodge_hunt() -> void:
+    print("[Fase 6: arco, esquiva e caça]")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    GameState.add_item(&"arco", 1)
+    select_item(&"arco")
+    await place_player(Vector2(600, 300))
+    _player.face(2)
+    await frames(2)
+    check(_prompts[-1] == "Atirar", "arco: 'Atirar'")
+    check(not _player.combat.attack() and _messages[-1].contains("flechas"), "sem flecha não atira")
+    GameState.add_item(&"flecha", 5)
+    var e := spawn_enemy(&"morcego", Vector2(680, 294))
+    e.info = e.info.duplicate()
+    e.info.speed = 0.0
+    e.info.aggro = 0.0
+    check(_player.combat.attack() and GameState.get_item_count(&"flecha") == 4, "atirou uma flecha")
+    await get_tree().create_timer(0.5).timeout
+    check(e.hp < e.max_hp, "flecha acertou o morcego de longe")
+    e.queue_free()
+    # esquiva
+    var start := _player.global_position
+    check(_player.combat.dodge(Vector2.LEFT), "esquivou")
+    check(not _player.take_damage(20, Vector2.RIGHT), "durante a esquiva não leva dano")
+    await get_tree().create_timer(0.3).timeout
+    check(_player.global_position.x < start.x - 40, "a esquiva desloca o jogador")
+    check(GameState.energy < GameState.MAX_ENERGY, "esquiva gasta energia")
+    # caça ao javali (invasor) e proteção da fauna nativa
+    _main.change_region_now(&"mata")
+    set_time(GameState.day, 18 * 60)
+    mata().respawn()
+    var jav: WildAnimal = mata().animals().filter(func(a: WildAnimal) -> bool: return a.species == &"javali")[0]
+    var cap: WildAnimal = mata().animals().filter(func(a: WildAnimal) -> bool: return a.species == &"capivara")[0]
+    check(jav.is_in_group("huntable") and not cap.is_in_group("huntable"), "só o javali pode ser caçado")
+    GameState.add_item(&"machado", 1)
+    select_item(&"machado")
+    for i in 2:
+        jav.take_hit(22, Vector2.RIGHT, 0)
+    await frames(2)
+    var meat: Array = mata().get_entities_root().find_children("*", "Pickup", true, false)
+    check(meat.size() >= 2, "javali abatido deixa carne e couro")
+    _main.change_region_now(&"farm")
+
+
+func _test_energy_and_paths() -> void:
+    print("[Fase 6: energia e caminhos]")
+    GameState.new_game()
+    check(GameState.energy == 100 and GameState.health == 100, "começa com vida e energia cheias")
+    GameState.energy = 1
+    check(not GameState.use_energy(2) and _messages[-1].contains("energia"), "sem energia não usa ferramenta")
+    GameState.sleep()
+    check(GameState.energy == 100, "dormir recupera a energia")
+    check(GameState.path_points_free() == 0, "sem nível de combate, sem pontos")
+    GameState.skill_xp[&"combate"] = 300  # nível 3
+    check(GameState.path_points_free() == 3, "nível 3 de combate = 3 pontos")
+    var base := GameState.melee_multiplier()
+    check(GameState.add_path_point(&"guerreiro") and GameState.melee_multiplier() > base, "Guerreiro aumenta o dano")
+    GameState.add_path_point(&"cacador")
+    GameState.add_path_point(&"explorador")
+    check(not GameState.add_path_point(&"guerreiro"), "não passa do total de pontos")
+    GameState.reset_paths()
+    check(GameState.path_points_free() == 3, "pontos podem ser redistribuídos")
+
+
+func _test_save_v5() -> void:
+    print("[Fase 6: save v5]")
+    GameState.health = 42
+    GameState.energy = 17
+    GameState.add_path_point(&"cacador")
+    check(SaveManager.save_game(), "salva")
+    GameState.new_game()
+    check(SaveManager.load_game() and GameState.health == 42 and GameState.energy == 17 and GameState.paths[&"cacador"] == 1,
+        "vida, energia e caminhos restaurados")
+    SaveManager.delete_save()

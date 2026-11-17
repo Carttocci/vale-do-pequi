@@ -15,13 +15,18 @@ signal water_changed(amount: int)
 signal money_changed(amount: int)
 signal skill_changed(skill: StringName, level: int, xp: int)
 signal journal_changed
+signal health_changed(value: int, max_value: int)
+signal energy_changed(value: int, max_value: int)
+signal fainted
 
 ## Versão do formato dos dados salvos (ver SaveManager.migrate).
-const DATA_VERSION := 4
+const DATA_VERSION := 5
 const INVENTORY_SIZE := 27
 const HOTBAR_SIZE := 9
 const WATER_MAX := 20
 const STARTING_MONEY := 200
+const MAX_HEALTH := 100
+const MAX_ENERGY := 100
 ## Habilidades (GDD §15). XP acumulada → nível 0..10.
 const SKILLS := [&"agricultura", &"pesca", &"caca", &"criacao", &"combate", &"mineracao", &"coleta", &"artesanato"]
 const SKILL_NAMES := {&"agricultura": "Agricultura", &"pesca": "Pesca", &"caca": "Caça e rastreio",
@@ -38,6 +43,10 @@ var day: int = 1
 var water: int = WATER_MAX
 var money: int = STARTING_MONEY
 var skill_xp: Dictionary = {}
+var health: int = MAX_HEALTH
+var energy: int = MAX_ENERGY
+## Caminhos de combate (GDD §10.3): pontos distribuídos, redistribuíveis.
+var paths := {&"guerreiro": 0, &"cacador": 0, &"explorador": 0}
 ## Peixes pescados: id -> quantidade. Caderno de campo: espécie -> true.
 var fish_log: Dictionary = {}
 var species_seen: Dictionary = {}
@@ -58,11 +67,87 @@ func new_game() -> void:
     skill_xp = {}
     fish_log = {}
     species_seen = {}
+    health = MAX_HEALTH
+    energy = MAX_ENERGY
+    paths = {&"guerreiro": 0, &"cacador": 0, &"explorador": 0}
     Clock.reset()
     select_slot(0)
     water_changed.emit(water)
     money_changed.emit(money)
+    health_changed.emit(health, MAX_HEALTH)
+    energy_changed.emit(energy, MAX_ENERGY)
     day_changed.emit(day)
+
+
+# --- vida e energia ----------------------------------------------------------
+
+## Gasta energia de ferramenta/esquiva. Sem energia suficiente não faz nada.
+func use_energy(amount: int) -> bool:
+    if amount <= 0:
+        return true
+    if energy < amount:
+        EventBus.show_message("Você está sem energia. Coma alguma coisa ou durma.", 2.0)
+        return false
+    energy -= amount
+    energy_changed.emit(energy, MAX_ENERGY)
+    return true
+
+
+func restore(hp: int, en: int) -> void:
+    health = clampi(health + hp, 0, MAX_HEALTH)
+    energy = clampi(energy + en, 0, MAX_ENERGY)
+    health_changed.emit(health, MAX_HEALTH)
+    energy_changed.emit(energy, MAX_ENERGY)
+
+
+func damage(amount: int) -> void:
+    if health <= 0:
+        return
+    health = maxi(0, health - amount)
+    health_changed.emit(health, MAX_HEALTH)
+    if health == 0:
+        fainted.emit()
+
+
+# --- caminhos de combate -----------------------------------------------------
+
+func path_points_total() -> int:
+    return skill_level(&"combate")
+
+
+func path_points_free() -> int:
+    var used := 0
+    for k in paths:
+        used += int(paths[k])
+    return path_points_total() - used
+
+
+func add_path_point(path: StringName) -> bool:
+    if not paths.has(path) or path_points_free() <= 0:
+        return false
+    paths[path] += 1
+    journal_changed.emit()
+    return true
+
+
+func reset_paths() -> void:
+    for k in paths:
+        paths[k] = 0
+    journal_changed.emit()
+
+
+## Multiplicador de dano corpo a corpo: nível de combate + Guerreiro.
+func melee_multiplier() -> float:
+    return 1.0 + skill_level(&"combate") * 0.04 + int(paths[&"guerreiro"]) * 0.08
+
+
+func ranged_multiplier() -> float:
+    return 1.0 + skill_level(&"combate") * 0.04 + int(paths[&"cacador"]) * 0.12
+
+
+## Defesa (fração de dano evitada).
+func defense() -> float:
+    return minf(0.5, int(paths[&"guerreiro"]) * 0.04)
 
 
 # --- habilidades e registros ----------------------------------------------
@@ -178,6 +263,10 @@ func refill_water() -> void:
 ## Dormir: avança um dia. Quem cuida do crescimento escuta `day_advanced`.
 func sleep() -> void:
     day += 1
+    health = MAX_HEALTH
+    energy = MAX_ENERGY
+    health_changed.emit(health, MAX_HEALTH)
+    energy_changed.emit(energy, MAX_ENERGY)
     day_advanced.emit(day)   # 1º: plantas regadas ontem crescem
     Clock.start_day(day)     # 2º: 06:00, clima novo (chuva rega tudo)
     day_changed.emit(day)
@@ -191,6 +280,9 @@ func to_data() -> Dictionary:
         "water": water,
         "money": money,
         "skills": skill_xp.duplicate(),
+        "health": health,
+        "energy": energy,
+        "paths": {"guerreiro": paths[&"guerreiro"], "cacador": paths[&"cacador"], "explorador": paths[&"explorador"]},
         "fish_log": fish_log.duplicate(),
         "species_seen": species_seen.keys().map(func(k: StringName) -> String: return String(k)),
         "selected_slot": selected_slot,
@@ -216,6 +308,13 @@ func from_data(data: Dictionary) -> void:
     species_seen = {}
     for k in data.get("species_seen", []):
         species_seen[StringName(k)] = true
+    health = clampi(int(data.get("health", MAX_HEALTH)), 1, MAX_HEALTH)
+    energy = clampi(int(data.get("energy", MAX_ENERGY)), 0, MAX_ENERGY)
+    var pd: Dictionary = data.get("paths", {})
+    for k in paths:
+        paths[k] = maxi(0, int(pd.get(String(k), 0)))
+    health_changed.emit(health, MAX_HEALTH)
+    energy_changed.emit(energy, MAX_ENERGY)
     inventory.from_data(data.get("inventory", []))
     select_slot(int(data.get("selected_slot", 0)))
     water_changed.emit(water)

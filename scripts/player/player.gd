@@ -43,7 +43,7 @@ var _interact_held: bool = false
 ## Ação que o E faria agora: {"kind", "prompt", "priority", "provider"}.
 var _action: Dictionary = {}
 
-enum ActionKind { NONE, CELL, ITEM, INTERACTABLE }
+enum ActionKind { NONE, CELL, ITEM, INTERACTABLE, ATTACK }
 
 ## Prioridade quando várias coisas são possíveis ao mesmo tempo:
 ## colher (30) > ação especial do item, ex. encher regador (20) >
@@ -57,6 +57,10 @@ const USE_COOLDOWN := 0.22
 @onready var sprite: Sprite2D = $Sprite
 @onready var interaction_area: Area2D = $InteractionArea
 @onready var camera: Camera2D = $Camera
+@onready var combat: CombatComponent = $Combat
+
+## Invulnerável depois de levar dano (segundos).
+var _iframes: float = 0.0
 
 
 func _ready() -> void:
@@ -65,6 +69,9 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+    _iframes = maxf(0.0, _iframes - delta)
+    if combat.dodging > 0.0:
+        return  # a esquiva controla o movimento
     var input_dir := get_move_input()
     _apply_movement(input_dir, delta)
     move_and_slide()
@@ -74,7 +81,9 @@ func _physics_process(delta: float) -> void:
     if not input_enabled or _use_cooldown > 0.0:
         return
     # Segurar repete a ação andando (capinar/regar/plantar/colher uma fileira).
-    # Objetos (porta, baú) não repetem.
+    # Objetos (porta, baú) não repetem. Arma: segurar carrega o golpe.
+    if combat.weapon():
+        return
     if _interact_held and _action.get("kind") in [ActionKind.ITEM, ActionKind.CELL]:
         try_interact()
     elif _use_held:
@@ -90,8 +99,12 @@ func _notification(what: int) -> void:
 func _input(event: InputEvent) -> void:
     # Soltar o botão sempre conta, mesmo que a interface tenha consumido o evento.
     if event.is_action_released("use_item"):
+        if _use_held:
+            combat.release_charge()
         _use_held = false
     if event.is_action_released("interact"):
+        if _interact_held:
+            combat.release_charge()
         _interact_held = false
 
 
@@ -104,11 +117,17 @@ func _unhandled_input(event: InputEvent) -> void:
         if event is InputEventMouseButton and event.device == InputEvent.DEVICE_ID_EMULATION:
             return
         _use_held = true
+        if combat.weapon():
+            combat.attack()
+            combat.begin_charge()
         get_viewport().set_input_as_handled()
     elif event.is_action_pressed("interact"):
         _interact_held = true
         if try_interact():
             get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("dodge"):
+        combat.dodge(get_move_input())
+        get_viewport().set_input_as_handled()
     elif event.is_action_pressed("hotbar_next"):
         GameState.select_slot(GameState.selected_slot + 1)
     elif event.is_action_pressed("hotbar_prev"):
@@ -154,7 +173,25 @@ func try_interact() -> bool:
             _action.provider.interact(self)
             _interact_held = false  # não repete abrir baú/dormir
             return true
+        ActionKind.ATTACK:
+            var ok := combat.attack()
+            combat.begin_charge()
+            return ok
     return false
+
+
+## Dano recebido de inimigo. `from` = direção do golpe (para o empurrão).
+func take_damage(amount: int, from: Vector2) -> bool:
+    if _iframes > 0.0 or combat.is_invulnerable() or GameState.health <= 0:
+        return false
+    var dmg := maxi(1, int(round(amount * (1.0 - GameState.defense()))))
+    _iframes = 0.7
+    velocity = from.normalized() * 160.0
+    sprite.modulate = Color(1.8, 0.6, 0.6)
+    var t := create_tween()
+    t.tween_property(sprite, "modulate", Color.WHITE, 0.3)
+    GameState.damage(dmg)
+    return true
 
 
 ## Usa só o item selecionado na célula à frente (clique / X), sem objetos.
@@ -263,6 +300,8 @@ func _resolve_action(interactable: Interactable) -> Dictionary:
             var a: Dictionary = target.get_item_action(item, pos, self)
             if a.get("prompt", "") != "" and int(a.priority) > best.priority:
                 best = {"kind": ActionKind.ITEM, "prompt": a.prompt, "priority": int(a.priority), "provider": target}
+    if item and item.is_weapon() and 4 > best.priority:
+        best = {"kind": ActionKind.ATTACK, "prompt": "Atirar" if item.ranged else "Atacar", "priority": 4, "provider": null}
     if interactable and PRIORITY_INTERACTABLE > best.priority:
         best = {"kind": ActionKind.INTERACTABLE, "prompt": interactable.get_prompt(),
             "priority": PRIORITY_INTERACTABLE, "provider": interactable}

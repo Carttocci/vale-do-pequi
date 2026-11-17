@@ -84,6 +84,8 @@ func roll_weather(day: int) -> Weather:
         return Weather.ENSOLARADO
     var rng := RandomNumberGenerator.new()
     rng.seed = hash([world_seed, day])
+    rng.randf()  # descarta: sementes vizinhas dão primeiros valores parecidos
+    rng.randf()
     var table: Dictionary = CHANCES_DRY if Calendar.period(day) == Calendar.PERIOD_DRY else CHANCES_RAINY
     var r := rng.randf()
     var acc := 0.0

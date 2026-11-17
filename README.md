@@ -10,7 +10,8 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 |---|---|---|---|
 | Andar | WASD / setas | analógico na esquerda (encoste o dedo em qualquer lugar) | analógico / direcional |
 | **Fazer a ação** (capinar, regar, plantar, encher regador, colher, abrir, dormir...) | **E** (segure para repetir andando) | botão verde à direita | A |
-| Usar só a ferramenta | clique | — | X |
+| Usar só a ferramenta / atacar | clique (segure = golpe carregado) | — | X |
+| Esquivar | Espaço | botão azul | B |
 | Trocar atalho | 1–9 / rodinha | tocar na barra de baixo | LB / RB |
 | Mochila | I | botão da mochila | Y |
 | Pausa | Esc | botão ⏸ | Start |

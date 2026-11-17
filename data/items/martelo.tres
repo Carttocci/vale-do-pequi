@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/martelo_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"martelo"
+display_name = "Martelo"
+description = "Impacto que atordoa."
+icon = ExtResource("2")
+category = 7
+max_stack = 1
+sell_price = 100
+buy_price = 420
+damage = 26
+attack_cooldown = 0.8
+reach = 16.0
+arc_width = 26.0
+knockback = 200.0
+stun = 0.8

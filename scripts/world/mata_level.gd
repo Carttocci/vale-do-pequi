@@ -62,7 +62,18 @@ func respawn() -> void:
                 _fauna_root.add_child(a)
                 if sp == &"javali":
                     _add_tracks(pos)
+    # Criaturas corrompidas saem à noite (19h às 2h)
+    for k in [&"raiz_torta", &"raiz_torta", &"javali_corrompido", &"lodo_cinza"]:
+        var pos := _random_spot(zones["mata"])
+        if pos != Vector2.INF:
+            var e := Enemy.new().setup(k, pos, self)
+            e.set_meta("hours", [19, 26])
+            _fauna_root.add_child(e)
     _update_visibility()
+
+
+func enemies() -> Array:
+    return _fauna_root.get_children().filter(func(c: Node) -> bool: return c is Enemy)
 
 
 func _add_tracks(pos: Vector2) -> void:
@@ -92,7 +103,7 @@ func _update_visibility() -> void:
         return
     var h := Clock.minutes / 60.0
     for a in _fauna_root.get_children():
-        if a is WildAnimal:
+        if a.has_meta("hours"):
             var hours: Array = a.get_meta("hours")
             var on: bool = h >= float(hours[0]) and h < float(hours[1])
             a.visible = on
