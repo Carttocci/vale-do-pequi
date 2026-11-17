@@ -1,0 +1,55 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/interface/touch_controls.gd" id="scr"]
+[ext_resource type="Script" path="res://scripts/interface/virtual_joystick.gd" id="joy"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_stick_base_placeholder.png" id="base"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_stick_knob_placeholder.png" id="knob"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_interact_placeholder.png" id="act"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_interact_pressed_placeholder.png" id="act_p"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_pause_placeholder.png" id="pause"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_fullscreen_placeholder.png" id="full"]
+
+[node name="TouchControls" type="CanvasLayer"]
+layer = 2
+script = ExtResource("scr")
+
+[node name="Joystick" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -250.0
+offset_right = 300.0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("joy")
+
+[node name="Base" type="TextureRect" parent="Joystick"]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 64.0
+mouse_filter = 2
+texture = ExtResource("base")
+
+[node name="Knob" type="TextureRect" parent="Joystick"]
+layout_mode = 0
+offset_right = 28.0
+offset_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource("knob")
+
+[node name="Interact" type="TouchScreenButton" parent="."]
+position = Vector2(572, 284)
+texture_normal = ExtResource("act")
+texture_pressed = ExtResource("act_p")
+action = "interact"
+
+[node name="Pause" type="TouchScreenButton" parent="."]
+position = Vector2(608, 6)
+texture_normal = ExtResource("pause")
+action = "menu"
+
+[node name="Fullscreen" type="TouchScreenButton" parent="."]
+position = Vector2(576, 6)
+texture_normal = ExtResource("full")
+action = "toggle_fullscreen"

@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/environments/pequizeiro_placeholder.png" id="tex"]
+[ext_resource type="Script" path="res://scripts/world/pequizeiro.gd" id="scr"]
+[ext_resource type="Script" path="res://scripts/world/interactable.gd" id="int"]
+[ext_resource type="Texture2D" path="res://assets/items/pequi_chao_placeholder.png" id="fruit"]
+
+[sub_resource type="RectangleShape2D" id="body"]
+size = Vector2(8, 6)
+
+[sub_resource type="CircleShape2D" id="area"]
+radius = 16.0
+
+[node name="Pequizeiro" type="StaticBody2D"]
+collision_mask = 0
+script = ExtResource("scr")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("tex")
+offset = Vector2(0, -21)
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+position = Vector2(0, -3)
+shape = SubResource("body")
+
+[node name="Interactable" type="Area2D" parent="."]
+script = ExtResource("int")
+
+[node name="Shape" type="CollisionShape2D" parent="Interactable"]
+position = Vector2(0, 0)
+shape = SubResource("area")
+
+[node name="Fallen" type="Node2D" parent="."]
+
+[node name="Pequi1" type="Sprite2D" parent="Fallen"]
+position = Vector2(-10, 3)
+texture = ExtResource("fruit")
+
+[node name="Pequi2" type="Sprite2D" parent="Fallen"]
+position = Vector2(8, 5)
+texture = ExtResource("fruit")
+
+[node name="Pequi3" type="Sprite2D" parent="Fallen"]
+position = Vector2(13, -1)
+texture = ExtResource("fruit")
+
+[node name="RegrowTimer" type="Timer" parent="."]

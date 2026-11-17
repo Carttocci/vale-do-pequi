@@ -1,0 +1,81 @@
+# Testa, exporta para Web e publica no GitHub Pages a cada push na main.
+# Antes do primeiro uso: Settings → Pages → Source: "GitHub Actions".
+name: Publicar versão Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.3"
+
+jobs:
+  # Os PNGs provisórios são gerados por tools/gerar_assets_provisorios.py.
+  # Se ainda não estiverem no repositório, este job gera e commita (só na 1ª vez).
+  assets:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gerar assets provisórios se faltarem
+        run: |
+          if [ -f assets/characters/player_placeholder.png ]; then echo "Assets já existem."; exit 0; fi
+          pip install pillow
+          python3 tools/gerar_assets_provisorios.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets
+          git commit -m "Gera assets provisórios (PNGs)"
+          git push
+
+  build:
+    needs: assets
+    runs-on: ubuntu-22.04
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Preparar export templates
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates/
+          if [ "$HOME" != "/root" ]; then
+            mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          fi
+
+      - name: Importar recursos
+        run: godot --headless --path . --import || true
+
+      - name: Rodar testes
+        run: godot --headless --path . res://tests/test_runner.tscn
+
+      - name: Exportar Web
+        run: |
+          mkdir -p build/web
+          godot --headless --path . --export-release "Web" build/web/index.html
+          test -f build/web/index.wasm
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-22.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/environments/poco_placeholder.png" id="tex"]
+[ext_resource type="Script" path="res://scripts/world/inspectable.gd" id="scr"]
+[ext_resource type="Script" path="res://scripts/world/interactable.gd" id="int"]
+
+[sub_resource type="RectangleShape2D" id="body"]
+size = Vector2(22, 8)
+
+[sub_resource type="CircleShape2D" id="area"]
+radius = 14.0
+
+[node name="Poco" type="StaticBody2D"]
+collision_mask = 0
+script = ExtResource("scr")
+prompt = "Olhar o poço"
+messages = PackedStringArray("Água limpinha e gelada. O regador chega na Fase 2.", "O balde ainda funciona. Já é um começo.")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("tex")
+offset = Vector2(0, -13)
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("body")
+
+[node name="Interactable" type="Area2D" parent="."]
+script = ExtResource("int")
+
+[node name="Shape" type="CollisionShape2D" parent="Interactable"]
+position = Vector2(0, -8)
+shape = SubResource("area")
