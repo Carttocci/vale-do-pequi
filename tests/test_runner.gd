@@ -113,6 +113,7 @@ func _run_all() -> void:
     await _test_eat_button()
     await _test_messy_farm()
     await _test_camera_zoom()
+    await _test_escape_closes_windows()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -2454,6 +2455,9 @@ func _test_attack_button() -> void:
     await place_player(Vector2(600, 300))
     _player.face(2)
     var e := spawn_enemy(&"raiz_torta", Vector2(612, 300))
+    # parada: sem andar nem revidar (o teste é do botão, não da IA)
+    e.set_process(false)
+    e.set_physics_process(false)
     var hp := e.hp
     combat.cooldown = 0.0
     _messages.clear()
@@ -2654,3 +2658,33 @@ func _test_camera_zoom() -> void:
         "botões + e − no celular")
     Settings.set_camera_zoom(1.0)
     DirAccess.remove_absolute(Settings.path)
+
+
+func _test_escape_closes_windows() -> void:
+    print("[Esc fecha a janela aberta, não a tela cheia nem abre a pausa]")
+    get_tree().paused = false
+    var hud := _main.get_node("HUD")
+    var inv := _main.get_node("InventoryUI") as InventoryUI
+    inv.open_inventory()
+    await action_press("menu")
+    check(not inv.is_open() and not hud.pause_menu.visible and not get_tree().paused, "Esc fecha a mochila")
+    var rec := _main.get_node("RecipeUI") as RecipeUI
+    rec.open("cozinha")
+    await action_press("menu")
+    check(not rec.is_open() and not hud.pause_menu.visible and not get_tree().paused, "Esc fecha a cozinha")
+    var j := _main.get_node("JournalUI") as JournalUI
+    j.open(0)
+    await action_press("menu")
+    check(not j.is_open() and not hud.pause_menu.visible and not get_tree().paused, "Esc fecha o diário")
+    var dlg := _main.get_node("DialogueUI") as DialogueUI
+    EventBus.dialogue_requested.emit("Teste", PackedStringArray(["Oi"]), PackedStringArray(), Callable())
+    await action_press("menu")
+    check(not dlg.is_open() and not hud.pause_menu.visible and not get_tree().paused, "Esc fecha a conversa")
+    var fish := _main.get_node("FishingUI") as FishingUI
+    fish.start(ItemDB.all_fish()[0])
+    await action_press("menu")
+    check(not fish.is_active() and not hud.pause_menu.visible, "Esc recolhe a linha da pesca")
+    await action_press("menu")
+    check(hud.pause_menu.visible and get_tree().paused, "sem nada aberto, Esc pausa")
+    await action_press("menu")
+    check(not get_tree().paused, "Esc de novo despausa")

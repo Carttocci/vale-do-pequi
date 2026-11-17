@@ -17,6 +17,35 @@ var camera_zoom: float = 1.75 if DisplayServer.is_touchscreen_available() else 1
 
 func _ready() -> void:
     load_settings()
+    lock_escape_key()
+
+
+## No navegador, em tela cheia o Esc é do navegador (sai da tela cheia antes de
+## chegar no jogo). Com o Keyboard Lock (Chrome/Edge) o Esc vem pro jogo e, pra
+## sair da tela cheia, segura o Esc. Firefox/Safari não têm: lá o F11/botão sai.
+func lock_escape_key() -> void:
+    if not OS.has_feature("web"):
+        return
+    JavaScriptBridge.eval("""
+        (function () {
+            var lock = function () {
+                if (navigator.keyboard && navigator.keyboard.lock) {
+                    navigator.keyboard.lock(['Escape']).catch(function () {});
+                }
+            };
+            lock();
+            document.addEventListener('fullscreenchange', lock);
+        })();
+    """, true)
+
+
+func is_fullscreen() -> bool:
+    return DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+
+
+func toggle_fullscreen() -> void:
+    DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if is_fullscreen() else DisplayServer.WINDOW_MODE_FULLSCREEN)
+    lock_escape_key()
 
 
 func load_settings() -> void:

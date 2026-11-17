@@ -48,8 +48,7 @@ func _ready() -> void:
     full.add_theme_font_size_override("font_size", 10)
     full.visible = not OS.has_feature("web_ios")
     full.pressed.connect(func() -> void:
-        var fs := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
-        DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if fs else DisplayServer.WINDOW_MODE_FULLSCREEN))
+        Settings.toggle_fullscreen())
     v.add_child(full)
     var back := Button.new()
     back.text = "Voltar"

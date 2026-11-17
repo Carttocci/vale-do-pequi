@@ -82,6 +82,10 @@ func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("interact") or event.is_action_pressed("use_item"):
         press()
         get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("menu"):
+        # Esc: recolhe a linha (não abre a pausa no meio da pesca)
+        _finish(false, "Você recolheu a linha.")
+        get_viewport().set_input_as_handled()
 
 
 ## O botão foi apertado (público para os testes).

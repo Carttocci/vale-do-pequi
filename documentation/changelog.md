@@ -1,5 +1,9 @@
 # Changelog — Vale do Pequi
 
+## 1.2.2 — Esc fecha janela, não a tela cheia (17/11/2026)
+- No navegador (Chrome/Edge), o Esc agora vem pro jogo mesmo em tela cheia, usando o Keyboard Lock. Pra sair da tela cheia: **segurar** o Esc, ou F11/botão de tela cheia. No Firefox e no Safari o navegador não deixa; lá o Esc continua saindo da tela cheia.
+- Esc fecha o que estiver aberto (mochila, baú, loja, cozinha/bancada, diário, conversa, opções) e só abre a pausa quando não tem nada aberto. Na pesca, Esc recolhe a linha.
+
 ## 1.2.1 — Ajustes de ataque, clique e obstáculos (17/11/2026)
 - **Só ataca com arma**: acabou o soco. Sem arma na mão, F/⚔ pega a melhor arma da barra; sem nenhuma na barra, avisa.
 - **Clique esquerdo contextual**: perto de morador, baú, porta, planta, fruta no chão etc. o clique faz a mesma coisa que o E (conversar, abrir, colher...). Sem nada na frente, com arma ataca e com ferramenta trabalha.

@@ -90,11 +90,7 @@ func _configure_scaling() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("toggle_fullscreen"):
-        var mode := DisplayServer.window_get_mode()
-        if mode == DisplayServer.WINDOW_MODE_FULLSCREEN:
-            DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-        else:
-            DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+        Settings.toggle_fullscreen()
         get_viewport().set_input_as_handled()
 
 
