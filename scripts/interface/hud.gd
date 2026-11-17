@@ -67,10 +67,13 @@ func _on_touch_mode_changed(enabled: bool) -> void:
     _on_prompt_changed(_prompt_text)
 
 
-## Celular em pé: o jogo é horizontal, então pede para girar a tela.
+## Celular/tablet em pé: o jogo é horizontal, então pede para girar a tela.
 func _update_rotate_hint() -> void:
+    # Só em aparelho de toque: no PC uma janela estreita não deve bloquear o jogo.
+    var touch_device := OS.has_feature("mobile") or OS.has_feature("web_android") \
+            or OS.has_feature("web_ios") or DisplayServer.is_touchscreen_available()
     var win := DisplayServer.window_get_size()
-    var portrait := win.y > win.x
+    var portrait := touch_device and win.y > win.x
     if rotate_hint.visible != portrait:
         rotate_hint.visible = portrait
 
