@@ -665,6 +665,28 @@ def make_farming():
         for y in (c - 3, c, c + 3):
             d.line([(c - 2, y), (c + 3, y)], fill=(120, 100, 80))
     touch_btn("assets/ui/touch_btn_journal_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), journal_glyph)
+    def attack_glyph(d, s):
+        c = s // 2
+        d.line([(c - 8, c + 8), (c + 7, c - 7)], fill=(220, 224, 232), width=3)
+        d.line([(c + 4, c - 7), (c + 7, c - 7), (c + 7, c - 4)], fill=(250, 250, 255), width=1)
+        d.line([(c - 9, c + 3), (c - 3, c + 9)], fill=(120, 80, 50), width=3)
+        d.line([(c - 10, c + 10), (c - 7, c + 7)], fill=(120, 80, 50), width=3)
+    touch_btn("assets/ui/touch_btn_attack_placeholder.png", 38, (120, 40, 36, 160), (240, 200, 180, 200), attack_glyph)
+    def eat_glyph(d, s):
+        c = s // 2
+        d.ellipse([c - 7, c - 2, c + 7, c + 7], fill=(250, 244, 228), outline=o)
+        d.ellipse([c - 5, c - 6, c + 5, c + 3], fill=(236, 200, 70), outline=o)
+        d.point((c - 2, c - 3), fill=(255, 240, 160))
+    touch_btn("assets/ui/touch_btn_eat_placeholder.png", 28, (38, 30, 28, 150), (226, 206, 168, 180), eat_glyph)
+    def zoom_glyph(plus):
+        def g(d, s):
+            c = s // 2
+            d.line([(c - 5, c), (c + 5, c)], fill=(240, 230, 210), width=2)
+            if plus:
+                d.line([(c, c - 5), (c, c + 5)], fill=(240, 230, 210), width=2)
+        return g
+    touch_btn("assets/ui/touch_btn_zoom_in_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), zoom_glyph(True))
+    touch_btn("assets/ui/touch_btn_zoom_out_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), zoom_glyph(False))
 
 
 def make_weather():

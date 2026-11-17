@@ -89,6 +89,9 @@ func can_till(cell: Vector2i) -> bool:
         return false
     if not ground.get_cell_atlas_coords(cell).x in TILLABLE_GROUND:
         return false
+    for f in get_tree().get_nodes_in_group("debris_field"):
+        if f.is_blocked(cell):
+            return false
     return not _is_blocked(cell_center(cell))
 
 

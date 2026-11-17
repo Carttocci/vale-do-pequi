@@ -13,6 +13,8 @@ var fog: ColorRect
 var flash: ColorRect
 
 var _flash_timer: float = 0.0
+## Quantas vezes a chuva recomeçou (testes: não pode subir enquanto continua chovendo).
+var rain_restarts: int = 0
 var _rng := RandomNumberGenerator.new()
 
 
@@ -76,9 +78,17 @@ func _process(delta: float) -> void:
 func refresh() -> void:
     daylight.color = Clock.daylight_color(Clock.minutes, Clock.weather)
     var raining := Clock.is_raining()
-    rain.emitting = raining
+    # Mexer em `amount` ou religar `emitting` reinicia as partículas (a chuva
+    # "pisca" e recomeça do topo). Então só mexe quando o tempo muda de verdade.
+    var amount := 320 if Clock.weather == Clock.Weather.TEMPESTADE else 160
+    if rain.amount != amount:
+        rain.amount = amount
+        rain_restarts += 1
+    if rain.emitting != raining:
+        rain.emitting = raining
+        if raining:
+            rain_restarts += 1
     rain.visible = raining
-    rain.amount = 320 if Clock.weather == Clock.Weather.TEMPESTADE else 160
     # Neblina de manhã: forte às 6h, some até as 10h.
     var fog_alpha := 0.0
     if Clock.weather == Clock.Weather.NEBLINA:
@@ -92,3 +102,8 @@ func _fit_rain() -> void:
     var size := get_viewport().get_visible_rect().size
     rain.position = Vector2(size.x / 2.0 + 40.0, -10.0)
     rain.emission_rect_extents = Vector2(size.x / 2.0 + 60.0, 4.0)
+    # gota tem que chegar até embaixo mesmo em tela alta (celular em pé)
+    var life := (size.y + 40.0) / 380.0
+    if not is_equal_approx(rain.lifetime, life):
+        rain.lifetime = life
+        rain.preprocess = life

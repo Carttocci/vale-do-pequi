@@ -279,7 +279,45 @@ def trees():
     canvas.save(out("assets/environments/arbusto_placeholder.png"))
 
 
+def debris():
+    """Fazenda bagunçada: mato, galho, pedrinha, árvore do cerrado e toco (+ ícone do galho)."""
+    vil = src("tileset_village_abandoned.png")
+    browns = [(84, 52, 40), (112, 72, 48), (140, 92, 58), (166, 114, 72)]
+
+    def to_brown(im):
+        cols = sorted({im.getpixel((x, y))[:3] for x in range(im.width) for y in range(im.height)
+                       if im.getpixel((x, y))[3] and im.getpixel((x, y))[0] > im.getpixel((x, y))[1] + 30}, key=sum)
+        return recolor(im, {c: browns[min(3, i * 4 // max(1, len(cols)))] for i, c in enumerate(cols)})
+
+    def fit(im, w, h):
+        im = im.crop(im.getbbox())
+        c = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        c.alpha_composite(im, ((w - im.width) // 2, h - im.height))
+        return c
+
+    mato = fit(vil.crop((80, 80, 96, 96)), 16, 16)
+    mato.save(out("assets/environments/mato_placeholder.png"))
+    galho = fit(to_brown(vil.crop((80, 128, 96, 144))), 16, 16)
+    galho.save(out("assets/environments/galho_placeholder.png"))
+    galho.save(out("assets/items/galho_placeholder.png"))
+    pedrinha = fit(vil.crop((160, 64, 176, 80)), 16, 16)
+    pedrinha.save(out("assets/environments/pedrinha_placeholder.png"))
+    toco = fit(to_brown(vil.crop((96, 128, 112, 144))), 16, 16)
+    toco.save(out("assets/environments/toco_placeholder.png"))
+    tree = vil.crop((64, 96, 96, 128))
+    tree = to_brown(tree.crop(tree.getbbox()))
+    # árvore do cerrado: copa um pouco mais escura e torta que a do pequizeiro
+    greens = sorted({tree.getpixel((x, y))[:3] for x in range(tree.width) for y in range(tree.height)
+                     if tree.getpixel((x, y))[3] and tree.getpixel((x, y))[1] > tree.getpixel((x, y))[0] + 10}, key=sum)
+    tree = recolor(tree, {g: tuple(int(v * 0.8) for v in g) for g in greens})
+    canvas = Image.new("RGBA", (40, 48), (0, 0, 0, 0))
+    ImageDraw.Draw(canvas).ellipse([8, 42, 32, 47], fill=(0, 0, 0, 60))
+    canvas.alpha_composite(tree, ((40 - tree.width) // 2, 46 - tree.height))
+    canvas.save(out("assets/environments/arvore_cerrado_placeholder.png"))
+
+
 if __name__ == "__main__":
+    debris()
     tiles()
     player()
     npcs()

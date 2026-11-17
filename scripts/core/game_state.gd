@@ -367,6 +367,8 @@ func from_data(data: Dictionary) -> void:
         known_recipes = {}
         for k in data.known_recipes:
             known_recipes[StringName(k)] = true
+    for r in Recipes.starting_known():
+        known_recipes[r] = true
     var pd: Dictionary = data.get("paths", {})
     for k in paths:
         paths[k] = maxi(0, int(pd.get(String(k), 0)))
@@ -399,7 +401,7 @@ const BUFF_NAMES := {&"combate": "Valentia (+25% de dano)", &"folego": "Fôlego 
 
 ## Come o item: recupera vida/energia e aplica o efeito (até dormir).
 func eat(item: ItemData) -> bool:
-    if item == null or item.category != ItemData.Category.FOOD:
+    if item == null or not item.is_edible():
         return false
     restore(item.health, item.energy)
     Audio.play(&"comer")

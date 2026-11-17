@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/interface/touch_controls.gd" id="scr"]
 [ext_resource type="Script" path="res://scripts/interface/virtual_joystick.gd" id="joy"]
@@ -11,6 +11,10 @@
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_bag_placeholder.png" id="bag"]
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_dodge_placeholder.png" id="dodge"]
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_journal_placeholder.png" id="journal"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_attack_placeholder.png" id="attack"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_eat_placeholder.png" id="eat"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_zoom_in_placeholder.png" id="zin"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_zoom_out_placeholder.png" id="zout"]
 
 [node name="TouchControls" type="CanvasLayer"]
 layer = 2
@@ -71,3 +75,19 @@ action = "dodge"
 position = Vector2(512, 6)
 texture_normal = ExtResource("journal")
 action = "journal"
+
+[node name="Attack" type="TouchScreenButton" parent="."]
+texture_normal = ExtResource("attack")
+action = "attack"
+
+[node name="Eat" type="TouchScreenButton" parent="."]
+texture_normal = ExtResource("eat")
+action = "eat"
+
+[node name="ZoomIn" type="TouchScreenButton" parent="."]
+texture_normal = ExtResource("zin")
+action = "zoom_in"
+
+[node name="ZoomOut" type="TouchScreenButton" parent="."]
+texture_normal = ExtResource("zout")
+action = "zoom_out"

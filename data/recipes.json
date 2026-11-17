@@ -1,27 +1,208 @@
 {
   "cozinha": [
-    {"id": "farinha", "out": "farinha", "count": 2, "ing": {"mandioca": 1}, "known": true},
-    {"id": "pamonha", "out": "pamonha", "count": 1, "ing": {"milho": 3}, "known": true},
-    {"id": "arroz_pequi", "out": "arroz_pequi", "count": 1, "ing": {"arroz": 1, "pequi": 2}, "known": true},
-    {"id": "lambari_frito", "out": "lambari_frito", "count": 1, "ing": {"lambari": 2}, "known": true},
-    {"id": "canjica", "out": "canjica", "count": 1, "ing": {"milho": 2, "leite": 1, "acucar": 1}, "teacher": "helena"},
-    {"id": "feijao_tropeiro", "out": "feijao_tropeiro", "count": 1, "ing": {"feijao": 2, "ovo": 1, "farinha": 1}, "teacher": "benedito"},
-    {"id": "doce_leite", "out": "doce_leite", "count": 2, "ing": {"leite": 2, "acucar": 1}, "teacher": "mariana"},
-    {"id": "caldo_mandioca", "out": "caldo_mandioca", "count": 1, "ing": {"mandioca": 1, "carne_javali": 1}, "teacher": "toninho"},
-    {"id": "empadao", "out": "empadao", "count": 1, "ing": {"carne_javali": 1, "milho": 1, "ovo": 1, "farinha": 1}, "teacher": "alzira"},
-    {"id": "pao_queijo", "out": "pao_queijo", "count": 3, "ing": {"farinha": 1, "leite": 1, "ovo": 1}, "teacher": "joao_pedro"}
+    {
+      "id": "farinha",
+      "out": "farinha",
+      "count": 2,
+      "ing": {
+        "mandioca": 1
+      },
+      "known": true
+    },
+    {
+      "id": "pamonha",
+      "out": "pamonha",
+      "count": 1,
+      "ing": {
+        "milho": 3
+      },
+      "known": true
+    },
+    {
+      "id": "arroz_pequi",
+      "out": "arroz_pequi",
+      "count": 1,
+      "ing": {
+        "arroz": 1,
+        "pequi": 2
+      },
+      "known": true
+    },
+    {
+      "id": "lambari_frito",
+      "out": "lambari_frito",
+      "count": 1,
+      "ing": {
+        "lambari": 2
+      },
+      "known": true
+    },
+    {
+      "id": "canjica",
+      "out": "canjica",
+      "count": 1,
+      "ing": {
+        "milho": 2,
+        "leite": 1,
+        "acucar": 1
+      },
+      "teacher": "helena"
+    },
+    {
+      "id": "feijao_tropeiro",
+      "out": "feijao_tropeiro",
+      "count": 1,
+      "ing": {
+        "feijao": 2,
+        "ovo": 1,
+        "farinha": 1
+      },
+      "teacher": "benedito"
+    },
+    {
+      "id": "doce_leite",
+      "out": "doce_leite",
+      "count": 2,
+      "ing": {
+        "leite": 2,
+        "acucar": 1
+      },
+      "teacher": "mariana"
+    },
+    {
+      "id": "caldo_mandioca",
+      "out": "caldo_mandioca",
+      "count": 1,
+      "ing": {
+        "mandioca": 1,
+        "carne_javali": 1
+      },
+      "teacher": "toninho"
+    },
+    {
+      "id": "empadao",
+      "out": "empadao",
+      "count": 1,
+      "ing": {
+        "carne_javali": 1,
+        "milho": 1,
+        "ovo": 1,
+        "farinha": 1
+      },
+      "teacher": "alzira"
+    },
+    {
+      "id": "pao_queijo",
+      "out": "pao_queijo",
+      "count": 3,
+      "ing": {
+        "farinha": 1,
+        "leite": 1,
+        "ovo": 1
+      },
+      "teacher": "joao_pedro"
+    }
   ],
   "bancada": [
-    {"id": "banco_madeira", "out": "banco_madeira", "count": 1, "ing": {"madeira": 6}, "known": true},
-    {"id": "vaso_flores", "out": "vaso_flores", "count": 1, "ing": {"pedra": 4}, "known": true},
-    {"id": "lampiao", "out": "lampiao", "count": 1, "ing": {"minerio_ferro": 1, "madeira": 2}, "known": true},
-    {"id": "espantalho", "out": "espantalho", "count": 1, "ing": {"madeira": 4, "couro": 1}, "known": true},
-    {"id": "flecha", "out": "flecha", "count": 10, "ing": {"madeira": 2, "pedra": 1}, "known": true},
-    {"id": "armadilha", "out": "armadilha", "count": 1, "ing": {"madeira": 4, "minerio_ferro": 1}, "known": true}
+    {
+      "id": "machado",
+      "out": "machado",
+      "count": 1,
+      "ing": {
+        "galho": 5,
+        "pedra": 3
+      },
+      "known": true
+    },
+    {
+      "id": "banco_madeira",
+      "out": "banco_madeira",
+      "count": 1,
+      "ing": {
+        "madeira": 6
+      },
+      "known": true
+    },
+    {
+      "id": "vaso_flores",
+      "out": "vaso_flores",
+      "count": 1,
+      "ing": {
+        "pedra": 4
+      },
+      "known": true
+    },
+    {
+      "id": "lampiao",
+      "out": "lampiao",
+      "count": 1,
+      "ing": {
+        "minerio_ferro": 1,
+        "madeira": 2
+      },
+      "known": true
+    },
+    {
+      "id": "espantalho",
+      "out": "espantalho",
+      "count": 1,
+      "ing": {
+        "madeira": 4,
+        "couro": 1
+      },
+      "known": true
+    },
+    {
+      "id": "flecha",
+      "out": "flecha",
+      "count": 10,
+      "ing": {
+        "madeira": 2,
+        "pedra": 1
+      },
+      "known": true
+    },
+    {
+      "id": "armadilha",
+      "out": "armadilha",
+      "count": 1,
+      "ing": {
+        "madeira": 4,
+        "minerio_ferro": 1
+      },
+      "known": true
+    }
   ],
   "obras": [
-    {"id": "caixa_dagua", "name": "Caixa d'água", "desc": "Regador enche o dobro (40).", "ing": {"pedra": 20, "madeira": 10}, "money": 300},
-    {"id": "galinheiro_maior", "name": "Galinheiro maior", "desc": "Cabem 10 galinhas.", "ing": {"madeira": 25, "pedra": 15}, "money": 500},
-    {"id": "curral_maior", "name": "Curral maior", "desc": "Cabem 6 vacas.", "ing": {"madeira": 40, "minerio_ferro": 5}, "money": 800}
+    {
+      "id": "caixa_dagua",
+      "name": "Caixa d'água",
+      "desc": "Regador enche o dobro (40).",
+      "ing": {
+        "pedra": 20,
+        "madeira": 10
+      },
+      "money": 300
+    },
+    {
+      "id": "galinheiro_maior",
+      "name": "Galinheiro maior",
+      "desc": "Cabem 10 galinhas.",
+      "ing": {
+        "madeira": 25,
+        "pedra": 15
+      },
+      "money": 500
+    },
+    {
+      "id": "curral_maior",
+      "name": "Curral maior",
+      "desc": "Cabem 6 vacas.",
+      "ing": {
+        "madeira": 40,
+        "minerio_ferro": 5
+      },
+      "money": 800
+    }
   ]
 }

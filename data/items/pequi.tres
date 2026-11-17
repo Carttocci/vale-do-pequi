@@ -13,3 +13,4 @@ category = 3
 max_stack = 99
 sell_price = 12
 buy_price = 0
+energy = 10

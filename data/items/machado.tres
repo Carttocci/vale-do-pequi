@@ -7,7 +7,7 @@
 script = ExtResource("1")
 id = &"machado"
 display_name = "Machado"
-description = "Golpe pesado que quebra defesas."
+description = "Corta árvore e toco. Na briga, golpe pesado que quebra defesas."
 icon = ExtResource("2")
 category = 7
 max_stack = 1

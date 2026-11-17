@@ -1,5 +1,16 @@
 # Changelog — Vale do Pequi
 
+## 1.2.0 — Fazenda bagunçada, ataque, comer e zoom (17/11/2026)
+- **Fazenda começa tomada pelo mato**, com galhos, pedrinhas e árvores do cerrado espalhados. Todo dia nasce mato novo e cai galho das árvores.
+  - Mato: E arranca (1 de energia), a enxada capina, e qualquer golpe de arma corta. Não dá pra capinar a roça em cima do mato.
+  - Galho e pedrinha: E pega (viram galho e pedra).
+  - **Machado na bancada: 5 galhos + 3 pedras.** Com ele, 5 machadadas derrubam a árvore (madeira + galho) e 3 arrancam o toco.
+- **Atacar sempre**: tecla F (ou K) e botão ⚔ no celular. Usa a arma da mão; senão, a melhor arma da mochila; sem arma, soco.
+- **Comer rápido**: tecla Q e botão de comer no celular. Come o que está na mão; senão, o que melhor tapa a fome. Pequi, milho, abóbora e leite agora podem ser comidos crus.
+- **Zoom da câmera**: botões + e − no celular, teclas + e − no PC e controle nas Opções. No celular começa mais perto do personagem.
+- **Chuva contínua**: a chuva não reinicia mais a cada 10 minutos do jogo, e as gotas chegam até embaixo da tela no celular em pé.
+- 45 testes novos (635 no total).
+
 ## 1.1.0 — Arte nova, etapa 1 (17/11/2026)
 - Arte baseada no **Ninja Adventure** (pixel-boy e AAA, licença CC0), repintada com cara de fazendinha do Cerrado: chão (grama, flores, capim seco, terra, roça, água, mata, praça, ponte, caverna, rocha, ruína), jogador de chapéu de palha, os 6 moradores, a Mãe-do-Ouro dourada, pequizeiro, ipê-amarelo e arbusto.
 - Os arquivos usados do pacote ficam em `third_party/ninja_adventure/`; `tools/aplicar_arte_ninja.py` faz a adaptação (roda sozinho no fim do gerador de arte provisória). Crédito na tela de título.

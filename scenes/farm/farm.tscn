@@ -1,5 +1,6 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
+[ext_resource type="Script" path="res://scripts/farming/debris_field.gd" id="debris"]
 [ext_resource type="Script" path="res://scripts/world/farm_level.gd" id="level"]
 [ext_resource type="Script" path="res://scripts/world/region_exit.gd" id="exit"]
 [ext_resource type="Script" path="res://scripts/animals/ranch.gd" id="ranch"]
@@ -33,6 +34,10 @@ position = Vector2(464, 140)
 
 [node name="Entities" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="DebrisField" type="Node2D" parent="Entities"]
+y_sort_enabled = true
+script = ExtResource("debris")
 
 [node name="Crops" type="Node2D" parent="Entities"]
 y_sort_enabled = true

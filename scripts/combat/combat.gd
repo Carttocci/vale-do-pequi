@@ -37,6 +37,39 @@ func weapon() -> ItemData:
     return item if item and item.is_weapon() else null
 
 
+## Soco: quando não tem arma nenhuma na mochila.
+static var FISTS: ItemData = _make_fists()
+
+
+static func _make_fists() -> ItemData:
+    var f := ItemData.new()
+    f.id = &"soco"
+    f.display_name = "Soco"
+    f.category = ItemData.Category.WEAPON
+    f.damage = 5
+    f.attack_cooldown = 0.35
+    f.reach = 14.0
+    f.arc_width = 14.0
+    f.knockback = 60.0
+    f.stun = 0.1
+    return f
+
+
+## Arma do botão de atacar: a da mão; se não tiver, a melhor arma de perto da
+## mochila; sem arma nenhuma, soco.
+func attack_weapon() -> ItemData:
+    var w := weapon()
+    if w:
+        return w
+    var best: ItemData = null
+    for i in GameState.inventory.size():
+        var id := GameState.inventory.get_item_id(i)
+        var it := ItemDB.get_item(id) if id != &"" else null
+        if it and it.is_weapon() and not it.ranged and (best == null or it.damage > best.damage):
+            best = it
+    return best if best else FISTS
+
+
 func _process(delta: float) -> void:
     cooldown = maxf(0.0, cooldown - delta)
     dodge_cooldown = maxf(0.0, dodge_cooldown - delta)
@@ -60,7 +93,7 @@ func is_invulnerable() -> bool:
 
 ## Golpe normal (ou flecha). Retorna true se atacou.
 func attack() -> bool:
-    var w := weapon()
+    var w := attack_weapon()
     if w == null or cooldown > 0.0 or dodging > 0.0:
         return false
     if w.ranged:
@@ -127,6 +160,9 @@ func _hit(w: ItemData, dmg: int, kb: float, spin: bool) -> void:
             hit = along >= -4.0 and along <= w.reach + 8.0 and across <= w.arc_width * 0.75 + 4.0
         if hit:
             en.take_hit(dmg, to if to != Vector2.ZERO else facing, kb, w.stun)
+    # mato cai no golpe; machado também derruba árvore e toco
+    for f in get_tree().get_nodes_in_group("debris_field"):
+        f.slash(center, facing, w.reach * (1.3 if spin else 1.0), w.arc_width * (3.0 if spin else 1.0), w)
 
 
 func _shoot(w: ItemData) -> bool:

@@ -8,6 +8,7 @@ signal closed
 var music_slider: HSlider
 var sfx_slider: HSlider
 var hint_check: CheckButton
+var zoom_slider: HSlider
 
 
 func _ready() -> void:
@@ -34,6 +35,8 @@ func _ready() -> void:
     sfx_slider = _slider(v, "Efeitos", Settings.sfx_volume, func(x: float) -> void:
         Settings.set_sfx_volume(x)
         Audio.play(&"clique", 0.0))
+    zoom_slider = _slider(v, "Zoom", 0.0, func(x: float) -> void:
+        Settings.set_camera_zoom(lerpf(Settings.ZOOM_MIN, Settings.ZOOM_MAX, x)))
     hint_check = CheckButton.new()
     hint_check.text = "Missão atual na tela"
     hint_check.button_pressed = Settings.show_quest_hint
@@ -59,6 +62,7 @@ func _ready() -> void:
 func open() -> void:
     music_slider.set_value_no_signal(Settings.music_volume)
     sfx_slider.set_value_no_signal(Settings.sfx_volume)
+    zoom_slider.set_value_no_signal(inverse_lerp(Settings.ZOOM_MIN, Settings.ZOOM_MAX, Settings.camera_zoom))
     hint_check.set_pressed_no_signal(Settings.show_quest_hint)
     show()
     # centraliza (o tamanho só é conhecido depois de mostrar)

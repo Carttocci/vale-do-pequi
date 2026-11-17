@@ -64,6 +64,8 @@ var _iframes: float = 0.0
 
 
 func _ready() -> void:
+    apply_camera_zoom.call_deferred()
+    Settings.changed.connect(apply_camera_zoom)
     _update_interaction_area()
     _update_sprite_frame()
 
@@ -127,6 +129,18 @@ func _unhandled_input(event: InputEvent) -> void:
             get_viewport().set_input_as_handled()
     elif event.is_action_pressed("dodge"):
         combat.dodge(get_move_input())
+        get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("attack"):
+        combat.attack()
+        get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("eat"):
+        eat_best()
+        get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("zoom_in"):
+        Settings.set_camera_zoom(Settings.camera_zoom + Settings.ZOOM_STEP)
+        get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("zoom_out"):
+        Settings.set_camera_zoom(Settings.camera_zoom - Settings.ZOOM_STEP)
         get_viewport().set_input_as_handled()
     elif event.is_action_pressed("hotbar_next"):
         GameState.select_slot(GameState.selected_slot + 1)
@@ -309,3 +323,38 @@ func _resolve_action(interactable: Interactable) -> Dictionary:
         best = {"kind": ActionKind.INTERACTABLE, "prompt": interactable.get_prompt(),
             "priority": PRIORITY_INTERACTABLE, "provider": interactable}
     return best
+
+
+## Botão de comer: a comida da mão; senão, a da mochila que melhor tapa a fome
+## (a menor que enche a energia; se nenhuma enche, a mais forte).
+func eat_best() -> bool:
+    var item := best_food()
+    if item == null:
+        EventBus.show_message("Nada pra comer na mochila. Pequi, milho e leite servem!", 2.0)
+        return false
+    if not GameState.inventory.remove(item.id, 1):
+        return false
+    return GameState.eat(item)
+
+
+func best_food() -> ItemData:
+    var sel := GameState.get_selected_item()
+    if sel and sel.is_edible():
+        return sel
+    var need := GameState.MAX_ENERGY - GameState.energy
+    var fits: ItemData = null
+    var strongest: ItemData = null
+    for i in GameState.inventory.size():
+        var id := GameState.inventory.get_item_id(i)
+        var it := ItemDB.get_item(id) if id != &"" else null
+        if it == null or not it.is_edible() or it.category in [ItemData.Category.SEED]:
+            continue
+        if strongest == null or it.energy > strongest.energy:
+            strongest = it
+        if it.energy >= need and (fits == null or it.energy < fits.energy):
+            fits = it
+    return fits if fits else strongest
+
+
+func apply_camera_zoom() -> void:
+    camera.zoom = Vector2.ONE * Settings.camera_zoom

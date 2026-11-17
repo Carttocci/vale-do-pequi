@@ -108,6 +108,11 @@ func _run_all() -> void:
     await _test_audio()
     await _test_settings_and_options()
     await _test_title_screen()
+    await _test_rain_continuous()
+    await _test_attack_button()
+    await _test_eat_button()
+    await _test_messy_farm()
+    await _test_camera_zoom()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -171,6 +176,10 @@ func _setup_main() -> void:
     add_child(_main)
     await frames(3)
     _player = _main.get("player") as Player
+    # os testes das fases antigas usam a fazenda limpa; a bagunça tem testes próprios
+    var debris := _main.get_node("Farm/Entities/DebrisField") as DebrisField
+    debris.clear_all()
+    debris.growth_enabled = false
 
 
 func _test_scene_structure() -> void:
@@ -2187,7 +2196,7 @@ func _test_decor_and_obras() -> void:
     _main.change_region_now(&"farm")
     var ui := _main.get_node("RecipeUI") as RecipeUI
     ui.open("bancada")
-    check(ui.entries().size() == 9, "bancada: 6 objetos + 3 obras")
+    check(ui.entries().size() == 10, "bancada: 7 objetos (com o machado) + 3 obras")
     GameState.add_item(&"madeira", 6)
     check(ui.make("banco_madeira") and GameState.get_item_count(&"banco_madeira") == 1, "banco de madeira feito")
     ui.close()
@@ -2395,3 +2404,213 @@ func _test_title_screen() -> void:
     check(title.options.visible, "opções na tela de título")
     title.queue_free()
     SaveManager.delete_save()
+
+
+# --- pedidos: chuva, ataque, comer, fazenda bagunçada, zoom -------------------------
+
+func action_press(action: String) -> void:
+    var ev := InputEventAction.new()
+    ev.action = action
+    ev.pressed = true
+    Input.parse_input_event(ev)
+    Input.flush_buffered_events()
+    await frames(1)
+    var up := InputEventAction.new()
+    up.action = action
+    up.pressed = false
+    Input.parse_input_event(up)
+    Input.flush_buffered_events()
+    await frames(1)
+
+
+func _test_rain_continuous() -> void:
+    print("[chuva contínua]")
+    var fx := _main.get_node("WeatherFX") as WeatherFX
+    Clock.forced_weather = Clock.Weather.CHUVA
+    jump_to_day(GameState.day + 1)
+    check(fx.rain.emitting, "dia de chuva: chovendo")
+    var restarts := fx.rain_restarts
+    for i in 12:
+        Clock.minutes += 10
+        Clock.time_changed.emit(Clock.minutes)
+    check(fx.rain_restarts == restarts and fx.rain.emitting, "passar as horas não reinicia a chuva")
+    Clock.forced_weather = Clock.Weather.TEMPESTADE
+    jump_to_day(GameState.day + 1)
+    check(fx.rain.amount == 320, "tempestade: chuva mais forte")
+    Clock.forced_weather = Clock.Weather.ENSOLARADO
+    jump_to_day(GameState.day + 1)
+    check(not fx.rain.emitting, "sol: sem chuva")
+
+
+func _test_attack_button() -> void:
+    print("[botão de atacar]")
+    GameState.new_game()
+    _main.change_region_now(&"mata")
+    set_time(GameState.day, 10 * 60)
+    GameState.inventory.clear()
+    GameState.add_item(&"semente_milho", 5)
+    GameState.select_slot(0)
+    var combat := _player.combat
+    check(combat.attack_weapon() == CombatComponent.FISTS, "sem arma nenhuma: soco")
+    await place_player(Vector2(300, 200))
+    _player.face(2)
+    var e := spawn_enemy(&"raiz_torta", Vector2(312, 200))
+    var hp := e.hp
+    combat.cooldown = 0.0
+    await action_press("attack")
+    check(e.hp < hp, "F (ou o botão ⚔) dá soco mesmo com semente na mão")
+    GameState.add_item(&"facao", 1)
+    GameState.select_slot(0)
+    check(combat.attack_weapon().id == &"facao", "com facão na mochila, o botão usa o facão")
+    GameState.add_item(&"espada", 1)
+    check(combat.attack_weapon().id == &"espada", "pega a arma mais forte da mochila")
+    hp = e.hp
+    combat.cooldown = 0.0
+    await action_press("attack")
+    check(e.hp < hp, "golpe com a arma da mochila")
+    e.queue_free()
+    check(_main.get_node("TouchControls/Attack").action == "attack", "botão de atacar no celular")
+
+
+func _test_eat_button() -> void:
+    print("[botão de comer]")
+    GameState.inventory.clear()
+    GameState.select_slot(0)
+    GameState.energy = 50
+    _messages.clear()
+    await action_press("eat")
+    check(GameState.energy == 50 and _messages.any(func(m: String) -> bool: return m.contains("Nada pra comer")),
+        "sem comida: avisa")
+    GameState.add_item(&"pequi", 2)
+    GameState.add_item(&"pamonha", 1)
+    GameState.add_item(&"empadao", 1)
+    GameState.select_slot(8)  # mão vazia
+    check(_player.best_food().id == &"empadao", "falta 50 de energia: escolhe o que enche (empadão)")
+    GameState.energy = 92
+    check(_player.best_food().id == &"pequi", "falta pouco: escolhe o menor que enche (pequi)")
+    GameState.energy = 50
+    await action_press("eat")
+    check(GameState.energy == 100 and GameState.get_item_count(&"empadao") == 0, "Q (ou o botão) come")
+    GameState.energy = 50
+    for i in GameState.inventory.size():
+        if GameState.inventory.get_item_id(i) == &"pequi":
+            GameState.select_slot(i)
+    check(_player.best_food().id == &"pequi", "comida na mão tem preferência")
+    await action_press("eat")
+    check(GameState.energy == 60, "pequi cru: +10 de energia")
+    check(_main.get_node("TouchControls/Eat").action == "eat", "botão de comer no celular")
+
+
+func _test_messy_farm() -> void:
+    print("[fazenda com mato, galho, pedra e árvore]")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    set_time(GameState.day, 10 * 60)
+    var df := _main.get_node("Farm/Entities/DebrisField") as DebrisField
+    df.generate()
+    check(df.count(&"mato") > 80 and df.count(&"galho") > 10 and df.count(&"pedrinha") > 10 and df.count(&"arvore") > 10,
+        "fazenda começa cheia: mato %d, galho %d, pedra %d, árvore %d" % [df.count(&"mato"), df.count(&"galho"), df.count(&"pedrinha"), df.count(&"arvore")])
+    var ground := df.ground
+    var bad := 0
+    for cell: Vector2i in df.cells:
+        if not ground.get_cell_atlas_coords(cell).x in DebrisField.GRASS_TILES:
+            bad += 1
+    check(bad == 0, "nada na estrada, na água ou na roça")
+    var spawn: Vector2 = _main.level.get_spawn_position(&"")
+    check(df.cells.keys().all(func(c: Vector2i) -> bool: return ground.map_to_local(c).distance_to(spawn) >= 40),
+        "porta de casa livre")
+    df.clear_all()
+    var base := Vector2i(36, 22)
+    for i in 5:
+        df._add(base + Vector2i(i, 0), &"galho")
+    for i in 3:
+        df._add(base + Vector2i(i, 2), &"pedrinha")
+    df._add(base + Vector2i(0, 4), &"mato")
+    GameState.inventory.clear()
+    GameState.select_slot(0)
+    var c0 := ground.map_to_local(base)
+    await place_player(c0 + Vector2(0, 14))
+    _player.face(4)
+    await frames(3)
+    check(_prompts[-1] == "Pegar galho", "E no galho: 'Pegar galho'")
+    for i in 5:
+        df.interact_cell(ground.map_to_local(base + Vector2i(i, 0)), _player)
+    for i in 3:
+        df.interact_cell(ground.map_to_local(base + Vector2i(i, 2)), _player)
+    check(GameState.get_item_count(&"galho") == 5 and GameState.get_item_count(&"pedra") == 3, "pegou 5 galhos e 3 pedras")
+    var mato_cell := base + Vector2i(0, 4)
+    var field := _main.get_node("Farm/FarmField") as FarmField
+    check(not field.can_till(mato_cell), "enxada não capina em cima do mato")
+    var energy := GameState.energy
+    df.interact_cell(ground.map_to_local(mato_cell), _player)
+    check(df.kind_at(mato_cell) == &"" and GameState.energy == energy - 1, "arrancou o mato (1 de energia)")
+    check(field.can_till(mato_cell), "terreno limpo dá pra capinar")
+    var ui := _main.get_node("RecipeUI") as RecipeUI
+    ui.open("bancada")
+    check(ui.make("machado") and GameState.get_item_count(&"machado") == 1, "bancada: 5 galhos + 3 pedras = machado")
+    check(GameState.get_item_count(&"galho") == 0 and GameState.get_item_count(&"pedra") == 0, "gastou os galhos e as pedras")
+    ui.close()
+    var tree := base + Vector2i(2, 6)
+    df._add(tree, &"arvore")
+    var axe := ItemDB.get_item(&"machado")
+    var tp := ground.map_to_local(tree)
+    check(df.get_item_action(axe, tp, _player).get("prompt", "") == "Cortar árvore", "com machado: 'Cortar árvore'")
+    check(df.get_item_action(ItemDB.get_item(&"enxada"), tp, _player).is_empty(), "sem machado não corta")
+    for i in 5:
+        df.use_item(axe, tp, _player)
+    check(df.kind_at(tree) == &"toco", "5 machadadas: árvore cai e fica o toco")
+    await frames(1)
+    var wood := df.get_children().filter(func(c: Node) -> bool: return c is Pickup and c.item_id == &"madeira")
+    check(wood.size() >= 1, "árvore deixa madeira")
+    for i in 3:
+        df.use_item(axe, tp, _player)
+    check(df.kind_at(tree) == &"", "3 machadadas: toco arrancado")
+    # golpe de arma corta mato; machado no golpe também corta árvore
+    df._add(base + Vector2i(1, 8), &"mato")
+    df._add(base + Vector2i(1, 9), &"arvore")
+    var fc := ground.map_to_local(base + Vector2i(1, 8))
+    var n := df.slash(fc + Vector2(0, -14), Vector2.DOWN, 18.0, 20.0, ItemDB.get_item(&"facao"))
+    check(n >= 1 and df.kind_at(base + Vector2i(1, 8)) == &"", "golpe de facão corta o mato")
+    check(df.kind_at(base + Vector2i(1, 9)) == &"arvore" and df.cells[base + Vector2i(1, 9)].hp == 5, "facão não corta árvore")
+    df.slash(fc, Vector2.DOWN, 18.0, 20.0, axe)
+    check(df.cells[base + Vector2i(1, 9)].hp == 4, "golpe de machado corta árvore")
+    # salva e carrega
+    check(SaveManager.save_game(), "salva a fazenda")
+    df.clear_all()
+    SaveManager.load_game()
+    await frames(1)
+    check(df.kind_at(base + Vector2i(1, 9)) == &"arvore" and df.cells[base + Vector2i(1, 9)].hp == 4, "árvore (já machucada) volta ao carregar")
+    df.growth_enabled = true
+    var weeds := df.count(&"mato")
+    var twigs := df.count(&"galho")
+    df.grow_daily()
+    check(df.count(&"mato") > weeds and df.count(&"galho") > twigs, "todo dia nasce mato e cai galho")
+    df.growth_enabled = false
+    _main.change_region_now(&"vila")
+    check(df.get_cell_prompt(fc) == "", "fora da fazenda a bagunça não responde")
+    _main.change_region_now(&"farm")
+    df.clear_all()
+    SaveManager.delete_save()
+
+
+func _test_camera_zoom() -> void:
+    print("[zoom da câmera]")
+    Settings.set_camera_zoom(2.0)
+    await frames(1)
+    check(_player.camera.zoom == Vector2(2, 2), "zoom aplicado na câmera")
+    await action_press("zoom_in")
+    check(is_equal_approx(Settings.camera_zoom, 2.25), "+ aproxima")
+    await action_press("zoom_out")
+    await action_press("zoom_out")
+    check(is_equal_approx(Settings.camera_zoom, 1.75), "− afasta")
+    Settings.set_camera_zoom(9.0)
+    check(Settings.camera_zoom == Settings.ZOOM_MAX, "zoom tem limite")
+    var hud := _main.get_node("HUD")
+    hud.options_panel.open()
+    hud.options_panel.zoom_slider.value = 0.0
+    check(Settings.camera_zoom == Settings.ZOOM_MIN, "slider de zoom nas opções")
+    hud.options_panel.hide()
+    check(_main.get_node("TouchControls/ZoomIn").action == "zoom_in" and _main.get_node("TouchControls/ZoomOut").action == "zoom_out",
+        "botões + e − no celular")
+    Settings.set_camera_zoom(1.0)
+    DirAccess.remove_absolute(Settings.path)
