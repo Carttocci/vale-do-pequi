@@ -32,6 +32,11 @@ signal shop_requested(shop: Dictionary)
 signal fishing_started(fish: FishData)
 signal fishing_finished(success: bool, fish: FishData)
 
+## Missões: morador conversou, região mudou, inimigo derrotado.
+signal npc_talked(npc_id: StringName)
+signal region_entered(region_id: StringName)
+signal enemy_killed(kind: StringName)
+
 ## Jogo pausado/retomado pelo menu.
 signal pause_changed(paused: bool)
 

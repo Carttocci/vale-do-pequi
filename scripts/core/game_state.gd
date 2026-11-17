@@ -18,9 +18,10 @@ signal journal_changed
 signal health_changed(value: int, max_value: int)
 signal energy_changed(value: int, max_value: int)
 signal fainted
+signal flag_set(flag: StringName)
 
 ## Versão do formato dos dados salvos (ver SaveManager.migrate).
-const DATA_VERSION := 5
+const DATA_VERSION := 6
 const INVENTORY_SIZE := 27
 const HOTBAR_SIZE := 9
 const WATER_MAX := 20
@@ -47,6 +48,8 @@ var health: int = MAX_HEALTH
 var energy: int = MAX_ENERGY
 ## Caminhos de combate (GDD §10.3): pontos distribuídos, redistribuíveis.
 var paths := {&"guerreiro": 0, &"cacador": 0, &"explorador": 0}
+## Marcos da história e do mundo (ex.: "trilha_serra_aberta", "guardiao_derrotado").
+var flags: Dictionary = {}
 ## Peixes pescados: id -> quantidade. Caderno de campo: espécie -> true.
 var fish_log: Dictionary = {}
 var species_seen: Dictionary = {}
@@ -70,7 +73,11 @@ func new_game() -> void:
     health = MAX_HEALTH
     energy = MAX_ENERGY
     paths = {&"guerreiro": 0, &"cacador": 0, &"explorador": 0}
+    flags = {}
     Clock.reset()
+    var quests := get_node_or_null("/root/Quests")
+    if quests:
+        quests.reset()
     select_slot(0)
     water_changed.emit(water)
     money_changed.emit(money)
@@ -107,6 +114,21 @@ func damage(amount: int) -> void:
     health_changed.emit(health, MAX_HEALTH)
     if health == 0:
         fainted.emit()
+
+
+# --- marcos da história -------------------------------------------------------
+
+func set_flag(flag: StringName, value: Variant = true) -> void:
+    flags[flag] = value
+    flag_set.emit(flag)
+
+
+func has_flag(flag: StringName) -> bool:
+    return flags.has(flag) and flags[flag] != false
+
+
+func get_flag(flag: StringName, default: Variant = null) -> Variant:
+    return flags.get(flag, default)
 
 
 # --- caminhos de combate -----------------------------------------------------
@@ -283,6 +305,7 @@ func to_data() -> Dictionary:
         "health": health,
         "energy": energy,
         "paths": {"guerreiro": paths[&"guerreiro"], "cacador": paths[&"cacador"], "explorador": paths[&"explorador"]},
+        "flags": _flags_to_data(),
         "fish_log": fish_log.duplicate(),
         "species_seen": species_seen.keys().map(func(k: StringName) -> String: return String(k)),
         "selected_slot": selected_slot,
@@ -310,6 +333,10 @@ func from_data(data: Dictionary) -> void:
         species_seen[StringName(k)] = true
     health = clampi(int(data.get("health", MAX_HEALTH)), 1, MAX_HEALTH)
     energy = clampi(int(data.get("energy", MAX_ENERGY)), 0, MAX_ENERGY)
+    flags = {}
+    var fd: Dictionary = data.get("flags", {})
+    for k in fd:
+        flags[StringName(k)] = fd[k]
     var pd: Dictionary = data.get("paths", {})
     for k in paths:
         paths[k] = maxi(0, int(pd.get(String(k), 0)))
@@ -324,3 +351,10 @@ func from_data(data: Dictionary) -> void:
 
 func reset() -> void:
     new_game()
+
+
+func _flags_to_data() -> Dictionary:
+    var out := {}
+    for k in flags:
+        out[String(k)] = flags[k]
+    return out

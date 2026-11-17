@@ -75,7 +75,7 @@ def speckle(d, x0, y0, w, h, colors, n, rng):
 def make_tileset():
     """Atlas 8x1 de tiles 16x16. A ordem é usada por scripts/world/farm_ground.gd."""
     rng = random.Random(7)
-    names = ["grama", "grama_flor", "capim_seco", "terra_vermelha", "terra_arada", "agua", "grama_escura", "agua_borda", "pedra", "ponte"]
+    names = ["grama", "grama_flor", "capim_seco", "terra_vermelha", "terra_arada", "agua", "grama_escura", "agua_borda", "pedra", "ponte", "caverna", "rocha", "ruina"]
     img = Image.new("RGBA", (T * len(names), T), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
 
@@ -121,6 +121,15 @@ def make_tileset():
     d.rectangle([9 * T, 0, 9 * T + T - 1, T - 1], fill=C["wood_l"])
     for y in range(0, T, 4):
         d.line([(9 * T, y), (9 * T + T - 1, y)], fill=C["wood_d"])
+    # 10 chão de caverna, 11 parede de rocha (sólida), 12 piso de ruína
+    base(10, (74, 66, 62, 255)); speckle(d, 10 * T, 0, T, T, [(90, 82, 76, 255), (60, 54, 50, 255)], 24, rng)
+    base(11, (52, 46, 48, 255))
+    for (x0, y0, x1, y1) in [(0, 0, 9, 6), (10, 0, 15, 6), (0, 7, 5, 15), (6, 7, 15, 15)]:
+        d.rectangle([11 * T + x0, y0, 11 * T + x1, y1], fill=(66, 60, 62, 255), outline=(36, 32, 34, 255))
+    base(12, (150, 140, 120, 255))
+    d.rectangle([12 * T, 0, 12 * T + T - 1, T - 1], outline=(110, 100, 86, 255))
+    d.line([(12 * T + 3, 8), (12 * T + 12, 8)], fill=(120, 110, 150, 255))
+    d.point((12 * T + 8, 4), fill=(120, 110, 150, 255))
     img.save(out("assets/tilesets/farm_tiles_placeholder.png"))
 
 
@@ -649,6 +658,13 @@ def make_farming():
         d.rectangle([c - 6, c - 3, c + 6, c + 7], fill=C["bege"], outline=o)
         d.arc([c - 4, c - 8, c + 4, c - 1], 180, 360, fill=C["bege"], width=2)
     touch_btn("assets/ui/touch_btn_bag_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), bag_glyph)
+    def journal_glyph(d, s):
+        c = s // 2
+        d.rectangle([c - 6, c - 7, c + 6, c + 7], fill=(150, 70, 50), outline=o)
+        d.rectangle([c - 4, c - 5, c + 5, c + 5], fill=C["bege"])
+        for y in (c - 3, c, c + 3):
+            d.line([(c - 2, y), (c + 3, y)], fill=(120, 100, 80))
+    touch_btn("assets/ui/touch_btn_journal_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), journal_glyph)
 
 
 def make_weather():
@@ -916,6 +932,137 @@ def make_combat():
     im.save(out("assets/ui/touch_btn_dodge_placeholder.png"))
 
 
+def make_adventure():
+    """Fase 7: mina, minérios, escadas, ruínas, chefes, Mãe-do-Ouro, mural de missões."""
+    o = C["outline"]
+    sil = (120, 110, 150, 255)
+    glow = (190, 170, 255, 255)
+
+    def icon(name, draw):
+        im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        draw(ImageDraw.Draw(im))
+        im.save(out(f"assets/items/{name}_placeholder.png"))
+
+    def rock_icon(fill, spot=None):
+        def f(d):
+            d.polygon([(2, 12), (4, 5), (9, 2), (14, 6), (14, 13)], fill=fill, outline=o)
+            if spot:
+                for (x, y) in [(6, 7), (10, 9), (8, 11)]:
+                    d.rectangle([x, y, x + 1, y + 1], fill=spot)
+        return f
+    icon("pedra", rock_icon(C["stone"]))
+    icon("minerio_ferro", rock_icon(C["stone_d"], (170, 90, 60, 255)))
+    icon("ouro", rock_icon((120, 100, 60, 255), (250, 210, 60, 255)))
+    def quartzo(d):
+        d.polygon([(5, 14), (6, 4), (8, 1), (10, 4), (11, 14)], fill=(230, 230, 240, 230), outline=o)
+    def cristal(d):
+        d.polygon([(4, 14), (5, 5), (8, 1), (11, 5), (12, 14)], fill=glow, outline=o)
+        d.line([(8, 3), (7, 12)], fill=C["white"])
+    def picareta(d):
+        d.line([(4, 14), (9, 6)], fill=C["wood"], width=2)
+        d.arc([2, 1, 15, 12], 200, 340, fill=(200, 205, 215, 255), width=2)
+    def coracao(d):
+        d.polygon([(8, 14), (2, 7), (4, 3), (8, 5), (12, 3), (14, 7)], fill=glow, outline=o)
+    for n, fn in [("quartzo", quartzo), ("cristal_vale", cristal), ("picareta", picareta), ("coracao_cristal", coracao)]:
+        icon(n, fn)
+
+    def rock_world(name, fill, spot=None, size=(16, 14)):
+        w, h = size
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        d.ellipse([1, h - 4, w - 2, h - 1], fill=(0, 0, 0, 60))
+        d.polygon([(1, h - 3), (3, 4), (8, 1), (w - 2, 5), (w - 1, h - 3)], fill=fill, outline=o)
+        if spot:
+            for (x, y) in [(5, 6), (9, 8), (7, 10)]:
+                d.rectangle([x, y, x + 1, y + 1], fill=spot)
+        im.save(out(f"assets/environments/{name}_placeholder.png"))
+    rock_world("rocha_pedra", C["stone"])
+    rock_world("rocha_ferro", C["stone_d"], (170, 90, 60, 255))
+    rock_world("rocha_quartzo", (120, 120, 130, 255), (235, 235, 245, 255))
+    rock_world("rocha_ouro", (110, 95, 70, 255), (250, 210, 60, 255))
+    rock_world("rocha_cristal", (80, 70, 110, 255), glow)
+    rock_world("pedregulho", (130, 120, 110, 255), None, (16, 16))
+
+    def simple(name, w, h, draw):
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw(ImageDraw.Draw(im))
+        im.save(out(f"assets/environments/{name}_placeholder.png"))
+    def escada_desce(d):
+        d.rectangle([1, 1, 14, 14], fill=(20, 16, 18, 255), outline=o)
+        for y in range(3, 14, 3):
+            d.line([(4, y), (11, y)], fill=C["wood_l"])
+        d.line([(4, 2), (4, 14)], fill=C["wood"]); d.line([(11, 2), (11, 14)], fill=C["wood"])
+    def escada_sobe(d):
+        d.line([(4, 0), (4, 15)], fill=C["wood"], width=2); d.line([(11, 0), (11, 15)], fill=C["wood"], width=2)
+        for y in range(2, 16, 3):
+            d.line([(4, y), (11, y)], fill=C["wood_l"])
+    simple("escada_desce", 16, 16, escada_desce)
+    simple("escada_sobe", 16, 16, escada_sobe)
+    def boca_mina(d):
+        d.polygon([(0, 40), (6, 6), (58, 6), (64, 40)], fill=(100, 92, 86, 255), outline=o)
+        d.rectangle([20, 14, 44, 40], fill=(16, 12, 14, 255), outline=o)
+        d.rectangle([18, 10, 46, 14], fill=C["wood"], outline=o)
+        d.line([(20, 14), (20, 40)], fill=C["wood"], width=2); d.line([(44, 14), (44, 40)], fill=C["wood"], width=2)
+    simple("boca_mina", 64, 42, boca_mina)
+    def portal(open_):
+        def f(d):
+            d.rectangle([2, 8, 46, 46], fill=(150, 140, 120, 255), outline=o)
+            d.rectangle([14, 16, 34, 46], fill=(20, 16, 24, 255) if open_ else sil, outline=o)
+            d.polygon([(0, 10), (24, 0), (48, 10)], fill=(130, 120, 104, 255), outline=o)
+            for (x, y) in [(6, 20), (40, 20), (6, 34), (40, 34)]:
+                d.ellipse([x - 2, y - 2, x + 2, y + 2], fill=glow if not open_ else (250, 210, 60, 255))
+        return f
+    simple("portal_ruina_fechado", 48, 48, portal(False))
+    simple("portal_ruina_aberto", 48, 48, portal(True))
+    for i, sym in enumerate(["sol", "lua", "chuva"]):
+        for lit in (False, True):
+            def totem(d, sym=sym, lit=lit):
+                d.ellipse([3, 26, 17, 31], fill=(0, 0, 0, 60))
+                d.rectangle([4, 4, 16, 29], fill=(140, 130, 112, 255), outline=o)
+                col = (250, 210, 60, 255) if lit else (90, 84, 76, 255)
+                if sym == "sol":
+                    d.ellipse([7, 9, 13, 15], outline=col, width=2)
+                elif sym == "lua":
+                    d.arc([6, 8, 14, 16], 60, 300, fill=col, width=2)
+                else:
+                    for x in (7, 10, 13):
+                        d.line([(x, 9), (x - 1, 15)], fill=col, width=1)
+                d.line([(6, 20), (14, 20)], fill=col)
+            simple(f"totem_{sym}_{'on' if lit else 'off'}", 20, 32, totem)
+    def mural(d):
+        d.line([(4, 30), (4, 10)], fill=C["wood_d"], width=2); d.line([(28, 30), (28, 10)], fill=C["wood_d"], width=2)
+        d.rectangle([1, 2, 31, 20], fill=C["wood_l"], outline=o)
+        for (x, y) in [(4, 5), (14, 6), (22, 5), (8, 12)]:
+            d.rectangle([x, y, x + 7, y + 6], fill=C["bege"], outline=C["wood_d"])
+    simple("mural", 32, 32, mural)
+
+    # chefes e Mãe-do-Ouro
+    def guardiao(d, ox, f):
+        b = (f % 2)
+        d.ellipse([ox + 4, 36, ox + 36, 40], fill=(0, 0, 0, 70))
+        d.polygon([(ox + 8, 36), (ox + 6, 14 + b), (ox + 14, 4), (ox + 26, 4), (ox + 34, 14 + b), (ox + 32, 36)], fill=(110, 100, 150, 255), outline=o)
+        for (x, y) in [(ox + 12, 10), (ox + 24, 8), (ox + 18, 22), (ox + 28, 26)]:
+            d.polygon([(x, y + 6), (x + 3, y), (x + 6, y + 6)], fill=glow, outline=o)
+        d.rectangle([ox + 15, 15, ox + 17, 17], fill=C["white"]); d.rectangle([ox + 23, 15, ox + 25, 17], fill=C["white"])
+    sheet("assets/enemies/guardiao_cristal_placeholder.png", 40, 40, 4, guardiao)
+    def eco(d, ox, f):
+        a = 150 + (f % 2) * 60
+        d.ellipse([ox + 6, 34, ox + 26, 39], fill=(0, 0, 0, 60))
+        d.polygon([(ox + 6, 36), (ox + 10, 8), (ox + 16, 2), (ox + 22, 8), (ox + 26, 36)], fill=(70, 66, 90, a), outline=o)
+        d.ellipse([ox + 11, 8, ox + 21, 18], fill=(30, 28, 40, a))
+        d.point((ox + 14, 12), fill=glow); d.point((ox + 18, 12), fill=glow)
+        for k in range(3):
+            d.arc([ox + 4 - k * 2, 14 - k * 2, ox + 28 + k * 2, 30 + k * 2], 200, 340, fill=(160, 150, 200, 120))
+    sheet("assets/enemies/eco_silencio_placeholder.png", 32, 40, 4, eco)
+    def mae_ouro(d, ox, f):
+        r = 8 + (f % 2)
+        d.ellipse([ox + 12 - r - 3, 12 - r - 3, ox + 12 + r + 3, 12 + r + 3], fill=(250, 200, 60, 70))
+        d.ellipse([ox + 12 - r, 12 - r, ox + 12 + r, 12 + r], fill=(255, 220, 90, 230))
+        d.ellipse([ox + 9, 8, ox + 15, 14], fill=(255, 250, 220, 255))
+    sheet("assets/npcs/mae_do_ouro_placeholder.png", 24, 24, 4, mae_ouro)
+    simple("estilhaco", 8, 8, lambda d: d.polygon([(4, 0), (8, 4), (4, 8), (0, 4)], fill=glow, outline=o))
+
+
 def make_app_icons():
     """Ícones do app web/PWA (pequi sobre terra vermelha)."""
     for size in (144, 180, 512):
@@ -934,6 +1081,7 @@ if __name__ == "__main__":
     make_village()
     make_fauna()
     make_combat()
+    make_adventure()
     make_weather()
     make_app_icons()
     make_tileset()

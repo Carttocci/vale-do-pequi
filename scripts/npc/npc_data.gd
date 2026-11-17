@@ -11,6 +11,8 @@ extends Resource
 @export var display_name: String = ""
 @export var profession: String = ""
 @export var sprite: Texture2D
+## Linhas da folha de sprite (8 = uma por direção; 1 = só animação).
+@export var sheet_rows: int = 8
 @export var schedule: PackedStringArray = PackedStringArray()
 ## Rotina de domingo (vazia = igual aos outros dias).
 @export var schedule_sunday: PackedStringArray = PackedStringArray()

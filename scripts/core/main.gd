@@ -76,6 +76,7 @@ func change_region_now(id: StringName, spawn: StringName = &"") -> void:
     player.velocity = Vector2.ZERO
     player.set_camera_limits(level.get_world_rect())
     EventBus.show_message(level.display_name, 2.0)
+    EventBus.region_entered.emit(level.region_id)
 
 
 ## Desktop: escala inteira (pixel perfeito, pode sobrar borda).

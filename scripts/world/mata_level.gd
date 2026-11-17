@@ -24,7 +24,14 @@ var _rng := RandomNumberGenerator.new()
 var _fauna_root: Node2D
 
 
+## Pedregulhos que fecham a trilha da Serra do Cristal (linha 1, colunas 28–31).
+const PEDREGULHOS := [Vector2(456, 30), Vector2(472, 30), Vector2(488, 30), Vector2(504, 30)]
+
+var pedregulhos: Array[Rock] = []
+
+
 func _ready() -> void:
+    _build_serra_trail()
     super._ready()
     _fauna_root = Node2D.new()
     _fauna_root.name = "Fauna"
@@ -112,3 +119,38 @@ func _update_visibility() -> void:
 
 func animals() -> Array:
     return _fauna_root.get_children().filter(func(c: Node) -> bool: return c is WildAnimal)
+
+
+# --- trilha da serra ---------------------------------------------------------
+
+func _build_serra_trail() -> void:
+    for i in PEDREGULHOS.size():
+        var r := Rock.new()
+        r.name = "Pedregulho%d" % (i + 1)
+        r.kind = &"pedregulho"
+        r.persistent_rock = true
+        r.position = PEDREGULHOS[i]
+        r.broken.connect(func(_r: Rock) -> void: _check_trail())
+        $Entities.add_child(r)
+        pedregulhos.append(r)
+    var exit := RegionExit.new()
+    exit.name = "SaidaSerra"
+    exit.target_region = &"serra"
+    exit.target_spawn = &"da_mata"
+    exit.position = Vector2(480, 4)
+    var shape := CollisionShape2D.new()
+    var rect := RectangleShape2D.new()
+    rect.size = Vector2(64, 8)
+    shape.shape = rect
+    exit.add_child(shape)
+    add_child(exit)
+
+
+func trail_open() -> bool:
+    return pedregulhos.all(func(r: Rock) -> bool: return r.is_broken())
+
+
+func _check_trail() -> void:
+    if trail_open() and not GameState.has_flag(&"trilha_serra_aberta"):
+        GameState.set_flag(&"trilha_serra_aberta")
+        EventBus.show_message("A trilha da Serra do Cristal está aberta!", 3.0)

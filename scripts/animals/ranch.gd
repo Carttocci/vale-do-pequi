@@ -108,6 +108,8 @@ func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
 
 
 func _pen_near(pos: Vector2) -> StringName:
+    if not chicken_feeder.is_visible_in_tree():
+        return &""  # jogador em outra região
     if pos.distance_to(chicken_feeder.global_position + Vector2(0, -4)) < 16.0:
         return &"galinheiro"
     if pos.distance_to(cow_feeder.global_position + Vector2(0, -4)) < 16.0:

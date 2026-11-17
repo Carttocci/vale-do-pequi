@@ -37,6 +37,7 @@ Main (main.gd)
 | `ItemDB` | scripts/core/item_db.gd | Catálogo: lê `data/items/*.tres` (ItemData) e `data/crops/*.tres` (CropData) |
 | `Clock` | scripts/core/clock.gd | Hora do dia, clima do dia, sinais `time_changed`, `day_started`, `passed_out` |
 | `GameState` | scripts/core/game_state.gd | Estado do jogador: mochila, atalho selecionado, água do regador, dia |
+| `Quests` | scripts/quests/quests.gd | Missões (data/quests.json): ativas, concluídas, contadores; falas de missão dos moradores |
 | `SaveManager` | scripts/save/save_manager.gd | Salvar/carregar JSON com versão e migração |
 
 ## Fazenda (Fase 2)
@@ -56,6 +57,14 @@ Main (main.gd)
 - `NpcData` (data/npcs/*.tres): rotina, falas, loja. `Npc` (scripts/npc/npc.gd): segue a rotina a cada 10 min de jogo, anda pelo caminho A*, entra em casa ("!"), escolhe falas (`pick_lines`, sem efeito colateral e testável), amizade e loja. É `persistent` (amizade, conheceu, último dia de conversa).
 - `DialogueUI` e `ShopUI` abrem por sinais do `EventBus` (`dialogue_requested`, `shop_requested`) e pausam o mundo. O morador não conhece as telas.
 - `Interactable.target_priority`: desempate quando dois alvos estão perto (morador na frente de uma porta ganha).
+
+## Aventura (Fase 7)
+
+- Regiões novas: `SerraLevel` (serra), `MineLevel` (mina) e `RuinasLevel` (ruínas). Montam os objetos por código (`Prop`: sprite + colisão + E) para manter as cenas pequenas.
+- `MineLevel.build_floor(n)` refaz o chão com `FarmGround.load_from_text` (autômato celular + BFS: tudo que não se alcança vira rocha, escada de descer no ponto mais longe). Andares não são salvos: mina e ruínas têm `save_as_region`, então o save leva o jogador para a porta da serra.
+- `Rock` (picareta) e `Mining` (provedor `item_target`). Pedras quebradas avisam o `Level.invalidate_nav()`.
+- `Boss` herda de `Enemy` e adiciona ataque especial, segunda fase e ajudantes; `Projectile` acerta o jogador.
+- `Quests` escuta `EventBus.region_entered`, `enemy_killed`, `GameState.flag_set`, mochila e relógio para concluir etapas sozinhas; `Npc.talk()` pergunta `Quests.dialogue_for(id)` antes da conversa normal. `QuestBoard` (mural) e `JournalUI` (diário) só leem o autoload.
 
 ## Tempo e clima (Fase 3)
 

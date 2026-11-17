@@ -18,6 +18,10 @@ const KINDS := {
         "cooldown": 0.9, "ai": "flyer", "w": 16, "drops": [["fragmento_silencio", 1, 1, 0.1]], "xp": 5},
     &"javali_corrompido": {"name": "Javali corrompido", "hp": 45, "damage": 12, "speed": 26.0, "aggro": 100.0, "range": 14.0,
         "cooldown": 1.4, "ai": "charger", "w": 24, "drops": [["carne_javali", 1, 2, 1.0], ["couro", 1, 1, 0.6], ["fragmento_silencio", 1, 1, 0.3]], "xp": 12},
+    &"guardiao_cristal": {"name": "Guardião de Cristal", "hp": 260, "damage": 14, "speed": 16.0, "aggro": 400.0, "range": 18.0,
+        "cooldown": 1.2, "ai": "boss", "w": 40, "drops": [["coracao_cristal", 1, 1, 1.0], ["cristal_vale", 2, 3, 1.0]], "xp": 120},
+    &"eco_silencio": {"name": "Eco do Silêncio", "hp": 320, "damage": 12, "speed": 20.0, "aggro": 400.0, "range": 16.0,
+        "cooldown": 1.2, "ai": "boss", "w": 32, "drops": [["fragmento_silencio", 5, 5, 1.0]], "xp": 200},
 }
 
 var kind: StringName
@@ -76,6 +80,7 @@ func take_hit(amount: int, dir: Vector2, knockback: float, stun: float = 0.0) ->
 
 func _die() -> void:
     GameState.add_xp(&"combate", int(info.xp))
+    EventBus.enemy_killed.emit(kind)
     for d: Array in info.drops:
         if _rng.randf() <= float(d[3]):
             var pk := Pickup.new().setup(StringName(d[0]), _rng.randi_range(int(d[1]), int(d[2])))
@@ -103,7 +108,12 @@ func _process(delta: float) -> void:
     _anim += delta
     match info.ai:
         "chaser", "boss":
-            if dist < info.aggro:
+            if _charge_time > 0.0:
+                _charge_time -= delta
+                _move(_charge_dir * info.speed * 6.0 * delta)
+                if dist <= info.range + 6.0:
+                    _try_hit(player, to_player)
+            elif dist < info.aggro:
                 if dist > info.range:
                     _move(to_player.normalized() * info.speed * delta)
                 else:

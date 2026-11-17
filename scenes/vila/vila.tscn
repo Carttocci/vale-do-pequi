@@ -1,8 +1,9 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/level.gd" id="r1"]
 [ext_resource type="Script" path="res://scripts/world/farm_ground.gd" id="r2"]
 [ext_resource type="Script" path="res://scripts/world/region_exit.gd" id="r3"]
+[ext_resource type="Script" path="res://scripts/quests/quest_board.gd" id="rq"]
 [ext_resource type="PackedScene" path="res://scenes/npc/npc.tscn" id="r4"]
 [ext_resource type="PackedScene" path="res://scenes/vila/objects/igreja.tscn" id="r5"]
 [ext_resource type="PackedScene" path="res://scenes/vila/objects/mercearia.tscn" id="r6"]
@@ -146,6 +147,10 @@ position = Vector2(232, 448)
 
 [node name="Cruzeiro" parent="Entities" instance=ExtResource("r12")]
 position = Vector2(416, 280)
+
+[node name="Mural" type="Node2D" parent="Entities"]
+position = Vector2(416, 232)
+script = ExtResource("rq")
 
 [node name="Banco1" parent="Entities" instance=ExtResource("r13")]
 position = Vector2(344, 232)

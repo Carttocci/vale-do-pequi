@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="NpcData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/npc/npc_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/npcs/mae_do_ouro_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"mae_do_ouro"
+display_name = "Mãe-do-Ouro"
+profession = "Guardiã das serras"
+sprite = ExtResource("2")
+sheet_rows = 1
+schedule = PackedStringArray()
+schedule_sunday = PackedStringArray()
+intro = PackedStringArray()
+lines_generic = PackedStringArray("As serras guardam ouro, mas o que vale mais é o que o povo lembra.", "Cada tradição viva é uma luz acesa contra o Silêncio.", "Volte quando quiser. Eu escuto as serras e elas me contam do vale.")
+lines_repeat = PackedStringArray("Vá em paz. O vale precisa de você.")

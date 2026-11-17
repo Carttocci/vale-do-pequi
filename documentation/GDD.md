@@ -369,8 +369,8 @@ Cada fase termina com uma versão jogável publicada no navegador.
 | 4 — Vila | Vila, NPCs, diálogos, lojas, economia | ✅ v0.5 |
 | 5 — Atividades | Pesca, caça, criação de animais | ✅ v0.6 |
 | 6 — Combate | Hack-and-slash, armas, inimigos, habilidades | ✅ v0.7 |
-| 7 — Aventura | Mineração, ruínas, masmorras, missões, **início da trama do Silêncio** | Próxima |
-| 8 — Conteúdo | Culinária, eventos/festividades, relacionamentos, construção | |
+| 7 — Aventura | Mineração, ruínas, masmorras, missões, **início da trama do Silêncio** | ✅ v0.8 |
+| 8 — Conteúdo | Culinária, eventos/festividades, relacionamentos, construção | Próxima |
 | 9 — Finalização | Testes, otimização, áudio, balanceamento, lançamento | |
 
 Prioridades permanentes: sensação de controle agradável · cara de Goiás (não fazenda genérica) · arquitetura bem estruturada desde o início.

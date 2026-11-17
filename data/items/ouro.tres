@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/ouro_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"ouro"
+display_name = "Pepita de ouro"
+description = "Goiás nasceu da corrida do ouro. Ainda tem um pouco na serra."
+icon = ExtResource("2")
+category = 10
+max_stack = 99
+sell_price = 120
+buy_price = 0

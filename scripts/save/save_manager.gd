@@ -44,6 +44,9 @@ var _MIGRATIONS: Dictionary = {
     # v4 (Fase 5) → v5 (Fase 6): vida, energia e caminhos de combate (padrão: cheios/zerados).
     4: func(d: Dictionary) -> Dictionary:
         return d,
+    # v5 (Fase 6) → v6 (Fase 7): marcos da história e missões (começam vazios).
+    5: func(d: Dictionary) -> Dictionary:
+        return d,
 }
 
 
@@ -124,11 +127,18 @@ func _collect() -> Dictionary:
     if player:
         player_data = {"x": player.global_position.x, "y": player.global_position.y, "facing": player.facing_index,
             "region": String(_current_region())}
+        var main := get_tree().get_first_node_in_group("save_root")
+        var lvl: Level = main.level if main and "level" in main else null
+        if lvl and lvl.save_as_region != &"" and main.get_region(lvl.save_as_region):
+            # mina/ruínas: o jogo volta do lado de fora, na porta
+            var pos: Vector2 = main.get_region(lvl.save_as_region).get_spawn_position(lvl.save_as_spawn)
+            player_data = {"x": pos.x, "y": pos.y, "facing": 2, "region": String(lvl.save_as_region)}
     return {
         "version": GameState.DATA_VERSION,
         "saved_at": Time.get_datetime_string_from_system(),
         "game": GameState.to_data(),
         "clock": Clock.to_data(),
+        "quests": Quests.to_data(),
         "player": player_data,
         "nodes": nodes,
     }
@@ -137,6 +147,7 @@ func _collect() -> Dictionary:
 func _apply(data: Dictionary) -> void:
     GameState.from_data(data.get("game", {}))
     Clock.from_data(data.get("clock", {}))
+    Quests.from_data(data.get("quests", {}))
     var nodes: Dictionary = data.get("nodes", {})
     for node in get_tree().get_nodes_in_group("persistent"):
         var key := _key(node)

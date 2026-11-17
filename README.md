@@ -14,6 +14,7 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 | Esquivar | Espaço | botão azul | B |
 | Trocar atalho | 1–9 / rodinha | tocar na barra de baixo | LB / RB |
 | Mochila | I | botão da mochila | Y |
+| Diário (missões, caderno, habilidades) | J | botão do caderno | — |
 | Pausa | Esc | botão ⏸ | Start |
 | Tela cheia | F11 | botão ⛶ (Android) | — |
 
@@ -22,6 +23,8 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 **Vila:** siga a estrada de terra para o leste (direita) da fazenda. Converse com os moradores (E). Na mercearia da Helena (seg–sáb, 07:30–18:00) você compra sementes e vende colheitas e pequi.
 
 **Mata e rio:** da vila, siga a estrada para o leste. Pesque com vara e minhoca (João Pedro, na lagoa da vila), observe os bichos (E) para o caderno de campo e arme armadilhas de javali. Galinhas e vacas: Mariana, na clínica.
+
+**Aventura:** a história começa conversando com o Seu Benedito na vila; a missão atual aparece no canto da tela e no diário (J). Pedidos do povo ficam no mural da praça. Com a picareta do Toninho, abra a trilha no norte da mata até a Serra do Cristal, desça a mina (elevador nos andares 5 e 10) e descubra as Ruínas do Cerrado.
 
 **Como jogar:** pegue a enxada (atalho 1) e aperte **E** na roça para capinar; com a semente na mão o E planta, com o regador o E rega (e enche no poço). A dica na tela mostra o que o E vai fazer. Durma na porta de casa para passar o dia. Mais sementes no baú do avô, ao lado da casa. O jogo salva ao dormir e pelo menu de pausa.
 

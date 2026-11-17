@@ -175,7 +175,7 @@ func _on_day_started(day: int, _weather: int) -> void:
 ## Retorna {"prompt": String, "priority": int} ou {} se nada.
 ## Prioridade 20 = ação especial que deve ganhar de objetos (encher regador no poço).
 func get_item_action(item: ItemData, target_pos: Vector2, _actor: Node) -> Dictionary:
-    if item == null:
+    if item == null or not _here():
         return {}
     var cell := cell_at(target_pos)
     match item.category:
@@ -202,7 +202,7 @@ func get_item_action(item: ItemData, target_pos: Vector2, _actor: Node) -> Dicti
 
 ## Grupo "item_target": usa o item selecionado na célula à frente do jogador.
 func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
-    if item == null:
+    if item == null or not _here():
         return false
     var cell := cell_at(target_pos)
     match item.category:
@@ -247,6 +247,8 @@ func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
 
 ## Grupo "cell_interaction": texto da dica para a célula (vazio = nada).
 func get_cell_prompt(target_pos: Vector2) -> String:
+    if not _here():
+        return ""
     var cell := cell_at(target_pos)
     if is_ripe(cell):
         return "Colher " + ItemDB.get_crop(cells[cell].crop).display_name.to_lower()
@@ -254,6 +256,8 @@ func get_cell_prompt(target_pos: Vector2) -> String:
 
 
 func interact_cell(target_pos: Vector2, _actor: Node) -> bool:
+    if not _here():
+        return false
     return not harvest(cell_at(target_pos)).is_empty()
 
 
@@ -362,3 +366,10 @@ func _build_soil_tileset() -> TileSet:
     source.create_tile(SOIL_DRY)
     source.create_tile(SOIL_WET)
     return ts
+
+
+## A roça só responde quando o jogador está na fazenda (as outras regiões usam
+## as mesmas coordenadas e não podem capinar a roça "de longe").
+func _here() -> bool:
+    var level := ground.get_parent() as Level
+    return level == null or level.active

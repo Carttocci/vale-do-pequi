@@ -89,6 +89,14 @@ func _run_all() -> void:
     await _test_ranged_dodge_hunt()
     _test_energy_and_paths()
     await _test_save_v5()
+    await _test_quest_chain_start()
+    await _test_mining_and_trail()
+    await _test_mine_floors()
+    await _test_guardian_boss()
+    await _test_ruins_and_act1()
+    await _test_side_quests_and_board()
+    await _test_journal_ui()
+    await _test_save_v6()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -1080,7 +1088,7 @@ func _test_village_layout() -> void:
             if v.get_marker(StringName(marker)) == null:
                 missing.append(marker)
     check(missing.is_empty(), "todos os marcadores das rotinas existem %s" % [missing])
-    check(get_tree().get_nodes_in_group("npc").size() == 6, "6 moradores na vila")
+    check(get_tree().get_nodes_in_group("npc").filter(func(n: Node) -> bool: return vila().is_ancestor_of(n)).size() == 6, "6 moradores na vila")
     var p := v.find_path(v.get_marker(&"casa_azul").global_position, v.get_marker(&"lagoa_pier").global_position)
     check(p.size() > 10, "existe caminho da casa azul até a lagoa (%d passos)" % p.size())
     var blocked := false
@@ -1122,6 +1130,7 @@ func _test_npc_schedule_and_walk() -> void:
 func _test_dialogue_and_friendship() -> void:
     print("[Fase 4: conversa]")
     var dlg := _main.get_node("DialogueUI") as DialogueUI
+    Quests.active.clear()  # sem fala de missão no meio
     var joao := npc("benedito")
     joao.met = false
     joao.friendship = 0
@@ -1664,3 +1673,321 @@ func _test_save_v5() -> void:
     check(SaveManager.load_game() and GameState.health == 42 and GameState.energy == 17 and GameState.paths[&"cacador"] == 1,
         "vida, energia e caminhos restaurados")
     SaveManager.delete_save()
+
+
+# --- Fase 7: aventura ---------------------------------------------------------
+
+func serra() -> SerraLevel:
+    return _main.get_region(&"serra") as SerraLevel
+
+
+func mine() -> MineLevel:
+    return _main.get_region(&"mina") as MineLevel
+
+
+func ruinas() -> RuinasLevel:
+    return _main.get_region(&"ruinas") as RuinasLevel
+
+
+## Conversa com o morador e fecha a caixa (conclui etapas de missão).
+func talk_to(id: String) -> void:
+    var dlg := _main.get_node("DialogueUI") as DialogueUI
+    npc(id).talk()
+    dlg.close()
+    await frames(1)
+
+
+func _test_quest_chain_start() -> void:
+    print("[Fase 7: história — começo]")
+    GameState.new_game()
+    _main.change_region_now(&"vila")
+    check(Quests.is_active("q_chegada"), "jogo novo começa a missão 'Uma nova vida'")
+    var hud := _main.get_node("HUD")
+    check(hud.quest_label.text.contains("Benedito"), "HUD mostra a etapa atual")
+    var dlg := _main.get_node("DialogueUI") as DialogueUI
+    var money := GameState.money
+    npc("benedito").talk()
+    check(dlg.is_open() and dlg.lines[0].begins_with("Então você veio mesmo"), "Benedito fala da missão em vez da conversa normal")
+    dlg.close()
+    await frames(1)
+    check(Quests.is_done("q_chegada") and GameState.money == money + 100, "missão concluída com recompensa")
+    check(Quests.is_active("q_luzes"), "próxima missão da história começa sozinha")
+    set_time(GameState.day, 14 * 60)
+    _main.change_region_now(&"mata")
+    check(Quests.active["q_luzes"] == 0, "de dia na mata a etapa não conclui")
+    set_time(GameState.day, 20 * 60)
+    check(Quests.active["q_luzes"] == 1, "na mata depois das 19h: etapa concluída")
+    _main.change_region_now(&"vila")
+    set_time(GameState.day, 10 * 60)
+    npc("benedito").snap_to_schedule()
+    await talk_to("benedito")
+    check(Quests.is_active("q_fragmentos") and GameState.get_item_count(&"flecha") >= 10, "Benedito conta do Silêncio e dá flechas")
+    var talked := Quests.dialogue_for("mariana")
+    check(talked.is_empty(), "sem os fragmentos a Mariana não tem fala de entrega")
+    GameState.add_item(&"fragmento_silencio", 3)
+    await talk_to("mariana")
+    check(Quests.is_active("q_trilha") and GameState.get_item_count(&"fragmento_silencio") == 0, "fragmentos entregues à Mariana")
+    await talk_to("toninho")
+    check(GameState.get_item_count(&"picareta") == 1, "Toninho entrega a picareta do avô")
+    check(Quests.step("q_trilha").type == "flag", "etapa seguinte: abrir a trilha")
+
+
+func _test_mining_and_trail() -> void:
+    print("[Fase 7: picareta e trilha da serra]")
+    _main.change_region_now(&"mata")
+    set_time(GameState.day, 10 * 60)
+    var m := mata()
+    check(m.pedregulhos.size() == 4 and not m.trail_open(), "4 pedregulhos fecham a trilha")
+    check(not m.is_walkable(Vector2(472, 24)), "pedregulho bloqueia a passagem")
+    select_item(&"picareta")
+    await place_player(Vector2(472, 52))
+    _player.face(4)
+    await frames(2)
+    check(_prompts[-1] == "Quebrar pedregulho", "com a picareta o E vira 'Quebrar pedregulho'")
+    var mining := _main.get_node("Mining") as Mining
+    var item := ItemDB.get_item(&"picareta")
+    var energy := GameState.energy
+    var hits := 0
+    while not m.pedregulhos[1].is_broken() and hits < 10:
+        mining.use_item(item, _player.get_target_position(), _player)
+        hits += 1
+    check(hits == 4, "pedregulho quebra em 4 picaretadas")
+    check(GameState.energy == energy - 4 * Mining.ENERGY, "picaretada gasta energia")
+    check(GameState.skill_xp.get(&"mineracao", 0) > 0, "XP de mineração")
+    await frames(2)
+    var stones: Array = m.get_entities_root().get_children().filter(func(c: Node) -> bool: return c is Pickup)
+    check(stones.size() >= 1, "pedregulho deixa pedras")
+    for st in stones:
+        st.queue_free()
+    for r: Rock in m.pedregulhos:
+        while not r.is_broken():
+            r.hit(5)
+    check(GameState.has_flag(&"trilha_serra_aberta"), "trilha aberta (marco da história)")
+    check(m.is_walkable(Vector2(472, 24)), "caminho livre depois de quebrar")
+    check(Quests.is_active("q_mina"), "missão 'Fundo da mina' começa")
+    check(m.get_node("SaidaSerra").target_region == &"serra", "saída norte leva à serra")
+    _main.change_region_now(&"serra", &"da_mata")
+    check(_main.level == serra(), "chegou na Serra do Cristal")
+    check(serra().mine_floors_available() == [1], "só o andar 1 no começo")
+    check(serra().portal.interactable.prompt == "Examinar portal", "portal das ruínas fechado")
+    var field := _main.get_node("Farm/FarmField") as FarmField
+    check(field.get_item_action(ItemDB.get_item(&"enxada"), Vector2(200, 200), _player).is_empty(),
+        "fora da fazenda a enxada não capina a roça de longe")
+
+
+func _test_mine_floors() -> void:
+    print("[Fase 7: mina procedural]")
+    var mn := mine()
+    mn.pending_floor = 1
+    _main.change_region_now(&"mina")
+    await get_tree().physics_frame
+    await frames(2)
+    check(mn.floor_number == 1 and GameState.get_flag(&"mina_fundo") == 1, "andar 1")
+    check(mn.is_walkable(_player.global_position), "jogador nasce em chão livre")
+    check(mn.ladder_down != null and mn.ladder_up != null, "escada para descer e para subir")
+    check(not mn.find_path(_player.global_position, mn.ladder_down.global_position).is_empty() \
+        or mn.ladder_down.global_position.distance_to(_player.global_position) < 20, "dá para andar até a escada de descer")
+    check(mn.rocks().size() >= 10, "andar tem pedras para minerar")
+    check(mn.enemies().size() >= 2, "andar tem criaturas")
+    var kinds := {}
+    for r in mn.rocks():
+        kinds[r.kind] = true
+    check(not kinds.has(&"ouro") and not kinds.has(&"cristal"), "no raso não tem ouro nem cristal")
+    var text1 := _ground_text(mn)
+    mn.build_floor(1)
+    check(_ground_text(mn) == text1, "mesmo andar no mesmo dia = mesmo mapa")
+    for i in 4:
+        mn.go_down()
+    await frames(1)
+    check(mn.floor_number == 5 and GameState.get_flag(&"mina_fundo") == 5, "desceu até o andar 5")
+    check(Quests.is_active("q_guardiao"), "chegar no andar 5 conclui 'Fundo da mina'")
+    check(serra().mine_floors_available() == [1, 5], "elevador libera o andar 5")
+    var deep := {}
+    for f in [7, 8, 9]:
+        mn.build_floor(f)
+        for r in mn.rocks():
+            deep[r.kind] = true
+    check(deep.has(&"ouro") or deep.has(&"cristal"), "no fundo aparecem ouro/cristal")
+    _main.change_region_now(&"serra", &"da_mina")
+
+
+func _ground_text(lvl: Level) -> String:
+    var s := ""
+    for y in lvl.ground.map_size.y:
+        for x in lvl.ground.map_size.x:
+            s += str(lvl.ground.get_cell_atlas_coords(Vector2i(x, y)).x)
+    return s
+
+
+func _test_guardian_boss() -> void:
+    print("[Fase 7: Guardião de Cristal]")
+    # as criaturas dos andares anteriores bateram no jogador; sem isso ele
+    # pode desmaiar no meio do teste e voltar para a fazenda
+    GameState.health = GameState.MAX_HEALTH
+    var mn := mine()
+    mn.pending_floor = 10
+    _main.change_region_now(&"mina")
+    await frames(2)
+    check(mn.boss != null and mn.boss.kind == &"guardiao_cristal", "andar 10: o Guardião aparece")
+    check(mn.ladder_down == null, "andar 10 é o último")
+    mn.boss.special_attack()
+    await frames(1)
+    check(get_tree().get_nodes_in_group("projectile").size() >= 8, "ataque especial: estilhaços em círculo")
+    for p in get_tree().get_nodes_in_group("projectile"):
+        p.queue_free()
+    var b := mn.boss
+    GameState.health = GameState.MAX_HEALTH
+    b.take_hit(b.max_hp / 2 + 1, Vector2.UP, 0.0)
+    await frames(2)
+    check(b.phase == 2, "abaixo de metade: segunda fase")
+    check(mn.enemies().size() >= 3, "chama morcegos para ajudar")
+    b.take_hit(9999, Vector2.UP, 0.0)
+    await get_tree().create_timer(0.4).timeout
+    check(GameState.has_flag(&"guardiao_derrotado"), "Guardião derrotado (marco)")
+    var heart: Array = mn.get_entities_root().find_children("*", "Pickup", true, false).filter(
+        func(p: Node) -> bool: return p.item_id == &"coracao_cristal")
+    check(heart.size() == 1, "deixa o coração de cristal")
+    check(Quests.is_active("q_ruinas"), "missão 'Ruínas do Cerrado' começa")
+    mn.build_floor(10)
+    check(mn.boss == null and mn.rocks().size() == 6, "depois de derrotado: sala de cristais")
+    _main.change_region_now(&"serra", &"da_mina")
+    check(serra().mine_floors_available() == [1, 5, 10], "elevador libera o andar 10")
+    check(serra().portal.interactable.prompt == "Entrar nas ruínas", "portal das ruínas aberto")
+
+
+func _test_ruins_and_act1() -> void:
+    print("[Fase 7: Ruínas do Cerrado]")
+    _main.change_region_now(&"ruinas", &"da_serra")
+    var r := ruinas()
+    await get_tree().physics_frame
+    await frames(1)
+    check(r.seal.collision_layer == 1 and not r.is_walkable(Vector2(320, 176)), "selo fecha a câmara")
+    check(not r.mae_do_ouro.visible, "câmara vazia antes do chefe")
+    r.enter_chamber()
+    check(r.boss == null, "chefe não aparece com o selo fechado")
+    r.touch_totem(&"sol")
+    r.touch_totem(&"lua")
+    check(r.lit.is_empty(), "ordem errada apaga os totens")
+    r.touch_totem(&"sol")
+    r.touch_totem(&"chuva")
+    r.touch_totem(&"lua")
+    check(GameState.has_flag(&"totens_resolvidos"), "sol, chuva e lua: enigma resolvido")
+    await get_tree().physics_frame
+    check(r.seal.collision_layer == 0 and r.is_walkable(Vector2(320, 176)), "selo some e libera a passagem")
+    check(Quests.step("q_ruinas").get("flag", "") == "eco_derrotado", "etapa: enfrentar o fundo das ruínas")
+    await place_player(Vector2(320, 120))
+    await frames(2)
+    check(r.boss != null and r.boss.kind == &"eco_silencio", "entrar na câmara desperta o Eco do Silêncio")
+    var b := r.boss
+    var energy := GameState.energy
+    b.special_attack()
+    var orbs := get_tree().get_nodes_in_group("projectile")
+    check(orbs.size() == 3, "Eco solta 3 orbes")
+    for o in orbs:
+        o.global_position = _player.global_position + Vector2(0, -6)
+    _player._iframes = 0.0
+    await frames(2)
+    check(GameState.energy < energy, "orbe do Silêncio rouba energia")
+    for o in get_tree().get_nodes_in_group("projectile"):
+        o.queue_free()
+    b.take_hit(9999, Vector2.UP, 0.0)
+    await get_tree().create_timer(0.4).timeout
+    check(GameState.has_flag(&"eco_derrotado") and r.mae_do_ouro.visible, "Eco derrotado: a Mãe-do-Ouro aparece")
+    var dlg := _main.get_node("DialogueUI") as DialogueUI
+    r.mae_do_ouro.talk()
+    check(dlg.speaker == "Mãe-do-Ouro" and dlg.lines.size() == 5, "Mãe-do-Ouro conta sobre o Silêncio")
+    dlg.close()
+    await frames(1)
+    check(Quests.is_done("q_ruinas") and GameState.has_flag(&"ato1_completo"), "Ato 1 completo!")
+    check(GameState.get_item_count(&"cristal_vale") >= 1, "recompensa: cristal do vale")
+    GameState.health = GameState.MAX_HEALTH
+
+
+func _test_side_quests_and_board() -> void:
+    print("[Fase 7: mural e missões secundárias]")
+    GameState.new_game()
+    _main.change_region_now(&"vila")
+    check(Quests.board_available().is_empty(), "dia 1: mural vazio")
+    GameState.day = 2
+    check(Quests.board_available().has("s_alzira_milho") and not Quests.board_available().has("s_toninho_ferro"),
+        "mural mostra pedidos conforme o dia")
+    var board := vila().get_node("Entities/Mural") as QuestBoard
+    var dlg := _main.get_node("DialogueUI") as DialogueUI
+    board.open()
+    check(dlg.is_open() and dlg.options[-1] == "Fechar", "mural lista pedidos")
+    var idx := Array(dlg.options).find("Pamonhada da Dona Alzira")
+    dlg.choose(idx)
+    check(Quests.is_active("s_alzira_milho"), "aceitou o pedido da Dona Alzira")
+    check(not Quests.board_available().has("s_alzira_milho"), "pedido aceito sai do mural")
+    GameState.add_item(&"milho", 5)
+    var money := GameState.money
+    var alz := npc("alzira")
+    var f := alz.friendship
+    await talk_to("alzira")
+    check(Quests.is_done("s_alzira_milho") and GameState.get_item_count(&"milho") == 0 and GameState.money == money + 150,
+        "milho entregue, recompensa paga")
+    check(alz.friendship >= f + 30, "amizade da Dona Alzira subiu")
+    GameState.day = 5
+    Quests.start("s_benedito_javali")
+    for i in 3:
+        EventBus.enemy_killed.emit(&"javali_corrompido")
+    EventBus.enemy_killed.emit(&"raiz_torta")
+    check(Quests.active["s_benedito_javali"] == 1, "3 javalis corrompidos contam para a missão")
+    Quests.start("s_mariana_fauna")
+    for sp in [&"capivara", &"cutia", &"quati", &"seriema"]:
+        GameState.log_species(sp)
+    check(Quests.active["s_mariana_fauna"] == 1, "4 espécies no caderno contam para a missão")
+
+
+func _test_journal_ui() -> void:
+    print("[Fase 7: diário]")
+    var j := _main.get_node("JournalUI") as JournalUI
+    var ev := InputEventAction.new()
+    ev.action = "journal"
+    ev.pressed = true
+    Input.parse_input_event(ev)
+    Input.flush_buffered_events()
+    await frames(2)
+    check(j.is_open() and get_tree().paused, "J abre o diário e pausa")
+    j.set_tab(0)
+    check(j.body_text().contains("Uma nova vida") and j.body_text().contains("Javalis corrompidos"), "aba Missões lista as ativas")
+    j.set_tab(1)
+    check(j.body_text().contains("Capivara  (Hydrochoerus hydrochaeris)") and j.body_text().contains("ainda não visto"),
+        "aba Caderno: espécies vistas e não vistas")
+    GameState.skill_xp[&"combate"] = 150
+    j.set_tab(2)
+    check(j.body_text().contains("pontos livres: 2"), "aba Habilidades mostra pontos de caminho")
+    GameState.add_path_point(&"guerreiro")
+    await frames(1)
+    check(j.body_text().contains("pontos livres: 1"), "diário atualiza ao gastar ponto")
+    j.close()
+    check(not get_tree().paused, "fechar despausa")
+    check(_main.get_node("TouchControls/Journal").action == "journal", "botão de toque do diário")
+
+
+func _test_save_v6() -> void:
+    print("[Fase 7: save v6]")
+    GameState.set_flag(&"mina_fundo", 7)
+    GameState.set_flag(&"trilha_serra_aberta")
+    for r: Rock in mata().pedregulhos:
+        r.hp = 0
+    _main.change_region_now(&"ruinas", &"da_serra")
+    check(SaveManager.save_game(), "salva dentro das ruínas")
+    var saved := SaveManager.read_save_file()
+    check(saved.version == 6 and saved.player.region == "serra", "dentro de ruínas/mina o save fica na porta da serra")
+    GameState.new_game()
+    for r: Rock in mata().pedregulhos:
+        r.load_save_data({"broken": false})
+    check(not Quests.is_active("s_benedito_javali"), "jogo novo zera missões")
+    check(SaveManager.load_game(), "carrega")
+    check(_main.level == serra(), "volta na serra")
+    check(GameState.get_flag(&"mina_fundo") == 7 and GameState.has_flag(&"trilha_serra_aberta"), "marcos restaurados")
+    check(Quests.is_active("s_benedito_javali") and Quests.active["s_benedito_javali"] == 1 and Quests.is_done("s_alzira_milho"),
+        "missões restauradas")
+    check(mata().trail_open(), "pedregulhos quebrados continuam quebrados")
+    var old := {"version": 5, "game": {"day": 3}, "nodes": {}}
+    var mig := SaveManager.migrate(old)
+    check(mig.version == 6, "save v5 migra para v6")
+    SaveManager.delete_save()
+    GameState.new_game()
+    _main.change_region_now(&"farm")

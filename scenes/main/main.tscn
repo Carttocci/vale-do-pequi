@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/main.gd" id="scr"]
 [ext_resource type="PackedScene" path="res://scenes/farm/farm.tscn" id="farm"]
@@ -8,11 +8,16 @@
 [ext_resource type="Script" path="res://scripts/weather/weather_fx.gd" id="wfx"]
 [ext_resource type="PackedScene" path="res://scenes/vila/vila.tscn" id="vila"]
 [ext_resource type="PackedScene" path="res://scenes/mata/mata.tscn" id="mata"]
+[ext_resource type="PackedScene" path="res://scenes/serra/serra.tscn" id="serra"]
+[ext_resource type="PackedScene" path="res://scenes/mina/mina.tscn" id="mina"]
+[ext_resource type="PackedScene" path="res://scenes/ruinas/ruinas.tscn" id="ruinas"]
 [ext_resource type="Script" path="res://scripts/fishing/fishing.gd" id="fishing"]
+[ext_resource type="Script" path="res://scripts/mining/mining.gd" id="mining"]
 [ext_resource type="Script" path="res://scripts/world/placement.gd" id="placement"]
 [ext_resource type="Script" path="res://scripts/interface/fishing_ui.gd" id="fishui"]
 [ext_resource type="Script" path="res://scripts/interface/dialogue_ui.gd" id="dlg"]
 [ext_resource type="Script" path="res://scripts/interface/shop_ui.gd" id="shop"]
+[ext_resource type="Script" path="res://scripts/interface/journal_ui.gd" id="journal"]
 
 [node name="Main" type="Node2D" groups=["save_root"]]
 script = ExtResource("scr")
@@ -22,6 +27,15 @@ script = ExtResource("scr")
 [node name="Vila" parent="." instance=ExtResource("vila")]
 
 [node name="Mata" parent="." instance=ExtResource("mata")]
+
+[node name="Serra" parent="." instance=ExtResource("serra")]
+
+[node name="Mina" parent="." instance=ExtResource("mina")]
+
+[node name="Ruinas" parent="." instance=ExtResource("ruinas")]
+
+[node name="Mining" type="Node" parent="."]
+script = ExtResource("mining")
 
 [node name="Fishing" type="Node" parent="."]
 script = ExtResource("fishing")
@@ -47,3 +61,6 @@ script = ExtResource("shop")
 
 [node name="FishingUI" type="CanvasLayer" parent="."]
 script = ExtResource("fishui")
+
+[node name="JournalUI" type="CanvasLayer" parent="."]
+script = ExtResource("journal")

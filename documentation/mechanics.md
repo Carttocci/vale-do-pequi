@@ -46,3 +46,16 @@
 | Dinheiro inicial | R$ 200 | `STARTING_MONEY` em game_state.gd |
 | Preços | `buy_price` (loja vende) e `sell_price` (loja compra) | data/items/*.tres |
 | Mercearia | Vende sementes; compra colheitas (CROP) e coleta (FORAGE) | `shop_*` em data/npcs/helena.tres |
+
+## Fase 7
+| Mecânica | Como funciona | Onde ajustar |
+|---|---|---|
+| Missões | História (encadeada, começa sozinha) e pedidos do mural (a partir de `min_day`). Etapas: talk, deliver, reach, flag, min_flag, kill, observe, collect | data/quests.json |
+| Marcos da história | `GameState.flags` (trilha_serra_aberta, mina_fundo, guardiao_derrotado, totens_resolvidos, eco_derrotado, ato1_completo) | scripts/core/game_state.gd |
+| Mineração | Picareta: 2 de energia por golpe; força +1 a cada 4 níveis de mineração | `ENERGY` em scripts/mining/mining.gd |
+| Pedras | pedra 2 golpes, ferro/quartzo 3, ouro 4, cristal/pedregulho 5–4; itens e XP | `KINDS` em scripts/mining/rock.gd |
+| Mina | 10 andares (40×23); semente = andar + dia; 14+2×andar pedras, 2+andar/2 criaturas (vida +12% por andar); elevador no 5 e no 10 | scripts/mining/mine_level.gd |
+| Minério por profundidade | 1–3 pedra/ferro · 4–6 + quartzo · 7–9 + ouro e cristal | `_ore_for_depth` |
+| Guardião de Cristal | 260 de vida; a cada 3,2 s estilhaços (8, depois 12) + investida; metade da vida chama 2 morcegos | `KINDS` em enemy.gd, scripts/combat/boss.gd |
+| Eco do Silêncio | 320 de vida; reaparece ao lado do jogador e solta 3 orbes (8 de dano, −10 de energia) | idem |
+| Enigma dos totens | Ordem sol → chuva → lua; errar apaga todos | `ORDER` em scripts/world/ruinas_level.gd |

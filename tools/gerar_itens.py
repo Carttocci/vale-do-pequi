@@ -59,6 +59,14 @@ ITEMS = [
      {"damage": 12, "attack_cooldown": 0.55, "reach": 160.0, "ranged": True, "ammo_item": "flecha"}),
     ("flecha", "Flecha", "Munição para o arco.", 4, 99, 1, 5, {}),
     ("madeira", "Madeira", "Pedaço de madeira. Serve para artesanato.", 4, 99, 3, 0, {}),
+    # Fase 7 — mineração e aventura
+    ("picareta", "Picareta", "Quebra pedras e minérios. Gasta energia.", 0, 1, 0, 200, {"tool_type": 4}),
+    ("pedra", "Pedra", "Pedra comum. Serve para construir.", 10, 99, 2, 0, {}),
+    ("minerio_ferro", "Minério de ferro", "O Toninho transforma isso em ferramenta.", 10, 99, 15, 0, {}),
+    ("quartzo", "Quartzo", "Cristal transparente da Serra do Cristal.", 10, 99, 30, 0, {}),
+    ("ouro", "Pepita de ouro", "Goiás nasceu da corrida do ouro. Ainda tem um pouco na serra.", 10, 99, 120, 0, {}),
+    ("cristal_vale", "Cristal do Vale", "Brilha sozinho no escuro. Faz um zumbido baixinho.", 10, 99, 250, 0, {}),
+    ("coracao_cristal", "Coração de cristal", "Pulsava dentro do Guardião. Está frio como o Silêncio.", 11, 1, 0, 0, {}),
     ("fragmento_silencio", "Fragmento do Silêncio", "Caco frio e sem som que sobra das criaturas corrompidas.", 11, 99, 0, 0, {}),
 ]
 

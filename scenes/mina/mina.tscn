@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/mining/mine_level.gd" id="r1"]
+[ext_resource type="Script" path="res://scripts/world/farm_ground.gd" id="r2"]
+[ext_resource type="Script" path="res://scripts/world/region_exit.gd" id="r3"]
+
+[sub_resource type="RectangleShape2D" id="exit_shape"]
+size = Vector2(32, 8)
+
+[node name="Mina" type="Node2D"]
+script = ExtResource("r1")
+region_id = &"mina"
+display_name = "Mina do Cristal"
+
+[node name="Ground" type="TileMapLayer" parent="."]
+script = ExtResource("r2")
+map_path = "res://data/maps/serra.txt"
+
+[node name="PlayerSpawn" type="Marker2D" parent="."]
+position = Vector2(320, 300)
+
+[node name="Markers" type="Node2D" parent="."]
+
+[node name="Entities" type="Node2D" parent="."]
+y_sort_enabled = true

@@ -32,6 +32,7 @@ func _ready() -> void:
     GameState.money_changed.connect(func(_m: int) -> void: update_clock())
     update_clock()
     _build_bars()
+    _build_tracker()
     save_button.pressed.connect(_on_save_pressed)
     new_game_button.pressed.connect(_on_new_game_pressed)
     message_timer.timeout.connect(_fade_message)
@@ -157,3 +158,35 @@ func _make_bar(color: Color, value: Callable) -> Control:
         c.draw_rect(Rect2(Vector2.ZERO, Vector2(c.size.x * clampf(value.call(), 0.0, 1.0), c.size.y)), color)
         c.draw_rect(Rect2(Vector2.ZERO, c.size), Color(0.72, 0.47, 0.22), false, 1.0))
     return c
+
+
+# --- missão atual (canto esquerdo) -----------------------------------------
+
+var quest_label: Label
+
+
+func _build_tracker() -> void:
+    quest_label = Label.new()
+    quest_label.position = Vector2(8, 78)
+    quest_label.size = Vector2(190, 40)
+    quest_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    quest_label.add_theme_font_size_override("font_size", 8)
+    quest_label.add_theme_color_override("font_color", Color(1, 0.9, 0.6))
+    quest_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+    quest_label.add_theme_constant_override("outline_size", 3)
+    quest_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    $Root.add_child(quest_label)
+    for sig in [Quests.quest_started, Quests.quest_updated, Quests.quest_completed]:
+        sig.connect(func(_id: String) -> void: update_tracker())
+    update_tracker()
+
+
+## Mostra a etapa atual da história principal (ou da primeira secundária).
+func update_tracker() -> void:
+    var text := ""
+    for id in Quests.order:
+        if Quests.is_active(id):
+            text = "★ " + String(Quests.step(id).get("text", ""))
+            if Quests.defs[id].get("main", false):
+                break
+    quest_label.text = text

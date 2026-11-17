@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/minerio_ferro_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"minerio_ferro"
+display_name = "Minério de ferro"
+description = "O Toninho transforma isso em ferramenta."
+icon = ExtResource("2")
+category = 10
+max_stack = 99
+sell_price = 15
+buy_price = 0

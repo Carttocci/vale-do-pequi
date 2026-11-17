@@ -22,9 +22,12 @@ const LEGEND := {
     "^": 7,  # água com margem
     "p": 8,  # calçamento de pedra (praça)
     "b": 9,  # ponte de madeira
+    "c": 10, # chão de caverna
+    "r": 11, # parede de rocha (sólida)
+    "u": 12, # piso de ruína
 }
 ## Colunas do atlas que bloqueiam passagem.
-const SOLID_TILES := [5, 7]
+const SOLID_TILES := [5, 7, 11]
 
 @export_file("*.txt") var map_path: String = "res://data/maps/fazenda_pequi.txt"
 
@@ -37,12 +40,17 @@ func _ready() -> void:
 
 
 func load_map(path: String) -> void:
-    clear()
     var file := FileAccess.open(path, FileAccess.READ)
     if file == null:
         push_error("FarmGround: não consegui abrir o mapa '%s' (erro %d)" % [path, FileAccess.get_open_error()])
         return
-    var lines := file.get_as_text().strip_edges(false, true).split("\n")
+    load_from_text(file.get_as_text())
+
+
+## Monta o chão a partir de texto ASCII (usado também pela mina, gerada na hora).
+func load_from_text(text: String) -> void:
+    clear()
+    var lines := text.strip_edges(false, true).split("\n")
     map_size = Vector2i(0, lines.size())
     for y in lines.size():
         var line := lines[y].strip_edges(false, true)

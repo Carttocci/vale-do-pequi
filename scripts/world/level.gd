@@ -15,6 +15,9 @@ extends Node2D
 @export var display_name: String = "Fazenda do Pequi"
 ## Tipo de água para a pesca: "lagoa" ou "rio".
 @export var water_habitat: String = "lagoa"
+## Regiões "de passagem" (mina, ruínas) salvam o jogador do lado de fora.
+@export var save_as_region: StringName = &""
+@export var save_as_spawn: StringName = &""
 
 @onready var ground: FarmGround = $Ground
 @onready var entities: Node2D = $Entities
@@ -81,6 +84,11 @@ func find_path(from: Vector2, to: Vector2) -> PackedVector2Array:
     if not out.is_empty():
         out[out.size() - 1] = to
     return out
+
+
+## Descarta a grade de navegação (algo que bloqueava passagem sumiu ou mudou).
+func invalidate_nav() -> void:
+    _nav = null
 
 
 func is_walkable(world_pos: Vector2) -> bool:

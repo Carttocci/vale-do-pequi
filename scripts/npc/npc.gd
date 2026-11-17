@@ -31,7 +31,9 @@ func _ready() -> void:
     add_to_group("persistent")
     sprite.texture = data.sprite
     sprite.hframes = 4
-    sprite.vframes = 8
+    sprite.vframes = data.sheet_rows
+    if data.sheet_rows == 1:
+        sprite.offset = Vector2(0, -16)
     interactable.prompt = "Conversar com " + data.display_name
     interactable.target_priority = 1
     interactable.interacted.connect(func(_a: Node) -> void: talk())
@@ -139,6 +141,9 @@ func _face_marker(m: Marker2D) -> void:
 
 
 func _update_frame() -> void:
+    if data.sheet_rows == 1:
+        sprite.frame = int(Time.get_ticks_msec() / 150) % FRAMES_PER_DIRECTION
+        return
     var step := int(_anim * 8.0) % FRAMES_PER_DIRECTION if not _path.is_empty() else 0
     sprite.frame = _facing * FRAMES_PER_DIRECTION + step
 
@@ -146,6 +151,13 @@ func _update_frame() -> void:
 # --- conversa ----------------------------------------------------------------
 
 func talk() -> void:
+    EventBus.npc_talked.emit(data.id)
+    var quest := Quests.dialogue_for(String(data.id))
+    if not quest.is_empty():
+        met = true
+        EventBus.dialogue_requested.emit(data.display_name, quest.lines, PackedStringArray(),
+            func(_i: int) -> void: Quests.finish_talk(quest.quest))
+        return
     var lines := pick_lines()
     var first_today := last_talk_day != GameState.day
     if first_today:

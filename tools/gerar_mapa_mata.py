@@ -1,7 +1,7 @@
 """
 Gera data/maps/mata.txt (Mata dos Ipês + Rio das Araras, 60x34) e a lista de
 árvores/arbustos usada pela cena (tools/gerar_cena_mata.py).
-Legenda em scripts/world/farm_ground.gd (b = ponte).
+Legenda em scripts/world/farm_ground.gd (b = ponte, r = rocha).
 """
 import os
 import random
@@ -38,6 +38,11 @@ for y in range(H):
 fill(0, 19, 30, 20, "=")
 fill(29, 2, 30, 20, "=")
 fill(28, 0, 31, 1, "=")
+# paredão de pedra no norte (a Serra do Cristal começa aqui); só a trilha passa
+for y in range(0, 2):
+    for x in range(W):
+        if not 28 <= x <= 31:
+            g[y][x] = "r"
 # Rio das Araras
 fill(0, 24, W - 1, 24, "^")
 fill(0, 25, W - 1, 28, "~")

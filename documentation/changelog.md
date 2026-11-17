@@ -1,5 +1,18 @@
 # Changelog — Vale do Pequi
 
+## 0.8.0 — Fase 7: Aventura (17/11/2026)
+- **História do Ato 1** ("Uma nova vida" → "Ruínas do Cerrado"), 7 missões em cadeia: luzes na mata, fragmentos do Silêncio, a trilha da serra, a mina, o Guardião de Cristal e as ruínas. Termina com a **Mãe-do-Ouro** revelando o que é o Silêncio (*lembrança fecha as brechas*).
+- **Missões secundárias** no **mural da praça** (6 pedidos dos moradores: entregas, caça de javali corrompido, censo da fauna), liberadas com os dias.
+- **Diário (J / botão do caderno)**: abas Missões, Caderno de campo (peixes e bichos) e Habilidades (com os pontos de caminho de combate). Missão atual aparece no canto do HUD.
+- **Picareta e mineração**: pedra, minério de ferro, quartzo, ouro e cristal do vale. XP de mineração.
+- **Trilha da Serra**: pedregulhos fecham o norte da Mata dos Ipês até você quebrar com a picareta.
+- **Serra do Cristal**: boca da mina e portal das ruínas; pedras e quartzo renascem todo dia.
+- **Mina do Cristal**: 10 andares gerados na hora (mesmo andar no mesmo dia), minérios mais raros no fundo, criaturas mais fortes, **elevador** nos andares 5 e 10.
+- **Chefes**: Guardião de Cristal (estilhaços em círculo, investida, chama morcegos) e Eco do Silêncio (some e reaparece, orbes que roubam energia).
+- **Ruínas do Cerrado**: enigma dos totens sol / chuva / lua (pista no mural antigo) que abre a câmara do fundo.
+- Correção: fora da fazenda a enxada/regador não mexem mais na roça "de longe".
+- Save v6 (marcos da história, missões; dentro da mina/ruínas o jogo salva na porta da serra). 89 testes novos (492 no total).
+
 ## 0.7.0 — Fase 6: Combate (17/11/2026)
 - **Vida e energia** (barras no HUD). Ferramentas, pesca, esquiva e golpe carregado gastam energia; dormir recupera tudo. Vida zero: desmaia, acorda em casa no dia seguinte e perde 10% do dinheiro (máx. R$ 100).
 - **Armas** (Ferraria do Toninho): facão, espada, machado, lança, martelo (atordoa) e arco (flechas). O facão do avô vem no baú em jogos novos.

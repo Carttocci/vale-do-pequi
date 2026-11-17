@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/interface/touch_controls.gd" id="scr"]
 [ext_resource type="Script" path="res://scripts/interface/virtual_joystick.gd" id="joy"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_fullscreen_placeholder.png" id="full"]
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_bag_placeholder.png" id="bag"]
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_dodge_placeholder.png" id="dodge"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_journal_placeholder.png" id="journal"]
 
 [node name="TouchControls" type="CanvasLayer"]
 layer = 2
@@ -65,3 +66,8 @@ action = "inventory"
 position = Vector2(530, 300)
 texture_normal = ExtResource("dodge")
 action = "dodge"
+
+[node name="Journal" type="TouchScreenButton" parent="."]
+position = Vector2(512, 6)
+texture_normal = ExtResource("journal")
+action = "journal"
