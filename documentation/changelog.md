@@ -1,5 +1,10 @@
 # Changelog — Vale do Pequi
 
+## 1.1.0 — Arte nova, etapa 1 (17/11/2026)
+- Arte baseada no **Ninja Adventure** (pixel-boy e AAA, licença CC0), repintada com cara de fazendinha do Cerrado: chão (grama, flores, capim seco, terra, roça, água, mata, praça, ponte, caverna, rocha, ruína), jogador de chapéu de palha, os 6 moradores, a Mãe-do-Ouro dourada, pequizeiro, ipê-amarelo e arbusto.
+- Os arquivos usados do pacote ficam em `third_party/ninja_adventure/`; `tools/aplicar_arte_ninja.py` faz a adaptação (roda sozinho no fim do gerador de arte provisória). Crédito na tela de título.
+- Próximas etapas: bichos, inimigos e chefes, construções e objetos, ícones dos itens.
+
 ## 1.0.0 — Fase 9: Finalização (17/11/2026)
 - **Tela de título**: Continuar (com a data do save), Novo jogo (pede confirmação se já existe save), Opções e Créditos.
 - **Som e música** gerados por código (`tools/gerar_audio.py`): viola caipira de dia, música da noite, ambiente de gotas na mina e nas ruínas, e forró de festa junina em dia de festa na vila, com troca suave. 17 efeitos (enxada, regador, moeda, golpe, picareta, comer, peixe mordendo, nível, missão, chefe...).

@@ -1289,4 +1289,8 @@ if __name__ == "__main__":
     make_items()
     make_bush()
     make_title()
+    # arte nova (Ninja Adventure repintado) por cima das provisórias, quando o pacote estiver no projeto
+    if os.path.isdir(os.path.join(ROOT, "third_party", "ninja_adventure")):
+        import subprocess, sys
+        subprocess.run([sys.executable, os.path.join(ROOT, "tools", "aplicar_arte_ninja.py")], check=True)
     print("Assets provisórios gerados.")
