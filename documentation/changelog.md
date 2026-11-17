@@ -1,5 +1,10 @@
 # Changelog — Vale do Pequi
 
+## 1.2.4 — Clique não fica preso e fonte de grade exata (17/11/2026)
+- Corrigido: depois de um clique do mouse em algo (galho, mato, pedra...), a ação ficava "segurada" e o personagem saía catando tudo por onde passava. Agora soltar o mouse solta a ação.
+- Fontes trocadas por fontes de grade de pixel exata: **Micro 5** (texto, tamanho 11/22) e **Jersey 15** (título, 54). As anteriores não seguiam uma grade e as letras saíam com larguras tortas no HUD.
+- Botões e subtítulo da tela de título maiores.
+
 ## 1.2.3 — Letras nítidas e menu novo (17/11/2026)
 - Fontes de pixel art de verdade (licença OFL, do Google Fonts): **Pixelify Sans** no jogo e **Jersey 10** no título. Sem suavização, então ficam nítidas ao ampliar a tela.
 - Cada tamanho de texto cai no tamanho em que a fonte foi desenhada (texto normal em 13, notinhas em Jersey 10), sem letra deformada.

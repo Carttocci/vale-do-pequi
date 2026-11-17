@@ -104,6 +104,9 @@ func _input(event: InputEvent) -> void:
         if _use_held:
             combat.release_charge()
         _use_held = false
+        # o clique contextual também "aperta" a interação; soltar o mouse solta ela
+        # (antes ficava presa e o personagem saía catando tudo sozinho)
+        _interact_held = false
     if event.is_action_released("interact"):
         if _interact_held:
             combat.release_charge()

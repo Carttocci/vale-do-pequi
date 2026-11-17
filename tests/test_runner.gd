@@ -114,6 +114,7 @@ func _run_all() -> void:
     await _test_messy_farm()
     await _test_camera_zoom()
     await _test_escape_closes_windows()
+    await _test_click_does_not_stick()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -2688,3 +2689,27 @@ func _test_escape_closes_windows() -> void:
     check(hud.pause_menu.visible and get_tree().paused, "sem nada aberto, Esc pausa")
     await action_press("menu")
     check(not get_tree().paused, "Esc de novo despausa")
+
+
+func _test_click_does_not_stick() -> void:
+    print("[clique não fica preso catando tudo]")
+    _main.change_region_now(&"farm")
+    var df := _main.get_node("Farm/Entities/DebrisField") as DebrisField
+    df.clear_all()
+    var ground := df.ground
+    var base := Vector2i(36, 22)
+    for i in 4:
+        df._add(base + Vector2i(0, -i), &"galho")
+    GameState.inventory.clear()
+    GameState.select_slot(8)
+    await place_player(ground.map_to_local(base) + Vector2(0, 14))
+    _player.face(4)
+    await frames(3)
+    await action_press("use_item")
+    check(GameState.get_item_count(&"galho") == 1, "um clique pega um galho")
+    check(not _player._interact_held, "soltar o mouse solta a ação")
+    for i in 12:
+        _player.global_position += Vector2(0, -4)
+        await get_tree().physics_frame
+    check(GameState.get_item_count(&"galho") == 1, "andar depois do clique não cata os outros sozinho")
+    df.clear_all()
