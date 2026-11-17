@@ -7,17 +7,20 @@ extends Node2D
 ##   pedrinha  → E pega (ou picareta)                            → pedra
 ##   árvore    → machado (E ou golpe), 5 golpes                  → madeira + galho, fica o toco
 ##   toco      → machado, 3 golpes                               → madeira
+##   pedra grande → picareta, 4 golpes                          → pedras (às vezes minério)
+## Galho, árvore, toco e pedra grande bloqueiam a passagem.
 ## Todo dia nasce mais mato e cai galho das árvores. Salva tudo (grupo persistent).
 
 const KINDS := {
     &"mato": {"tex": "mato", "hp": 1, "solid": false, "prompt": "Arrancar mato"},
-    &"galho": {"tex": "galho", "hp": 1, "solid": false, "prompt": "Pegar galho"},
+    &"galho": {"tex": "galho", "hp": 1, "solid": true, "prompt": "Pegar galho"},
     &"pedrinha": {"tex": "pedrinha", "hp": 1, "solid": false, "prompt": "Pegar pedra"},
     &"arvore": {"tex": "arvore_cerrado", "hp": 5, "solid": true, "prompt": "Cortar árvore"},
     &"toco": {"tex": "toco", "hp": 3, "solid": true, "prompt": "Arrancar toco"},
+    &"pedra_grande": {"tex": "pedra_grande", "hp": 4, "solid": true, "prompt": "Quebrar pedra grande"},
 }
 ## Chance por célula de grama livre no jogo novo.
-const DENSITY := {&"mato": 0.16, &"galho": 0.035, &"pedrinha": 0.03, &"arvore": 0.035}
+const DENSITY := {&"mato": 0.16, &"galho": 0.035, &"pedrinha": 0.025, &"arvore": 0.035, &"pedra_grande": 0.02}
 const GRASS_TILES := [0, 1, 2]
 const DAILY_WEEDS := 4
 const DAILY_TWIGS := 2
@@ -131,6 +134,8 @@ func get_item_action(item: ItemData, pos: Vector2, _actor: Node) -> Dictionary:
         return {"prompt": "Capinar mato", "priority": 20}
     if k == &"pedrinha" and item.tool_type == ItemData.ToolType.PICKAXE:
         return {"prompt": "Quebrar pedra", "priority": 20}
+    if k == &"pedra_grande" and item.tool_type == ItemData.ToolType.PICKAXE:
+        return {"prompt": KINDS[k].prompt, "priority": 20}
     return {}
 
 
@@ -139,7 +144,7 @@ func use_item(item: ItemData, pos: Vector2, _actor: Node) -> bool:
         return false
     var cell := cell_at(pos)
     var k := kind_at(cell)
-    if k in [&"arvore", &"toco"]:
+    if k in [&"arvore", &"toco", &"pedra_grande"]:
         if not GameState.use_energy(2):
             return false
         hit(cell, 1)
@@ -177,7 +182,7 @@ func hit(cell: Vector2i, power: int) -> void:
         return
     var c: Dictionary = cells[cell]
     c.hp -= power
-    Audio.play(&"acerto")
+    Audio.play(&"picareta" if c.kind == &"pedra_grande" else &"acerto")
     var node: Node2D = c.node
     var t := node.create_tween()
     node.position.x += 1
@@ -191,6 +196,13 @@ func hit(cell: Vector2i, power: int) -> void:
         _remove(cell)
         _add(cell, &"toco")
         EventBus.show_message("Timbeeer! A árvore caiu.", 1.5)
+    elif c.kind == &"pedra_grande":
+        _drop(cell, &"pedra", _rng.randi_range(3, 5))
+        if _rng.randf() < 0.25:
+            _drop(cell, &"minerio_ferro", 1)
+        GameState.add_xp(&"mineracao", 5)
+        Audio.play(&"pedra_quebra")
+        _remove(cell)
     else:
         _drop(cell, &"madeira", _rng.randi_range(1, 2))
         _remove(cell)
@@ -238,7 +250,7 @@ func _add(cell: Vector2i, kind: StringName, hp: int = -1) -> void:
     if info.solid:
         var shape := CollisionShape2D.new()
         var r := RectangleShape2D.new()
-        r.size = Vector2(12, 6) if kind == &"arvore" else Vector2(12, 8)
+        r.size = {&"arvore": Vector2(12, 6), &"galho": Vector2(14, 8), &"pedra_grande": Vector2(16, 10)}.get(kind, Vector2(12, 8))
         shape.shape = r
         shape.position = Vector2(0, -3)
         body.add_child(shape)
@@ -297,7 +309,7 @@ func generate(seed: int = 42) -> void:
             for k: StringName in DENSITY:
                 acc += DENSITY[k]
                 if roll < acc:
-                    if k == &"arvore" and _has_tree_near(cell):
+                    if k in [&"arvore", &"pedra_grande"] and _has_tree_near(cell):
                         break
                     _add(cell, k)
                     break
@@ -309,7 +321,7 @@ func generate(seed: int = 42) -> void:
 func _has_tree_near(cell: Vector2i) -> bool:
     for dy in range(-1, 2):
         for dx in range(-1, 2):
-            if kind_at(cell + Vector2i(dx, dy)) in [&"arvore", &"toco"]:
+            if kind_at(cell + Vector2i(dx, dy)) in [&"arvore", &"toco", &"pedra_grande"]:
                 return true
     return false
 

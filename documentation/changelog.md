@@ -1,5 +1,11 @@
 # Changelog — Vale do Pequi
 
+## 1.2.1 — Ajustes de ataque, clique e obstáculos (17/11/2026)
+- **Só ataca com arma**: acabou o soco. Sem arma na mão, F/⚔ pega a melhor arma da barra; sem nenhuma na barra, avisa.
+- **Clique esquerdo contextual**: perto de morador, baú, porta, planta, fruta no chão etc. o clique faz a mesma coisa que o E (conversar, abrir, colher...). Sem nada na frente, com arma ataca e com ferramenta trabalha.
+- **Galho bloqueia a passagem**: não dá mais pra andar por cima, tem que pegar.
+- **Pedras grandes** na fazenda: só a picareta quebra (4 golpes), dão 3 a 5 pedras e às vezes minério de ferro. Também bloqueiam a passagem.
+
 ## 1.2.0 — Fazenda bagunçada, ataque, comer e zoom (17/11/2026)
 - **Fazenda começa tomada pelo mato**, com galhos, pedrinhas e árvores do cerrado espalhados. Todo dia nasce mato novo e cai galho das árvores.
   - Mato: E arranca (1 de energia), a enxada capina, e qualquer golpe de arma corta. Não dá pra capinar a roça em cima do mato.

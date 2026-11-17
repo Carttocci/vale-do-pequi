@@ -314,6 +314,20 @@ def debris():
     ImageDraw.Draw(canvas).ellipse([8, 42, 32, 47], fill=(0, 0, 0, 60))
     canvas.alpha_composite(tree, ((40 - tree.width) // 2, 46 - tree.height))
     canvas.save(out("assets/environments/arvore_cerrado_placeholder.png"))
+    # pedra grande (só a picareta quebra): pedregulho cinza com luz no topo e musgo
+    w, h = 22, 20
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.ellipse([2, h - 5, w - 3, h - 1], fill=(0, 0, 0, 70))
+    body = [(2, 15), (1, 9), (4, 4), (9, 1), (15, 2), (20, 7), (21, 13), (18, 17), (6, 17)]
+    d.polygon(body, fill=(128, 126, 136, 255), outline=OL)
+    d.polygon([(4, 9), (6, 5), (10, 3), (15, 4), (18, 8), (12, 8), (7, 10)], fill=(168, 166, 176, 255))
+    d.line([(6, 5), (10, 3)], fill=(208, 206, 214, 255))
+    d.line([(11, 9), (13, 14)], fill=(92, 88, 100, 255))
+    d.line([(13, 14), (17, 15)], fill=(92, 88, 100, 255))
+    for (x, y) in [(3, 14), (4, 15), (5, 15), (18, 14), (19, 12)]:
+        d.point((x, y), fill=(110, 150, 60, 255))
+    im.save(out("assets/environments/pedra_grande_placeholder.png"))
 
 
 if __name__ == "__main__":

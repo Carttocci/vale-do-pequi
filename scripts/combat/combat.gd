@@ -37,37 +37,25 @@ func weapon() -> ItemData:
     return item if item and item.is_weapon() else null
 
 
-## Soco: quando não tem arma nenhuma na mochila.
-static var FISTS: ItemData = _make_fists()
-
-
-static func _make_fists() -> ItemData:
-    var f := ItemData.new()
-    f.id = &"soco"
-    f.display_name = "Soco"
-    f.category = ItemData.Category.WEAPON
-    f.damage = 5
-    f.attack_cooldown = 0.35
-    f.reach = 14.0
-    f.arc_width = 14.0
-    f.knockback = 60.0
-    f.stun = 0.1
-    return f
-
-
-## Arma do botão de atacar: a da mão; se não tiver, a melhor arma de perto da
-## mochila; sem arma nenhuma, soco.
-func attack_weapon() -> ItemData:
-    var w := weapon()
-    if w:
-        return w
-    var best: ItemData = null
-    for i in GameState.inventory.size():
+## Botão de atacar sem arma na mão: pega a melhor arma da barra de itens
+## (se tiver) e coloca na mão. Sem arma na barra, não ataca.
+func equip_best_weapon() -> bool:
+    if weapon():
+        return true
+    var best := -1
+    var best_dmg := -1
+    for i in GameState.HOTBAR_SIZE:
         var id := GameState.inventory.get_item_id(i)
         var it := ItemDB.get_item(id) if id != &"" else null
-        if it and it.is_weapon() and not it.ranged and (best == null or it.damage > best.damage):
-            best = it
-    return best if best else FISTS
+        if it and it.is_weapon() and not it.ranged and it.damage > best_dmg:
+            best = i
+            best_dmg = it.damage
+    if best < 0:
+        return false
+    GameState.select_slot(best)
+    return true
+
+
 
 
 func _process(delta: float) -> void:
@@ -93,7 +81,7 @@ func is_invulnerable() -> bool:
 
 ## Golpe normal (ou flecha). Retorna true se atacou.
 func attack() -> bool:
-    var w := attack_weapon()
+    var w := weapon()
     if w == null or cooldown > 0.0 or dodging > 0.0:
         return false
     if w.ranged:

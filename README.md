@@ -15,7 +15,7 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 | Trocar atalho | 1–9 / rodinha | tocar na barra de baixo | LB / RB |
 | Mochila | I | botão da mochila | Y |
 | Diário (missões, caderno, habilidades) | J | botão do caderno | — |
-| Atacar (arma da mão, melhor da mochila ou soco) | F ou K | botão ⚔ | X |
+| Atacar (só com arma; sem arma na mão, pega a melhor da barra) | F ou K | botão ⚔ | X |
 | Comer | Q | botão de comer | — |
 | Zoom da câmera | + e − | botões + e − | — |
 | Pausa (opções, salvar, voltar ao menu) | Esc | botão ⏸ | Start |

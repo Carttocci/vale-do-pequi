@@ -2443,32 +2443,54 @@ func _test_rain_continuous() -> void:
 
 
 func _test_attack_button() -> void:
-    print("[botão de atacar]")
+    print("[ataque só com arma; clique contextual]")
     GameState.new_game()
-    _main.change_region_now(&"mata")
+    _main.change_region_now(&"farm")
     set_time(GameState.day, 10 * 60)
     GameState.inventory.clear()
     GameState.add_item(&"semente_milho", 5)
     GameState.select_slot(0)
     var combat := _player.combat
-    check(combat.attack_weapon() == CombatComponent.FISTS, "sem arma nenhuma: soco")
-    await place_player(Vector2(300, 200))
+    await place_player(Vector2(600, 300))
     _player.face(2)
-    var e := spawn_enemy(&"raiz_torta", Vector2(312, 200))
+    var e := spawn_enemy(&"raiz_torta", Vector2(612, 300))
     var hp := e.hp
     combat.cooldown = 0.0
+    _messages.clear()
     await action_press("attack")
-    check(e.hp < hp, "F (ou o botão ⚔) dá soco mesmo com semente na mão")
+    check(e.hp == hp and _messages.any(func(m: String) -> bool: return m.contains("precisa de uma arma")),
+        "sem arma não ataca (avisa)")
     GameState.add_item(&"facao", 1)
-    GameState.select_slot(0)
-    check(combat.attack_weapon().id == &"facao", "com facão na mochila, o botão usa o facão")
     GameState.add_item(&"espada", 1)
-    check(combat.attack_weapon().id == &"espada", "pega a arma mais forte da mochila")
-    hp = e.hp
+    GameState.select_slot(0)
     combat.cooldown = 0.0
     await action_press("attack")
-    check(e.hp < hp, "golpe com a arma da mochila")
+    check(GameState.get_selected_item().id == &"espada" and e.hp < hp, "F/⚔ pega a melhor arma da barra e ataca")
+    # clique: com arma e nada na frente → ataca
+    e.global_position = Vector2(612, 300)  # o golpe anterior empurrou a raiz
+    await place_player(Vector2(600, 300))
+    _player.face(2)
+    hp = e.hp
+    combat.cooldown = 0.0
+    await action_press("use_item")
+    check(e.hp < hp, "clique com espada na mão (sem nada na frente) ataca")
     e.queue_free()
+    await frames(1)
+    # clique perto de morador → conversa, não ataca
+    _main.change_region_now(&"vila")
+    Quests.active.clear()
+    var ben := npc("benedito")
+    set_time(GameState.day, 10 * 60)
+    ben.snap_to_schedule()
+    await place_player(ben.global_position + Vector2(0, 16))
+    _player.face(4)
+    await frames(3)
+    var dlg := _main.get_node("DialogueUI") as DialogueUI
+    await action_press("use_item")
+    check(dlg.is_open(), "clique perto do morador abre a conversa (mesmo com espada)")
+    dlg.close()
+    await frames(1)
+    Quests.reset()
     check(_main.get_node("TouchControls/Attack").action == "attack", "botão de atacar no celular")
 
 
@@ -2565,6 +2587,24 @@ func _test_messy_farm() -> void:
     for i in 3:
         df.use_item(axe, tp, _player)
     check(df.kind_at(tree) == &"", "3 machadadas: toco arrancado")
+    # pedra grande: só picareta; galho e pedra grande bloqueiam a passagem
+    var rock := base + Vector2i(4, 6)
+    df._add(rock, &"pedra_grande")
+    df._add(base + Vector2i(6, 6), &"galho")
+    await get_tree().physics_frame
+    await get_tree().physics_frame
+    _main.level.invalidate_nav()
+    check(not _main.level.is_walkable(ground.map_to_local(rock) + Vector2(0, 4)), "pedra grande bloqueia")
+    check(not _main.level.is_walkable(ground.map_to_local(base + Vector2i(6, 6)) + Vector2(0, 4)), "galho bloqueia (não passa por cima)")
+    var rp := ground.map_to_local(rock)
+    check(df.get_item_action(axe, rp, _player).is_empty(), "machado não quebra pedra")
+    var pick := ItemDB.get_item(&"picareta")
+    check(df.get_item_action(pick, rp, _player).get("prompt", "") == "Quebrar pedra grande", "picareta: 'Quebrar pedra grande'")
+    for i in 4:
+        df.use_item(pick, rp, _player)
+    await frames(1)
+    var stones := df.get_children().filter(func(c: Node) -> bool: return c is Pickup and c.item_id == &"pedra")
+    check(df.kind_at(rock) == &"" and stones.size() >= 1, "4 picaretadas: vira pedras")
     # golpe de arma corta mato; machado no golpe também corta árvore
     df._add(base + Vector2i(1, 8), &"mato")
     df._add(base + Vector2i(1, 9), &"arvore")

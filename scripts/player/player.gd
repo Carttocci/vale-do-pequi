@@ -118,10 +118,19 @@ func _unhandled_input(event: InputEvent) -> void:
         # tocar em qualquer botão usaria a ferramenta. No toque, usar = botão próprio.
         if event is InputEventMouseButton and event.device == InputEvent.DEVICE_ID_EMULATION:
             return
-        _use_held = true
-        if combat.weapon():
+        # Clique = botão de ação contextual: perto de morador/objeto/planta, interage
+        # (igual ao E). Sem nada na frente: arma ataca, ferramenta trabalha.
+        _refresh_interaction_target()
+        var kind: int = _action.get("kind", ActionKind.NONE)
+        if kind != ActionKind.NONE and kind != ActionKind.ATTACK:
+            _interact_held = true
+            try_interact()
+        elif combat.weapon():
+            _use_held = true
             combat.attack()
             combat.begin_charge()
+        else:
+            _use_held = true
         get_viewport().set_input_as_handled()
     elif event.is_action_pressed("interact"):
         _interact_held = true
@@ -131,7 +140,11 @@ func _unhandled_input(event: InputEvent) -> void:
         combat.dodge(get_move_input())
         get_viewport().set_input_as_handled()
     elif event.is_action_pressed("attack"):
-        combat.attack()
+        # só ataca com arma; sem arma na mão, pega a melhor da barra
+        if combat.equip_best_weapon():
+            combat.attack()
+        else:
+            EventBus.show_message("Você precisa de uma arma na barra pra atacar (facão, espada...).", 2.0)
         get_viewport().set_input_as_handled()
     elif event.is_action_pressed("eat"):
         eat_best()
