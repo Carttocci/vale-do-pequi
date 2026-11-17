@@ -5,7 +5,7 @@ extends StaticBody2D
 const SIZE := 18
 
 ## Conteúdo inicial num jogo novo, no formato "id:quantidade".
-@export var starting_items: PackedStringArray = []
+@export var starting_items: PackedStringArray = PackedStringArray()
 @export var title: String = "Baú"
 
 var inventory := Inventory.new(SIZE)

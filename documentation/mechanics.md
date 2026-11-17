@@ -35,3 +35,14 @@
 | Chuva | Rega toda a terra capinada no começo do dia | FarmField `_on_day_started` |
 | Época das culturas | `periods` em cada cultura | data/crops/*.tres |
 | Safra do pequi | outubro a janeiro | `PEQUI_MONTHS` |
+
+## Fase 4
+| Mecânica | Como funciona | Onde ajustar |
+|---|---|---|
+| Regiões | Fazenda ↔ Vila pela estrada leste/oeste | `RegionExit` nas cenas; `Markers/` de chegada |
+| Rotina dos moradores | "HH:MM marcador" (com "!" entra em casa); domingo separado | data/npcs/*.tres (`schedule`, `schedule_sunday`) |
+| Velocidade ao andar | 42 px/s, caminho A* na grade da região | `SPEED` em scripts/npc/npc.gd |
+| Amizade | +10 na 1ª conversa do dia; falas de amigo a partir de 50 | `TALK_FRIENDSHIP`, `FRIEND_THRESHOLD` |
+| Dinheiro inicial | R$ 200 | `STARTING_MONEY` em game_state.gd |
+| Preços | `buy_price` (loja vende) e `sell_price` (loja compra) | data/items/*.tres |
+| Mercearia | Vende sementes; compra colheitas (CROP) e coleta (FORAGE) | `shop_*` em data/npcs/helena.tres |

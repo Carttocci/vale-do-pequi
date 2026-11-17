@@ -53,6 +53,33 @@ func _ready() -> void:
     Clock.minutes = 9 * 60
     Clock.weather = Clock.Weather.ENSOLARADO
     wfx.refresh()
+    # Fase 4: vila com moradores, conversa e loja
+    main.change_region_now(&"vila")
+    GameState.day = 2
+    Clock.minutes = 10 * 60
+    Clock.time_changed.emit(Clock.minutes)
+    for n in get_tree().get_nodes_in_group("npc"):
+        n.snap_to_schedule()
+    player.global_position = Vector2(560, 330)
+    player.camera.reset_smoothing()
+    await _frames(20)
+    _shot("vila")
+    var helena: Npc = null
+    for n in get_tree().get_nodes_in_group("npc"):
+        if n.data.id == &"helena":
+            helena = n
+    player.global_position = helena.global_position + Vector2(0, 16)
+    player.face(4)
+    player.camera.reset_smoothing()
+    await _frames(10)
+    helena.talk()
+    await _frames(5)
+    _shot("conversa")
+    main.get_node("DialogueUI").choose(0)
+    await _frames(5)
+    _shot("loja")
+    main.get_node("ShopUI").close()
+    main.change_region_now(&"farm")
     var tc: TouchControls = main.get_node("TouchControls")
     tc.set_touch_mode(true)
     await _frames(10)

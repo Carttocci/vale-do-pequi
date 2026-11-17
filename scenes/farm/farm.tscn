@@ -1,6 +1,7 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/farm_level.gd" id="level"]
+[ext_resource type="Script" path="res://scripts/world/region_exit.gd" id="exit"]
 [ext_resource type="Script" path="res://scripts/world/farm_ground.gd" id="ground"]
 [ext_resource type="Script" path="res://scripts/world/fence_line.gd" id="fence"]
 [ext_resource type="Script" path="res://scripts/farming/farm_field.gd" id="field"]
@@ -12,6 +13,9 @@
 [ext_resource type="PackedScene" path="res://scenes/farm/objects/ipe_amarelo.tscn" id="ipe"]
 [ext_resource type="PackedScene" path="res://scenes/farm/objects/cupinzeiro.tscn" id="cupim"]
 [ext_resource type="PackedScene" path="res://scenes/farm/objects/arbusto.tscn" id="arbusto"]
+
+[sub_resource type="RectangleShape2D" id="exit_shape"]
+size = Vector2(16, 32)
 
 [node name="Farm" type="Node2D"]
 script = ExtResource("level")
@@ -156,3 +160,18 @@ script = ExtResource("field")
 ground_path = NodePath("../Ground")
 soil_path = NodePath("../Soil")
 crops_root_path = NodePath("../Entities/Crops")
+
+[node name="Markers" type="Node2D" parent="."]
+
+[node name="da_vila" type="Marker2D" parent="Markers"]
+position = Vector2(920, 328)
+metadata/facing = 6
+
+[node name="SaidaVila" type="Area2D" parent="."]
+position = Vector2(952, 320)
+script = ExtResource("exit")
+target_region = &"vila"
+target_spawn = &"da_fazenda"
+
+[node name="Shape" type="CollisionShape2D" parent="SaidaVila"]
+shape = SubResource("exit_shape")

@@ -1,0 +1,218 @@
+[gd_scene load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/level.gd" id="r1"]
+[ext_resource type="Script" path="res://scripts/world/farm_ground.gd" id="r2"]
+[ext_resource type="Script" path="res://scripts/world/region_exit.gd" id="r3"]
+[ext_resource type="PackedScene" path="res://scenes/npc/npc.tscn" id="r4"]
+[ext_resource type="PackedScene" path="res://scenes/vila/objects/igreja.tscn" id="r5"]
+[ext_resource type="PackedScene" path="res://scenes/vila/objects/mercearia.tscn" id="r6"]
+[ext_resource type="PackedScene" path="res://scenes/vila/objects/ferreiro.tscn" id="r7"]
+[ext_resource type="PackedScene" path="res://scenes/vila/objects/bar.tscn" id="r8"]
+[ext_resource type="PackedScene" path="res://scenes/vila/objects/clinica.tscn" id="r9"]
+[ext_resource type="PackedScene" path="res://scenes/vila/objects/casa_azul.tscn" id="r10"]
+[ext_resource type="PackedScene" path="res://scenes/vila/objects/casa_amarela.tscn" id="r11"]
+[ext_resource type="PackedScene" path="res://scenes/vila/objects/cruzeiro.tscn" id="r12"]
+[ext_resource type="PackedScene" path="res://scenes/vila/objects/banco.tscn" id="r13"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/ipe_amarelo.tscn" id="r14"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/arbusto.tscn" id="r15"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/placa.tscn" id="r16"]
+[ext_resource type="Resource" path="res://data/npcs/helena.tres" id="r17"]
+[ext_resource type="Resource" path="res://data/npcs/benedito.tres" id="r18"]
+[ext_resource type="Resource" path="res://data/npcs/toninho.tres" id="r19"]
+[ext_resource type="Resource" path="res://data/npcs/alzira.tres" id="r20"]
+[ext_resource type="Resource" path="res://data/npcs/mariana.tres" id="r21"]
+[ext_resource type="Resource" path="res://data/npcs/joao_pedro.tres" id="r22"]
+
+[sub_resource type="RectangleShape2D" id="exit_shape"]
+size = Vector2(16, 32)
+
+[node name="Vila" type="Node2D"]
+script = ExtResource("r1")
+region_id = &"vila"
+display_name = "Vila de Santa Pequiria"
+
+[node name="Ground" type="TileMapLayer" parent="."]
+script = ExtResource("r2")
+map_path = "res://data/maps/vila.txt"
+
+[node name="PlayerSpawn" type="Marker2D" parent="."]
+position = Vector2(40, 328)
+
+[node name="Markers" type="Node2D" parent="."]
+
+[node name="entrada_oeste" type="Marker2D" parent="Markers"]
+position = Vector2(24, 312)
+metadata/facing = 2
+
+[node name="da_fazenda" type="Marker2D" parent="Markers"]
+position = Vector2(40, 328)
+metadata/facing = 2
+
+[node name="mercearia_balcao" type="Marker2D" parent="Markers"]
+position = Vector2(648, 312)
+metadata/facing = 0
+
+[node name="casa_azul" type="Marker2D" parent="Markers"]
+position = Vector2(632, 168)
+metadata/facing = 4
+
+[node name="praca_banco_1" type="Marker2D" parent="Markers"]
+position = Vector2(344, 248)
+metadata/facing = 0
+
+[node name="praca_banco_2" type="Marker2D" parent="Markers"]
+position = Vector2(488, 248)
+metadata/facing = 0
+
+[node name="praca_cruzeiro" type="Marker2D" parent="Markers"]
+position = Vector2(440, 296)
+metadata/facing = 6
+
+[node name="praca_1" type="Marker2D" parent="Markers"]
+position = Vector2(360, 328)
+metadata/facing = 0
+
+[node name="praca_2" type="Marker2D" parent="Markers"]
+position = Vector2(472, 328)
+metadata/facing = 0
+
+[node name="igreja_porta" type="Marker2D" parent="Markers"]
+position = Vector2(424, 216)
+metadata/facing = 4
+
+[node name="bar_porta" type="Marker2D" parent="Markers"]
+position = Vector2(584, 456)
+metadata/facing = 4
+
+[node name="bar_balcao" type="Marker2D" parent="Markers"]
+position = Vector2(616, 456)
+metadata/facing = 0
+
+[node name="ferreiro_porta" type="Marker2D" parent="Markers"]
+position = Vector2(168, 312)
+metadata/facing = 4
+
+[node name="ferreiro_bigorna" type="Marker2D" parent="Markers"]
+position = Vector2(200, 312)
+metadata/facing = 0
+
+[node name="clinica_porta" type="Marker2D" parent="Markers"]
+position = Vector2(200, 200)
+metadata/facing = 4
+
+[node name="clinica_frente" type="Marker2D" parent="Markers"]
+position = Vector2(232, 200)
+metadata/facing = 0
+
+[node name="lagoa_beira" type="Marker2D" parent="Markers"]
+position = Vector2(152, 392)
+metadata/facing = 6
+
+[node name="lagoa_pier" type="Marker2D" parent="Markers"]
+position = Vector2(152, 376)
+metadata/facing = 6
+
+[node name="casa_amarela" type="Marker2D" parent="Markers"]
+position = Vector2(232, 456)
+metadata/facing = 4
+
+[node name="Entities" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Igreja" parent="Entities" instance=ExtResource("r5")]
+position = Vector2(416, 208)
+
+[node name="Mercearia" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(624, 304)
+
+[node name="Ferreiro" parent="Entities" instance=ExtResource("r7")]
+position = Vector2(168, 304)
+
+[node name="Bar" parent="Entities" instance=ExtResource("r8")]
+position = Vector2(600, 448)
+
+[node name="Clinica" parent="Entities" instance=ExtResource("r9")]
+position = Vector2(200, 192)
+
+[node name="CasaAzul" parent="Entities" instance=ExtResource("r10")]
+position = Vector2(624, 160)
+
+[node name="CasaAmarela" parent="Entities" instance=ExtResource("r11")]
+position = Vector2(232, 448)
+
+[node name="Cruzeiro" parent="Entities" instance=ExtResource("r12")]
+position = Vector2(416, 280)
+
+[node name="Banco1" parent="Entities" instance=ExtResource("r13")]
+position = Vector2(344, 232)
+
+[node name="Banco2" parent="Entities" instance=ExtResource("r13")]
+position = Vector2(488, 232)
+
+[node name="Banco3" parent="Entities" instance=ExtResource("r13")]
+position = Vector2(344, 352)
+
+[node name="Banco4" parent="Entities" instance=ExtResource("r13")]
+position = Vector2(488, 352)
+
+[node name="Ipe1" parent="Entities" instance=ExtResource("r14")]
+position = Vector2(88, 104)
+
+[node name="Ipe2" parent="Entities" instance=ExtResource("r14")]
+position = Vector2(760, 120)
+
+[node name="Ipe3" parent="Entities" instance=ExtResource("r14")]
+position = Vector2(456, 488)
+
+[node name="Ipe4" parent="Entities" instance=ExtResource("r14")]
+position = Vector2(40, 470)
+
+[node name="Ipe5" parent="Entities" instance=ExtResource("r14")]
+position = Vector2(744, 440)
+
+[node name="Arbusto1" parent="Entities" instance=ExtResource("r15")]
+position = Vector2(296, 88)
+
+[node name="Arbusto2" parent="Entities" instance=ExtResource("r15")]
+position = Vector2(520, 104)
+
+[node name="Arbusto3" parent="Entities" instance=ExtResource("r15")]
+position = Vector2(312, 488)
+
+[node name="Arbusto4" parent="Entities" instance=ExtResource("r15")]
+position = Vector2(712, 232)
+
+[node name="Arbusto5" parent="Entities" instance=ExtResource("r15")]
+position = Vector2(104, 232)
+
+[node name="PlacaMata" parent="Entities" instance=ExtResource("r16")]
+position = Vector2(776, 298)
+prompt = "Ler placa"
+messages = PackedStringArray("TRILHA DA MATA DOS IPÊS  —  fechada por enquanto.")
+
+[node name="Helena" parent="Entities" instance=ExtResource("r4")]
+data = ExtResource("r17")
+
+[node name="Benedito" parent="Entities" instance=ExtResource("r4")]
+data = ExtResource("r18")
+
+[node name="Toninho" parent="Entities" instance=ExtResource("r4")]
+data = ExtResource("r19")
+
+[node name="Alzira" parent="Entities" instance=ExtResource("r4")]
+data = ExtResource("r20")
+
+[node name="Mariana" parent="Entities" instance=ExtResource("r4")]
+data = ExtResource("r21")
+
+[node name="JoaoPedro" parent="Entities" instance=ExtResource("r4")]
+data = ExtResource("r22")
+
+[node name="SaidaFazenda" type="Area2D" parent="."]
+position = Vector2(8, 320)
+script = ExtResource("r3")
+target_region = &"farm"
+target_spawn = &"da_vila"
+
+[node name="Shape" type="CollisionShape2D" parent="SaidaFazenda"]
+shape = SubResource("exit_shape")

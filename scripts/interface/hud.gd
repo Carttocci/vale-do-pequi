@@ -29,6 +29,7 @@ func _ready() -> void:
     GameState.day_changed.connect(func(_d: int) -> void: update_clock())
     Clock.time_changed.connect(func(_m: int) -> void: update_clock())
     Clock.day_started.connect(func(_d: int, _w: int) -> void: update_clock())
+    GameState.money_changed.connect(func(_m: int) -> void: update_clock())
     update_clock()
     save_button.pressed.connect(_on_save_pressed)
     new_game_button.pressed.connect(_on_new_game_pressed)
@@ -42,6 +43,8 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+    # Dica de ação some enquanto há conversa/loja/menu na frente.
+    prompt_label.visible = _prompt_text != "" and not get_tree().paused
     # Checagem barata a cada quadro: o sinal de redimensionamento não é
     # confiável em todos os navegadores quando o celular gira.
     _update_rotate_hint()
@@ -120,5 +123,5 @@ func _on_new_game_pressed() -> void:
 
 ## "Seg, 1 Out  06:00" / "Chuva · Período chuvoso"
 func update_clock() -> void:
-    day_label.text = "%s  %s\n%s · %s" % [Calendar.format_date(GameState.day), Calendar.format_time(Clock.minutes),
-        Clock.weather_name(), Calendar.period_name(GameState.day).trim_prefix("Período ")]
+    day_label.text = "%s  %s\n%s · %s\nR$ %d" % [Calendar.format_date(GameState.day), Calendar.format_time(Clock.minutes),
+        Clock.weather_name(), Calendar.period_name(GameState.day).trim_prefix("Período "), GameState.money]

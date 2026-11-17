@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="NpcData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/npc/npc_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/npcs/toninho_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"toninho"
+display_name = "Toninho"
+profession = "Ferreiro"
+sprite = ExtResource("2")
+schedule = PackedStringArray("06:00 ferreiro_porta!", "07:00 ferreiro_bigorna", "12:00 bar_porta", "13:00 ferreiro_bigorna", "19:00 praca_1", "21:00 ferreiro_porta!")
+schedule_sunday = PackedStringArray()
+intro = PackedStringArray("E aí! Toninho, ferreiro. Se quebrou, eu conserto. Se não quebrou, eu dou um jeito de melhorar.", "Ainda tô arrumando a forja. Logo logo dá pra reforçar sua enxada e seu regador.")
+lines_morning = PackedStringArray("Forja acesa desde as seis. Ferro bom é ferro quente.")
+lines_afternoon = PackedStringArray("Calor da forja mais calor de Goiás... haja água!")
+lines_evening = PackedStringArray("Martelo descansando. Amanhã tem mais.")
+lines_rain = PackedStringArray("Chuva esfria a oficina. Até que é bom.")
+lines_dry = PackedStringArray("Na seca chega muito facão pra afiar. O povo vai pro mato buscar lenha.")
+lines_friend = PackedStringArray("Tô desenhando um regador maior pra você. Ainda não tá pronto, mas vai ficar bão demais.")
+lines_generic = PackedStringArray("Sabia que tinha uma mina na Serra do Cristal? Diz que o minério de lá é diferente.", "Enxada boa é igual amigo: dura a vida inteira se você cuidar.")
+lines_repeat = PackedStringArray("Opa, de novo? Tá precisando de quê?", "Volta outra hora que tô no meio dum serviço.")

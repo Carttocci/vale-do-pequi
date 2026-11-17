@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="NpcData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/npc/npc_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/npcs/benedito_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"benedito"
+display_name = "Seu Benedito"
+profession = "Agricultor"
+sprite = ExtResource("2")
+schedule = PackedStringArray("06:00 entrada_oeste!", "08:00 praca_banco_2", "12:00 bar_porta", "14:00 praca_cruzeiro", "17:00 entrada_oeste!")
+schedule_sunday = PackedStringArray()
+intro = PackedStringArray("Ô, de casa! Então é você que vai levantar a Fazenda do Pequi de novo.", "Benedito, seu criado. Planto do outro lado da estrada faz uns cinquenta anos.", "Conselho de velho: rega todo dia e respeita o tempo da terra. Milho é no chuvoso, viu?")
+lines_morning = PackedStringArray("Acordei com os passarinho. Seriema cantando é sinal de dia bom.")
+lines_afternoon = PackedStringArray("Sol quente desses, o melhor lugar é a sombra de um pé de pequi.")
+lines_evening = PackedStringArray("Já tô indo pra casa. Velho dorme cedo, uai.")
+lines_rain = PackedStringArray("Chuva no Cerrado é ouro, meu fio. A terra bebe tudinho.", "Nem precisa regar hoje. Deus regou por nós.")
+lines_dry = PackedStringArray("Na seca o capim fica dourado e o ipê floresce. É bonito, mas a roça sofre.")
+lines_friend = PackedStringArray("Seu avô e eu catava pequi junto nesse tempo. Cada balaio...", "Uma coisa me intriga: as moda de viola antiga, ninguém lembra mais. Nem eu. Parece que sumiram da cabeça do povo.")
+lines_generic = PackedStringArray("Mandioca é paciente, mas paga bem.", "Pequi a gente não arranca do pé, não. Espera cair maduro.", "Já ouviu falar das luzes na mata? Meu pai dizia que era coisa antiga.")
+lines_repeat = PackedStringArray("Vai com Deus.", "Já falei demais por hoje, sô!")

@@ -14,3 +14,4 @@ max_stack = 99
 sell_price = 5
 tool_type = 0
 crop_id = &"milho"
+buy_price = 10

@@ -75,7 +75,7 @@ def speckle(d, x0, y0, w, h, colors, n, rng):
 def make_tileset():
     """Atlas 8x1 de tiles 16x16. A ordem é usada por scripts/world/farm_ground.gd."""
     rng = random.Random(7)
-    names = ["grama", "grama_flor", "capim_seco", "terra_vermelha", "terra_arada", "agua", "grama_escura", "agua_borda"]
+    names = ["grama", "grama_flor", "capim_seco", "terra_vermelha", "terra_arada", "agua", "grama_escura", "agua_borda", "pedra"]
     img = Image.new("RGBA", (T * len(names), T), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
 
@@ -111,6 +111,11 @@ def make_tileset():
     base(7, C["water"])
     d.rectangle([7 * T, 0, 7 * T + T - 1, 2], fill=C["earth_d"])
     d.line([(7 * T, 3), (7 * T + T - 1, 3)], fill=C["water_l"])
+    # 8 calçamento de pedra (praça da vila)
+    base(8, (170, 160, 146, 255))
+    for (x0, y0, x1, y1) in [(0, 0, 7, 5), (8, 0, 15, 5), (0, 6, 4, 10), (5, 6, 11, 10), (12, 6, 15, 10), (0, 11, 7, 15), (8, 11, 15, 15)]:
+        d.rectangle([8 * T + x0, y0, 8 * T + x1, y1], outline=(130, 122, 110, 255))
+    speckle(d, 8 * T, 0, T, T, [(186, 176, 160, 255)], 10, rng)
     img.save(out("assets/tilesets/farm_tiles_placeholder.png"))
 
 
@@ -118,8 +123,16 @@ def make_tileset():
 DIRS = [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]  # S, SE, E, NE, N, NW, W, SW
 
 
-def draw_player(d, ox, oy, dx, dy, frame):
-    """Desenha um frame 32x32 do jogador. Origem lógica: pés em (16, 30)."""
+PLAYER_LOOK = {"shirt": C["shirt"], "shirt_d": C["shirt_d"], "pants": C["jeans"], "pants_d": C["jeans_d"],
+               "skin": C["skin"], "skin_d": C["skin_d"], "hair": C["hair"], "head": "palha", "apron": None,
+               "plaid": True}
+
+
+def draw_player(d, ox, oy, dx, dy, frame, look=None):
+    """Desenha um frame 32x32 de uma pessoa (jogador ou morador).
+    Origem lógica: pés em (16, 30). `look` muda cores, cabelo/chapéu e avental."""
+    L = dict(PLAYER_LOOK)
+    L.update(look or {})
     o = C["outline"]
     walking = frame in (1, 3)
     bob = -1 if walking else 0
@@ -133,33 +146,36 @@ def draw_player(d, ox, oy, dx, dy, frame):
     # pernas
     if side:
         a = 2 if frame == 1 else (-2 if frame == 3 else 0)
-        d.rectangle([cx - 2 + a, oy + 22 + bob, cx + 1 + a, oy + 28], fill=C["jeans"], outline=o)
-        d.rectangle([cx - 2 - a, oy + 22 + bob, cx + 1 - a, oy + 28], fill=C["jeans_d"], outline=o)
+        d.rectangle([cx - 2 + a, oy + 22 + bob, cx + 1 + a, oy + 28], fill=L["pants"], outline=o)
+        d.rectangle([cx - 2 - a, oy + 22 + bob, cx + 1 - a, oy + 28], fill=L["pants_d"], outline=o)
         d.rectangle([cx - 2 + a, oy + 27, cx + 2 + a, oy + 29], fill=C["boot"])
     else:
         l = -1 if frame == 1 else 0
         r = -1 if frame == 3 else 0
-        d.rectangle([cx - 5, oy + 22 + bob, cx - 1, oy + 28 + l], fill=C["jeans"], outline=o)
-        d.rectangle([cx + 1, oy + 22 + bob, cx + 5, oy + 28 + r], fill=C["jeans"], outline=o)
+        d.rectangle([cx - 5, oy + 22 + bob, cx - 1, oy + 28 + l], fill=L["pants"], outline=o)
+        d.rectangle([cx + 1, oy + 22 + bob, cx + 5, oy + 28 + r], fill=L["pants"], outline=o)
         d.rectangle([cx - 5, oy + 27 + l, cx - 1, oy + 29 + l], fill=C["boot"])
         d.rectangle([cx + 1, oy + 27 + r, cx + 5, oy + 29 + r], fill=C["boot"])
 
     # tronco (camisa xadrez simplificada)
     tw = 5 if side else 7
-    d.rectangle([cx - tw, oy + 13 + bob, cx + tw, oy + 23 + bob], fill=C["shirt"], outline=o)
-    for yy in range(oy + 15 + bob, oy + 23 + bob, 3):
-        d.line([(cx - tw + 1, yy), (cx + tw - 1, yy)], fill=C["shirt_d"])
+    d.rectangle([cx - tw, oy + 13 + bob, cx + tw, oy + 23 + bob], fill=L["shirt"], outline=o)
+    if L["plaid"]:
+        for yy in range(oy + 15 + bob, oy + 23 + bob, 3):
+            d.line([(cx - tw + 1, yy), (cx + tw - 1, yy)], fill=L["shirt_d"])
+    if L["apron"] and not back:
+        d.rectangle([cx - tw + 2, oy + 16 + bob, cx + tw - 2, oy + 24 + bob], fill=L["apron"], outline=o)
     # braços
     swing = 1 if frame == 1 else (-1 if frame == 3 else 0)
     if side:
         ax = cx - dx * 1
-        d.rectangle([ax - 1, oy + 14 + bob + swing, ax + 2, oy + 21 + bob + swing], fill=C["shirt_d"], outline=o)
+        d.rectangle([ax - 1, oy + 14 + bob + swing, ax + 2, oy + 21 + bob + swing], fill=L["shirt_d"], outline=o)
     else:
-        d.rectangle([cx - tw - 2, oy + 14 + bob + swing, cx - tw, oy + 21 + bob + swing], fill=C["shirt_d"], outline=o)
-        d.rectangle([cx + tw, oy + 14 + bob - swing, cx + tw + 2, oy + 21 + bob - swing], fill=C["shirt_d"], outline=o)
+        d.rectangle([cx - tw - 2, oy + 14 + bob + swing, cx - tw, oy + 21 + bob + swing], fill=L["shirt_d"], outline=o)
+        d.rectangle([cx + tw, oy + 14 + bob - swing, cx + tw + 2, oy + 21 + bob - swing], fill=L["shirt_d"], outline=o)
 
     # cabeça
-    d.rectangle([cx - 5, oy + 6 + bob, cx + 5, oy + 14 + bob], fill=C["hair"] if back else C["skin"], outline=o)
+    d.rectangle([cx - 5, oy + 6 + bob, cx + 5, oy + 14 + bob], fill=L["hair"] if back else L["skin"], outline=o)
     if not back:
         ex = dx * 2
         if side:
@@ -167,23 +183,72 @@ def draw_player(d, ox, oy, dx, dy, frame):
         else:
             d.point((cx - 2 + ex, oy + 10 + bob), fill=o)
             d.point((cx + 2 + ex, oy + 10 + bob), fill=o)
-        d.line([(cx - 5, oy + 13 + bob), (cx + 5, oy + 13 + bob)], fill=C["skin_d"])
+        d.line([(cx - 5, oy + 13 + bob), (cx + 5, oy + 13 + bob)], fill=L["skin_d"])
 
-    # chapéu de palha
-    d.ellipse([cx - 9, oy + 4 + bob, cx + 9, oy + 9 + bob], fill=C["hat"], outline=o)
-    d.rectangle([cx - 5, oy + 1 + bob, cx + 5, oy + 6 + bob], fill=C["hat"], outline=o)
-    d.line([(cx - 4, oy + 5 + bob), (cx + 4, oy + 5 + bob)], fill=C["terracota_d"])  # fita
-    d.point((cx - 2, oy + 3 + bob), fill=C["hat_d"])
+    # cabeça: chapéu de palha, boné, coque, rabo de cavalo ou cabelo curto
+    head = L["head"]
+    if head == "palha":
+        d.ellipse([cx - 9, oy + 4 + bob, cx + 9, oy + 9 + bob], fill=C["hat"], outline=o)
+        d.rectangle([cx - 5, oy + 1 + bob, cx + 5, oy + 6 + bob], fill=C["hat"], outline=o)
+        d.line([(cx - 4, oy + 5 + bob), (cx + 4, oy + 5 + bob)], fill=C["terracota_d"])  # fita
+        d.point((cx - 2, oy + 3 + bob), fill=C["hat_d"])
+    elif head == "bone":
+        d.rectangle([cx - 5, oy + 3 + bob, cx + 5, oy + 7 + bob], fill=L.get("cap", (60, 90, 150, 255)), outline=o)
+        if not back:
+            bx = cx + dx * 4
+            d.rectangle([bx - 4, oy + 7 + bob, bx + 4, oy + 8 + bob], fill=L.get("cap", (60, 90, 150, 255)), outline=o)
+    else:
+        d.rectangle([cx - 6, oy + 4 + bob, cx + 6, oy + 8 + bob], fill=L["hair"], outline=o)
+        if head == "coque":
+            d.ellipse([cx - 3, oy + 0 + bob, cx + 3, oy + 5 + bob], fill=L["hair"], outline=o)
+        elif head == "rabo":
+            tx = cx - dx * 6 if dx else cx
+            d.rectangle([tx - 2, oy + 7 + bob, tx + 2, oy + 15 + bob], fill=L["hair"], outline=o)
+        elif head == "longo":
+            d.rectangle([cx - 7, oy + 6 + bob, cx - 5, oy + 15 + bob], fill=L["hair"])
+            d.rectangle([cx + 5, oy + 6 + bob, cx + 7, oy + 15 + bob], fill=L["hair"])
 
 
-def make_player():
+def make_player(path="assets/characters/player_placeholder.png", look=None):
     """Spritesheet 4 colunas (frames de caminhada) x 8 linhas (direções S,SE,E,NE,N,NW,W,SW)."""
     img = Image.new("RGBA", (32 * 4, 32 * 8), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     for row, (dx, dy) in enumerate(DIRS):
         for f in range(4):
-            draw_player(d, f * 32, row * 32, dx, dy, f)
-    img.save(out("assets/characters/player_placeholder.png"))
+            draw_player(d, f * 32, row * 32, dx, dy, f, look)
+    img.save(out(path))
+
+
+NPC_LOOKS = {
+    # Helena, comerciante: cabelo preso, blusa verde-água, avental de mercearia
+    "helena": {"shirt": (60, 150, 140, 255), "shirt_d": (40, 110, 104, 255), "pants": (90, 60, 50, 255),
+               "pants_d": (70, 46, 38, 255), "skin": (170, 112, 80, 255), "skin_d": (140, 88, 62, 255),
+               "hair": (40, 26, 20, 255), "head": "coque", "apron": (226, 206, 168, 255), "plaid": False},
+    # Seu Benedito, agricultor: chapéu de palha, camisa azul xadrez, calça cáqui
+    "benedito": {"shirt": (70, 100, 160, 255), "shirt_d": (50, 74, 120, 255), "pants": (150, 130, 90, 255),
+                 "pants_d": (120, 104, 70, 255), "skin": (150, 98, 70, 255), "skin_d": (120, 78, 54, 255),
+                 "hair": (200, 200, 200, 255), "head": "palha"},
+    # Toninho, ferreiro: cabelo curto, camiseta cinza, avental de couro
+    "toninho": {"shirt": (120, 120, 120, 255), "shirt_d": (90, 90, 90, 255), "pants": (60, 60, 70, 255),
+                "pants_d": (44, 44, 52, 255), "skin": (120, 78, 54, 255), "skin_d": (96, 60, 42, 255),
+                "hair": (30, 24, 20, 255), "head": "curto", "apron": (110, 70, 40, 255), "plaid": False},
+    # Dona Alzira, cozinheira: coque grisalho, vestido vermelho, avental branco
+    "alzira": {"shirt": (170, 50, 60, 255), "shirt_d": (130, 36, 44, 255), "pants": (170, 50, 60, 255),
+               "pants_d": (130, 36, 44, 255), "skin": (210, 160, 120, 255), "skin_d": (180, 130, 96, 255),
+               "hair": (180, 180, 186, 255), "head": "coque", "apron": (240, 236, 224, 255), "plaid": False},
+    # Mariana, veterinária: rabo de cavalo, jaleco branco, calça jeans
+    "mariana": {"shirt": (236, 236, 236, 255), "shirt_d": (200, 200, 205, 255), "skin": (200, 150, 110, 255),
+                "skin_d": (170, 120, 86, 255), "hair": (110, 60, 30, 255), "head": "rabo", "plaid": False},
+    # João Pedro, pescador: boné, camiseta amarela, bermuda
+    "joao_pedro": {"shirt": (220, 180, 50, 255), "shirt_d": (180, 140, 30, 255), "pants": (80, 110, 80, 255),
+                   "pants_d": (60, 84, 60, 255), "skin": (140, 90, 60, 255), "skin_d": (110, 70, 46, 255),
+                   "hair": (30, 24, 20, 255), "head": "bone", "cap": (200, 60, 50, 255), "plaid": False},
+}
+
+
+def make_npcs():
+    for name, look in NPC_LOOKS.items():
+        make_player(f"assets/npcs/{name}_placeholder.png", look)
 
 
 # ---------------------------------------------------------------- objetos
@@ -246,6 +311,103 @@ def make_house():
     d.line([(28, 40), (31, 45), (29, 50)], fill=C["bege_d"])
     d.line([(74, 62), (78, 66)], fill=C["bege_d"])
     img.save(out("assets/environments/casa_principal_placeholder.png"))
+
+
+def make_building(path, wall, wall_d, roof, roof_d, extras=None, door=None):
+    """Prédio genérico da vila (96x80, mesma base/colisão da casa principal)."""
+    w, h = 96, 80
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    o = C["outline"]
+    d.rectangle([4, 74, 92, 79], fill=(0, 0, 0, 60))
+    d.rectangle([8, 34, 88, 76], fill=wall, outline=o)
+    d.rectangle([9, 68, 87, 75], fill=wall_d)
+    d.polygon([(0, 38), (12, 6), (84, 6), (96, 38)], fill=roof, outline=o)
+    for y in range(10, 38, 5):
+        xl = 12 - (y - 6) * 12 / 32 + 2
+        d.line([(xl, y), (w - xl, y)], fill=roof_d)
+    d.rectangle([42, 50, 54, 76], fill=door or C["wood"], outline=o)
+    for x0 in (18, 66):
+        d.rectangle([x0, 46, x0 + 12, 58], fill=C["wood_d"], outline=o)
+        d.line([(x0 + 6, 46), (x0 + 6, 58)], fill=C["wood_l"])
+    if extras:
+        extras(d)
+    img.save(out(path))
+
+
+def make_village():
+    o = C["outline"]
+
+    def toldo(d):  # mercearia: toldo listrado + placa
+        for i, x in enumerate(range(10, 86, 8)):
+            d.rectangle([x, 38, x + 7, 44], fill=(200, 60, 50, 255) if i % 2 == 0 else (240, 236, 224, 255), outline=o)
+        d.rectangle([30, 26, 66, 34], fill=C["wood_l"], outline=o)
+        d.rectangle([33, 29, 63, 31], fill=C["wood_d"])
+
+    def ferraria(d):  # chaminé com fumaça + bigorna na placa
+        d.rectangle([70, 0, 78, 14], fill=C["stone_d"], outline=o)
+        d.ellipse([68, -6, 80, 4], fill=(150, 150, 150, 150))
+        d.rectangle([28, 24, 50, 33], fill=C["wood_l"], outline=o)
+        d.polygon([(33, 27), (45, 27), (43, 30), (35, 30)], fill=C["stone_d"])
+
+    def bar(d):  # placa com caneca
+        d.rectangle([30, 24, 66, 34], fill=C["wood_l"], outline=o)
+        d.rectangle([44, 26, 50, 32], fill=C["ipe"], outline=o)
+        d.rectangle([60, 60, 70, 70], fill=(120, 80, 40, 255), outline=o)  # barril
+
+    def clinica(d):  # cruz verde
+        d.rectangle([44, 24, 52, 34], fill=(70, 160, 90, 255))
+        d.rectangle([40, 27, 56, 31], fill=(70, 160, 90, 255))
+
+    make_building("assets/environments/mercearia_placeholder.png", (238, 220, 170, 255), (200, 170, 110, 255),
+                  (60, 120, 100, 255), (40, 90, 76, 255), toldo)
+    make_building("assets/environments/ferreiro_placeholder.png", (150, 130, 115, 255), (110, 95, 85, 255),
+                  (90, 70, 60, 255), (66, 50, 42, 255), ferraria)
+    make_building("assets/environments/bar_placeholder.png", (230, 190, 120, 255), (190, 150, 90, 255),
+                  C["terracota"], C["terracota_d"], bar)
+    make_building("assets/environments/clinica_placeholder.png", (220, 236, 230, 255), (180, 200, 196, 255),
+                  (80, 120, 160, 255), (60, 92, 124, 255), clinica)
+    make_building("assets/environments/casa_azul_placeholder.png", (150, 190, 220, 255), (110, 150, 180, 255),
+                  C["terracota"], C["terracota_d"])
+    make_building("assets/environments/casa_amarela_placeholder.png", (240, 210, 110, 255), (200, 170, 80, 255),
+                  C["terracota"], C["terracota_d"])
+
+    # igreja (96x112): fachada branca com torre e cruz
+    w, h = 96, 112
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([4, 106, 92, 111], fill=(0, 0, 0, 60))
+    d.polygon([(4, 60), (20, 40), (76, 40), (92, 60)], fill=C["terracota"], outline=o)
+    d.rectangle([8, 58, 88, 108], fill=(244, 240, 228, 255), outline=o)
+    d.rectangle([9, 100, 87, 107], fill=(130, 160, 200, 255))  # barrado azul
+    d.rectangle([36, 14, 60, 60], fill=(244, 240, 228, 255), outline=o)  # torre
+    d.polygon([(34, 16), (48, 2), (62, 16)], fill=C["terracota"], outline=o)
+    d.rectangle([47, -1, 49, 8], fill=C["ipe"])
+    d.rectangle([44, 2, 52, 4], fill=C["ipe"])
+    d.ellipse([42, 22, 54, 34], fill=(130, 160, 200, 255), outline=o)  # janela redonda
+    d.rectangle([40, 78, 56, 108], fill=(110, 140, 190, 255), outline=o)  # porta azul
+    d.polygon([(40, 78), (48, 70), (56, 78)], fill=(110, 140, 190, 255), outline=o)
+    for x0 in (16, 70):
+        d.rectangle([x0, 74, x0 + 10, 90], fill=(130, 160, 200, 255), outline=o)
+    img.save(out("assets/environments/igreja_placeholder.png"))
+
+    # cruzeiro da praça (24x40)
+    img = Image.new("RGBA", (24, 40), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.ellipse([2, 33, 22, 39], fill=(0, 0, 0, 60))
+    d.rectangle([4, 30, 20, 36], fill=C["stone"], outline=o)
+    d.rectangle([10, 4, 14, 31], fill=C["wood"], outline=o)
+    d.rectangle([5, 10, 19, 14], fill=C["wood"], outline=o)
+    img.save(out("assets/environments/cruzeiro_placeholder.png"))
+
+    # banco de praça (24x14)
+    img = Image.new("RGBA", (24, 14), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([1, 2, 22, 5], fill=C["wood_l"], outline=o)
+    d.rectangle([1, 6, 22, 9], fill=C["wood"], outline=o)
+    d.rectangle([3, 9, 5, 13], fill=C["stone_d"])
+    d.rectangle([18, 9, 20, 13], fill=C["stone_d"])
+    img.save(out("assets/environments/banco_placeholder.png"))
 
 
 def make_well():
@@ -506,6 +668,8 @@ def make_app_icons():
 if __name__ == "__main__":
     make_touch_ui()
     make_farming()
+    make_npcs()
+    make_village()
     make_weather()
     make_app_icons()
     make_tileset()

@@ -14,6 +14,8 @@ const LAYER_INTERACTABLE := 1 << 2  # camada 3
 ## O jogador relê este texto a cada quadro, então pode mudar a qualquer hora.
 @export var prompt: String = "Interagir"
 @export var enabled: bool = true
+## Desempate quando há vários alvos perto (ex.: morador na frente de uma porta).
+@export var target_priority: int = 0
 
 
 func _ready() -> void:

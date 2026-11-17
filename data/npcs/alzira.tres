@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="NpcData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/npc/npc_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/npcs/alzira_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"alzira"
+display_name = "Dona Alzira"
+profession = "Cozinheira"
+sprite = ExtResource("2")
+schedule = PackedStringArray("06:00 casa_amarela!", "07:00 bar_balcao", "21:00 casa_amarela!")
+schedule_sunday = PackedStringArray("06:00 casa_amarela!", "08:00 igreja_porta", "10:00 bar_balcao", "21:00 casa_amarela!")
+intro = PackedStringArray("Ah, que bom te ver por aqui! Sou a Alzira. Faço galinhada, empadão, pamonha... o que tiver de ingrediente.", "Meu filho, o João Pedro, vive na beira da lagoa pescando. Se ver ele, manda vir almoçar!")
+lines_morning = PackedStringArray("Pão de queijo saindo do forno daqui a pouco.")
+lines_afternoon = PackedStringArray("Almoço servido! Hoje tem arroz com pequi.")
+lines_evening = PackedStringArray("Cozinha fechando. Mas sempre sobra um pedaço de doce de leite.")
+lines_rain = PackedStringArray("Dia de chuva pede um caldo quente, né?")
+lines_dry = PackedStringArray("Na seca eu faço muita conserva. O que sobrar da colheita, guarda bem.")
+lines_friend = PackedStringArray("Tem uma receita de família que eu não lembro mais o final... me dá um aperto no peito. Se um dia você achar, me conta?")
+lines_generic = PackedStringArray("Milho bom vira pamonha, curau, cuscuz... nada se perde.", "Quem come bem trabalha melhor. Não esquece de comer, viu?")
+lines_repeat = PackedStringArray("Já comeu hoje? Vai lá, depois a gente conversa mais.", "Vai com Deus!")

@@ -37,6 +37,7 @@ func _ready() -> void:
 
 
 func _run_all() -> void:
+    _test_export_safe_defaults()
     _test_input_map()
     _test_direction_mapping()
     await _setup_main()
@@ -70,6 +71,12 @@ func _run_all() -> void:
     await _test_pequi_season()
     _test_daylight_and_hud()
     await _test_save_v2_and_migration()
+    await _test_regions()
+    _test_village_layout()
+    await _test_npc_schedule_and_walk()
+    await _test_dialogue_and_friendship()
+    await _test_shop()
+    await _test_save_v3()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -960,7 +967,7 @@ func _test_save_v2_and_migration() -> void:
     var seed := Clock.world_seed
     check(SaveManager.save_game(), "salva com relógio")
     var raw := SaveManager.read_save_file()
-    check(int(raw.version) == 2 and raw.has("clock"), "save v2 tem relógio e clima")
+    check(int(raw.version) == GameState.DATA_VERSION and raw.has("clock"), "save tem relógio e clima")
     Clock.reset()
     check(SaveManager.load_game(), "carrega")
     check(Clock.minutes == 15 * 60 + 40 and Clock.weather == Clock.Weather.NUBLADO and Clock.world_seed == seed, "hora, clima e semente restaurados")
@@ -975,3 +982,277 @@ func _test_save_v2_and_migration() -> void:
     check(GameState.day == 5 and GameState.water == 3, "dados da v1 preservados")
     check(Clock.minutes == Clock.DAY_START and Clock.weather == Clock.Weather.ENSOLARADO, "migração v1→v2 começa o dia às 06:00, ensolarado")
     SaveManager.delete_save()
+
+
+# --- Fase 4 ----------------------------------------------------------------
+
+func vila() -> Level:
+    return _main.get_region(&"vila")
+
+
+func npc(id: String) -> Npc:
+    for n in get_tree().get_nodes_in_group("npc"):
+        if String(n.data.id) == id:
+            return n
+    return null
+
+
+func set_time(day: int, minutes: int) -> void:
+    GameState.day = day
+    Clock.minutes = minutes
+    Clock.time_changed.emit(minutes)
+
+
+func _test_regions() -> void:
+    print("[Fase 4: regiões]")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    var farm: Level = _main.get_region(&"farm")
+    check(_main.level == farm and farm.visible and not vila().visible, "começa na fazenda, vila escondida")
+    # Andar até a saída leste
+    await place_player(Vector2(925, 320))
+    Input.action_press("move_right")
+    await frames(25)
+    Input.action_release("move_right")
+    await get_tree().create_timer(0.8).timeout
+    check(_main.level == vila(), "saída leste leva à vila")
+    check(_player.get_parent() == vila().get_entities_root(), "jogador está nas entidades da vila")
+    check(not farm.visible and farm.process_mode == Node.PROCESS_MODE_DISABLED, "fazenda desligada enquanto está na vila")
+    check(_player.camera.limit_right == 800, "câmera com o tamanho da vila")
+    check(_player.global_position.distance_to(vila().get_marker(&"da_fazenda").global_position) < 20, "chega pela entrada oeste")
+    check(_player.input_enabled, "controle volta depois da transição")
+    # A lagoa da fazenda fica nas mesmas coordenadas: não pode bloquear a vila.
+    await place_player(Vector2(170, 372))
+    Input.action_press("move_down")
+    await frames(40)
+    Input.action_release("move_down")
+    check(_player.global_position.y > 410, "água da fazenda não bloqueia a vila (%.0f)" % _player.global_position.y)
+    # Voltar
+    await place_player(Vector2(36, 320))
+    Input.action_press("move_left")
+    await frames(25)
+    Input.action_release("move_left")
+    await get_tree().create_timer(0.8).timeout
+    check(_main.level == farm and farm.visible, "saída oeste da vila volta para a fazenda")
+    check(_player.global_position.distance_to(farm.get_marker(&"da_vila").global_position) < 20, "chega pela estrada leste da fazenda")
+    # Fazenda continua viva: planta cresce mesmo com o jogador na vila
+    var f := field()
+    var cell := Vector2i(10, 10)
+    f.load_save_data({})
+    f.till(cell)
+    f.plant(cell, &"milho")
+    f.water(cell)
+    _main.change_region_now(&"vila")
+    Clock.advance_minutes(Clock.DAY_END - Clock.minutes)  # apaga às 2h na vila
+    await frames(2)
+    check(_main.level == farm, "apagar na vila acorda na fazenda")
+    check(f.cells[cell].age == 1, "plantação cresceu enquanto estava fora")
+
+
+func _test_village_layout() -> void:
+    print("[Fase 4: vila]")
+    var v := vila()
+    check(v.ground.map_size == Vector2i(50, 34), "mapa da vila carregado (50x34)")
+    _main.change_region_now(&"vila")
+    var all_ok := true
+    for m in v.get_node("Markers").get_children():
+        if not v.is_walkable(m.global_position):
+            all_ok = false
+            printerr("    marcador em lugar bloqueado: ", m.name, " ", m.global_position)
+    check(all_ok, "todos os marcadores ficam em lugar andável")
+    var missing := []
+    for n in get_tree().get_nodes_in_group("npc"):
+        for line in Array(n.data.schedule) + Array(n.data.schedule_sunday):
+            var marker := String(line).split(" ")[1].trim_suffix("!")
+            if v.get_marker(StringName(marker)) == null:
+                missing.append(marker)
+    check(missing.is_empty(), "todos os marcadores das rotinas existem %s" % [missing])
+    check(get_tree().get_nodes_in_group("npc").size() == 6, "6 moradores na vila")
+    var p := v.find_path(v.get_marker(&"casa_azul").global_position, v.get_marker(&"lagoa_pier").global_position)
+    check(p.size() > 10, "existe caminho da casa azul até a lagoa (%d passos)" % p.size())
+    var blocked := false
+    for pt in p:
+        if not v.is_walkable(pt):
+            blocked = true
+    check(not blocked, "caminho não atravessa prédios nem água")
+
+
+func _test_npc_schedule_and_walk() -> void:
+    print("[Fase 4: rotina]")
+    _main.change_region_now(&"vila")
+    var helena := npc("helena")
+    set_time(2, 6 * 60 + 10)  # terça 06:10
+    helena.snap_to_schedule()
+    check(helena.inside and not helena.visible, "06:10 Helena ainda está em casa")
+    check(not helena.interactable.enabled, "dentro de casa não dá pra conversar")
+    set_time(2, 7 * 60 + 30)
+    check(not helena.inside and helena.visible and not helena._path.is_empty(), "07:30 sai de casa andando")
+    for i in 400:
+        helena._process(0.1)
+        if helena._path.is_empty():
+            break
+    check(helena.is_at_marker(&"mercearia_balcao"), "chegou no balcão da mercearia andando")
+    check(helena.is_shop_open(), "loja aberta com ela no balcão")
+    set_time(2, 20 * 60 + 10)
+    helena.snap_to_schedule()
+    check(helena.inside and not helena.is_shop_open(), "20h já foi pra casa: loja fechada")
+    set_time(7, 10 * 60)  # dia 7 = domingo
+    helena.snap_to_schedule()
+    check(Calendar.weekday(7) == "Dom" and helena.is_at_marker(&"igreja_porta"), "domingo de manhã Helena vai à igreja")
+    check(not helena.is_shop_open(), "domingo a mercearia não abre")
+    var benedito := npc("benedito")
+    set_time(2, 9 * 60)
+    benedito.snap_to_schedule()
+    check(benedito.is_at_marker(&"praca_banco_2"), "Seu Benedito no banco da praça às 9h")
+
+
+func _test_dialogue_and_friendship() -> void:
+    print("[Fase 4: conversa]")
+    var dlg := _main.get_node("DialogueUI") as DialogueUI
+    var joao := npc("joao_pedro")
+    joao.met = false
+    joao.friendship = 0
+    joao.last_talk_day = 0
+    set_time(3, 9 * 60)
+    Clock.weather = Clock.Weather.ENSOLARADO
+    joao.snap_to_schedule()
+    await place_player(joao.global_position + Vector2(16, 0))
+    _player.face(6)
+    GameState.select_slot(8)
+    await frames(3)
+    check(_prompts[-1] == "Conversar com João Pedro", "dica 'Conversar com João Pedro'")
+    await press_e()
+    check(dlg.is_open() and get_tree().paused, "conversa abre e pausa")
+    check(dlg.lines == joao.data.intro, "primeira conversa é a apresentação")
+    check(dlg.speaker == "João Pedro", "nome de quem fala")
+    for i in joao.data.intro.size():
+        var ev := InputEventAction.new()
+        ev.action = "interact"
+        ev.pressed = true
+        Input.parse_input_event(ev)
+        Input.flush_buffered_events()
+        await frames(1)
+    check(not dlg.is_open() and not get_tree().paused, "E avança e fecha no fim")
+    check(joao.met and joao.friendship == Npc.TALK_FRIENDSHIP, "conheceu e ganhou amizade")
+    await press_e()
+    check(dlg.lines.size() == 1 and dlg.lines[0] in joao.data.lines_repeat, "segunda conversa no dia: fala de repetição")
+    dlg.close()
+    check(joao.friendship == Npc.TALK_FRIENDSHIP, "amizade só sobe uma vez por dia")
+    set_time(4, 9 * 60)
+    var pool := Array(joao.data.lines_generic) + Array(joao.data.lines_morning)
+    check(joao.pick_lines()[0] in pool, "outro dia de manhã: fala de manhã ou geral")
+    Clock.weather = Clock.Weather.CHUVA
+    check(joao.pick_lines()[0] in joao.data.lines_rain, "chovendo: fala sobre a chuva")
+    Clock.weather = Clock.Weather.ENSOLARADO
+    joao.friendship = 60
+    var found_friend := false
+    for d in range(10, 60):
+        GameState.day = d
+        if joao.pick_lines()[0] in joao.data.lines_friend:
+            found_friend = true
+            break
+    check(found_friend, "com amizade alta aparecem falas de amigo")
+
+
+func _test_shop() -> void:
+    print("[Fase 4: mercearia]")
+    GameState.new_game()
+    var shop := _main.get_node("ShopUI") as ShopUI
+    var dlg := _main.get_node("DialogueUI") as DialogueUI
+    var helena := npc("helena")
+    helena.met = true
+    set_time(2, 10 * 60)
+    helena.snap_to_schedule()
+    await place_player(helena.global_position + Vector2(0, 16))
+    _player.face(4)
+    GameState.select_slot(8)
+    await frames(3)
+    check(_prompts[-1] == "Conversar com Helena", "na frente do balcão: conversa com a Helena (não com a placa)")
+    await press_e()
+    check(dlg.is_open() and dlg.options == PackedStringArray(["Comprar", "Vender", "Tchau"]), "Helena oferece Comprar/Vender/Tchau")
+    dlg.choose(0)
+    await frames(1)
+    check(shop.is_open() and shop.tab == ShopUI.Tab.BUY and get_tree().paused, "Comprar abre a loja")
+    var money := GameState.money
+    var seeds := GameState.get_item_count(&"semente_abobora")
+    check(shop.buy(&"semente_abobora", 1) == 1, "comprou 1 semente de abóbora")
+    check(GameState.money == money - 16 and GameState.get_item_count(&"semente_abobora") == seeds + 1, "dinheiro saiu e semente entrou")
+    GameState.spend_money(GameState.money - 15)
+    check(shop.buy(&"semente_abobora", 1) == 0 and GameState.money == 15, "sem dinheiro não compra")
+    check(shop.buy(&"semente_milho", 5) == 1, "compra só o que o dinheiro dá")
+    check(shop.buy(&"enxada", 1) == 0, "não vende o que não está na lista")
+    shop.set_tab(ShopUI.Tab.SELL)
+    GameState.add_item(&"abobora", 3)
+    GameState.add_item(&"pequi", 4)
+    var before := GameState.money
+    check(shop.sell(&"abobora", 999) == 3 and GameState.money == before + 3 * 35, "vende 3 abóboras por R$ 105")
+    check(shop.sell(&"pequi", 1) == 1 and GameState.get_item_count(&"pequi") == 3, "vende pequi um por um")
+    check(shop.sell(&"enxada", 1) == 0 and GameState.get_item_count(&"enxada") == 1, "não compra ferramenta")
+    check(shop.sell(&"semente_milho", 1) == 0, "não compra semente de volta")
+    var hud := _main.get_node("HUD")
+    check(hud.day_label.text.ends_with("R$ %d" % GameState.money), "HUD mostra o dinheiro")
+    shop.close()
+    check(not get_tree().paused, "fechar a loja despausa")
+    # Fora do horário
+    set_time(2, 19 * 60)
+    helena.snap_to_schedule()
+    helena.talk()
+    check(dlg.is_open() and dlg.options.is_empty(), "fora do horário: só conversa, sem loja")
+    dlg.close()
+
+
+func _test_save_v3() -> void:
+    print("[Fase 4: save v3]")
+    _main.change_region_now(&"vila")
+    var helena := npc("helena")
+    helena.friendship = 37
+    helena.met = true
+    GameState.money = 1234
+    await place_player(Vector2(424, 300))
+    check(SaveManager.save_game(), "salva na vila")
+    var raw := SaveManager.read_save_file()
+    check(raw.player.region == "vila" and int(raw.game.money) == 1234, "save guarda região e dinheiro")
+    _main.change_region_now(&"farm")
+    GameState.money = 0
+    helena.friendship = 0
+    check(SaveManager.load_game(), "carrega")
+    check(_main.level == vila() and _player.global_position.distance_to(Vector2(424, 300)) < 1.0, "volta para a vila, no mesmo lugar")
+    check(GameState.money == 1234 and helena.friendship == 37, "dinheiro e amizade restaurados")
+    var v2 := {"version": 2, "game": {"day": 9}, "clock": {"minutes": 600}, "player": {"x": 100, "y": 100}, "nodes": {}}
+    var file := FileAccess.open(TEST_SAVE, FileAccess.WRITE)
+    file.store_string(JSON.stringify(v2))
+    file.close()
+    check(SaveManager.load_game(), "save da Fase 3 (v2) carrega")
+    check(GameState.money == GameState.STARTING_MONEY and _main.level.region_id == &"farm", "migração v2→v3: dinheiro inicial e fazenda")
+    SaveManager.delete_save()
+    _main.change_region_now(&"farm")
+
+
+## Proteção contra um bug que só aparece no jogo exportado (Web/Windows):
+## propriedade exportada cujo valor padrão tem tipo diferente do declarado
+## (ex.: PackedStringArray = []) perde os valores do .tres na exportação.
+func _test_export_safe_defaults() -> void:
+    print("[exportação]")
+    # O editor só percebe o problema no export, então verificamos o texto
+    # dos scripts: "@export var x: PackedStringArray = [...]" é proibido.
+    var bad := []
+    var scripts := []
+    _collect_scripts("res://scripts", scripts)
+    var re := RegEx.create_from_string("@export[^\\n]*:\\s*Packed\\w+Array\\s*=\\s*\\[")
+    for path: String in scripts:
+        var text := FileAccess.get_file_as_string(path)
+        for m in re.search_all(text):
+            bad.append(path.get_file())
+    check(scripts.size() > 20, "scripts encontrados para verificar (%d)" % scripts.size())
+    check(bad.is_empty(), "arrays exportados com padrão do tipo certo %s" % [bad])
+
+
+func _collect_scripts(path: String, out: Array) -> void:
+    var d := DirAccess.open(path)
+    if d == null:
+        return
+    for f in d.get_files():
+        if f.ends_with(".gd"):
+            out.append(path + "/" + f)
+    for sub in d.get_directories():
+        _collect_scripts(path + "/" + sub, out)

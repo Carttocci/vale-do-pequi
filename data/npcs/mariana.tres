@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="NpcData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/npc/npc_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/npcs/mariana_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"mariana"
+display_name = "Mariana"
+profession = "Veterinária"
+sprite = ExtResource("2")
+schedule = PackedStringArray("06:00 clinica_porta!", "08:00 clinica_frente", "13:00 praca_2", "14:00 clinica_frente", "18:00 lagoa_beira", "20:00 clinica_porta!")
+schedule_sunday = PackedStringArray()
+intro = PackedStringArray("Oi! Mariana, veterinária. Cheguei no vale faz pouco tempo também.", "Quando você tiver galinha, vaca ou cabra, pode contar comigo. Por enquanto tô estudando a fauna da região.")
+lines_morning = PackedStringArray("Vi uma seriema e um bando de araras hoje cedo. Esse vale é incrível.")
+lines_afternoon = PackedStringArray("Tô catalogando os bichos da Mata dos Ipês. Tem coisa aqui que não bate com livro nenhum.")
+lines_evening = PackedStringArray("À noite eu escuto uns barulhos estranhos vindo da mata... deve ser lobo-guará. Deve ser.")
+lines_rain = PackedStringArray("Na chuva os sapos fazem um concerto! Dá pra contar umas cinco espécies só de ouvido.")
+lines_dry = PackedStringArray("Na seca os bichos procuram água. A lagoa da vila fica cheia de visita.")
+lines_friend = PackedStringArray("Posso te contar uma coisa? Tem trilha na mata que aparece no mapa antigo e não existe mais. Como some uma trilha?")
+lines_generic = PackedStringArray("Capivara não é bicho de estimação, viu? Por mais fofa que seja.", "Respeita os bichos da mata que eles te respeitam.")
+lines_repeat = PackedStringArray("Tô no meio de umas anotações, depois a gente conversa!", "Até mais!")

@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/environments/casa_azul_placeholder.png" id="tex"]
+[ext_resource type="Script" path="res://scripts/world/inspectable.gd" id="scr"]
+[ext_resource type="Script" path="res://scripts/world/interactable.gd" id="int"]
+
+[sub_resource type="RectangleShape2D" id="body"]
+size = Vector2(80, 28)
+
+[sub_resource type="CircleShape2D" id="area"]
+radius = 12.0
+
+[node name="CasaAzul" type="StaticBody2D"]
+collision_mask = 0
+script = ExtResource("scr")
+prompt = "Olhar a casa"
+messages = PackedStringArray("Casa da Helena. Bem arrumadinha, cheia de planta na janela.")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("tex")
+offset = Vector2(0, -36)
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+position = Vector2(0, -14)
+shape = SubResource("body")
+
+[node name="Interactable" type="Area2D" parent="."]
+script = ExtResource("int")
+
+[node name="Shape" type="CollisionShape2D" parent="Interactable"]
+position = Vector2(0, 4)
+shape = SubResource("area")

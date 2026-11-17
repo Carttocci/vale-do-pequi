@@ -237,7 +237,8 @@ func _refresh_interaction_target() -> void:
         var candidate := area as Interactable
         if candidate == null or not candidate.enabled:
             continue
-        var dist := candidate.global_position.distance_squared_to(interaction_area.global_position)
+        # Prioridade maior ganha; empate vai para o mais próximo.
+        var dist := candidate.global_position.distance_squared_to(interaction_area.global_position) - candidate.target_priority * 100000.0
         if dist < best_dist:
             best_dist = dist
             best = candidate

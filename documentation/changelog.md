@@ -1,5 +1,22 @@
 # Changelog — Vale do Pequi
 
+## 0.5.0 — Fase 4: Vila (17/11/2026)
+
+### Adicionado
+- **Vila de Santa Pequiria** (50×34): praça de pedra com cruzeiro e bancos, igreja, mercearia, ferraria, bar e restaurante, clínica veterinária, casas e lagoa. Ligada à fazenda pela estrada leste.
+- Troca de região com escurecida; todas as regiões continuam vivas (plantas crescem com o jogador fora).
+- **6 moradores** com rotina pelo relógio (andam pelo mapa desviando de prédios e água, entram em casa à noite, rotina própria de domingo): Helena, Seu Benedito, Toninho, Dona Alzira, Mariana e João Pedro.
+- Conversas com apresentação na primeira vez e falas por hora do dia, chuva, período seco e amizade; sotaque do interior e pistas do Silêncio.
+- Amizade: +10 na primeira conversa do dia.
+- **Dinheiro** (começa com R$ 200) e **Mercearia da Helena**: compra sementes e vende colheitas e pequi. Aberta de segunda a sábado, 07:30–18:00 (só quando ela está no balcão).
+- Caixa de conversa (E/toque avança) e tela de loja (comprar 1/×5, vender 1/tudo).
+- Save v3 com dinheiro, região atual e amizades; saves da v2 migrados (ganham o dinheiro inicial).
+- 60 testes novos (310 no total).
+
+### Corrigido
+- Colisões de uma região desligada não interferem na outra (mesmas coordenadas).
+- **Versão do navegador perdia dados de listas** (baú do avô vinha vazio e placas/poço sem texto desde a v0.3): arrays exportados com padrão `[]` eram descartados no export. Corrigido e protegido por teste que varre os scripts.
+
 ## 0.4.0 — Fase 3: Tempo e clima (17/11/2026)
 
 ### Adicionado

@@ -14,3 +14,4 @@ max_stack = 99
 sell_price = 8
 tool_type = 0
 crop_id = &"abobora"
+buy_price = 16

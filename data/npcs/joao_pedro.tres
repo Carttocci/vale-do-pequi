@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="NpcData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/npc/npc_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/npcs/joao_pedro_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"joao_pedro"
+display_name = "João Pedro"
+profession = "Pescador"
+sprite = ExtResource("2")
+schedule = PackedStringArray("06:00 lagoa_pier", "11:00 bar_porta", "13:00 lagoa_pier", "19:00 praca_1", "22:00 casa_amarela!")
+schedule_sunday = PackedStringArray()
+intro = PackedStringArray("Ô, beleza? João Pedro. Pescador, filho da Dona Alzira, contador de causo nas horas vagas.", "Essa lagoa aqui tem lambari e traíra. Mas peixe bom mesmo tá no Rio das Araras.")
+lines_morning = PackedStringArray("De manhã cedinho é quando o peixe tá com fome. Que nem eu.")
+lines_afternoon = PackedStringArray("Sol na cabeça e linha n'água. Vida boa.")
+lines_evening = PackedStringArray("Dizem que de noite tem um dourado enorme no Rio das Araras. Ninguém pega. Eu ainda vou pegar.")
+lines_rain = PackedStringArray("Chuva? Peixe adora. Quem não gosta é minha mãe, que fica brava se eu chego molhado.")
+lines_dry = PackedStringArray("Na seca o rio baixa e aparece cada pedra... e cada segredo.")
+lines_friend = PackedStringArray("Vou te ensinar a pescar qualquer dia desses. Assim que tiver uma vara sobrando.")
+lines_generic = PackedStringArray("Paciência é a isca mais importante.", "Meu avô contava causo de pescador toda semana. Engraçado... não lembro de nenhum.")
+lines_repeat = PackedStringArray("Shh... acho que beliscou!", "Tô de olho na boia, depois a gente prosa.")

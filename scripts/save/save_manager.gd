@@ -29,6 +29,14 @@ var _MIGRATIONS: Dictionary = {
     1: func(d: Dictionary) -> Dictionary:
         d["clock"] = {"minutes": Clock.DAY_START, "weather": "ensolarado", "seed": randi()}
         return d,
+    # v2 (Fase 3) → v3 (Fase 4): dinheiro e região atual. Quem já jogava
+    # ganha o dinheiro inicial e continua na fazenda.
+    2: func(d: Dictionary) -> Dictionary:
+        d["game"] = d.get("game", {})
+        d.game["money"] = GameState.STARTING_MONEY
+        d["player"] = d.get("player", {})
+        d.player["region"] = "farm"
+        return d,
 }
 
 
@@ -107,7 +115,8 @@ func _collect() -> Dictionary:
     var player_data := {}
     var player := get_tree().get_first_node_in_group("player") as Player
     if player:
-        player_data = {"x": player.global_position.x, "y": player.global_position.y, "facing": player.facing_index}
+        player_data = {"x": player.global_position.x, "y": player.global_position.y, "facing": player.facing_index,
+            "region": String(_current_region())}
     return {
         "version": GameState.DATA_VERSION,
         "saved_at": Time.get_datetime_string_from_system(),
@@ -127,6 +136,9 @@ func _apply(data: Dictionary) -> void:
         if nodes.has(key) and node.has_method("load_save_data"):
             node.load_save_data(nodes[key])
     var p: Dictionary = data.get("player", {})
+    var main := get_tree().get_first_node_in_group("save_root")
+    if main and main.has_method("change_region_now"):
+        main.change_region_now(StringName(p.get("region", "farm")), &"")
     var player := get_tree().get_first_node_in_group("player") as Player
     if player and p.has("x"):
         player.global_position = Vector2(float(p.x), float(p.y))
@@ -144,3 +156,10 @@ func _key(node: Node) -> String:
     if main and main.is_ancestor_of(node):
         return String(main.get_path_to(node))
     return String(node.name)
+
+
+func _current_region() -> StringName:
+    var main := get_tree().get_first_node_in_group("save_root")
+    if main and "level" in main and main.level:
+        return main.level.region_id
+    return &"farm"

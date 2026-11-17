@@ -323,7 +323,11 @@ func _is_blocked(world_pos: Vector2) -> bool:
     query.position = world_pos
     query.collision_mask = 1  # camada "mundo": casas, árvores, cercas, água
     query.collide_with_bodies = true
-    return not space.intersect_point(query, 1).is_empty()
+    var level := ground.get_parent()
+    for hit in space.intersect_point(query, 8):
+        if level.is_ancestor_of(hit.collider):
+            return true
+    return false
 
 
 func _near_water(world_pos: Vector2) -> bool:

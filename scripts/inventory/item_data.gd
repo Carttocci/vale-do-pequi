@@ -12,8 +12,10 @@ enum ToolType { NONE, HOE, WATERING_CAN }
 @export var icon: Texture2D
 @export var category: Category = Category.MATERIAL
 @export var max_stack: int = 99
-## Preço de venda (usado a partir da Fase 4, quando entram as lojas).
+## Quanto a loja paga por 1 unidade.
 @export var sell_price: int = 0
+## Quanto custa comprar 1 unidade (0 = não se compra em loja).
+@export var buy_price: int = 0
 @export var tool_type: ToolType = ToolType.NONE
 ## Para sementes: id da cultura (CropData) que ela planta.
 @export var crop_id: StringName

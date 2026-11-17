@@ -5,7 +5,7 @@ extends StaticBody2D
 
 @export var prompt: String = "Olhar"
 ## Uma linha é sorteada a cada interação, para não ficar repetitivo.
-@export_multiline var messages: PackedStringArray = ["..."]
+@export_multiline var messages: PackedStringArray = PackedStringArray(["..."])
 @export var message_duration: float = 3.0
 
 var _next_index: int = 0

@@ -48,6 +48,15 @@ Main (main.gd)
 - **Jogador sem acoplamento:** o Player chama `use_item(item, ponto, ator)` em todo nó do grupo `item_target` e `get_cell_prompt`/`interact_cell` nos do grupo `cell_interaction`. O FarmField é um deles; pesca, mineração etc. entram do mesmo jeito.
 - **Uso por eventos:** "usar" é ligado por evento (não por polling), para que clicar na interface não use a ferramenta; no celular, o clique emulado do toque é ignorado e o botão "usar" faz o papel.
 
+## Regiões e moradores (Fase 4)
+
+- `Level` (scripts/world/level.gd): base de toda região. `FarmLevel` e a Vila usam. Todas ficam carregadas como filhas de `Main`; `set_active` liga/desliga visual, processamento e física (`TileMapLayer.enabled`). Navegação dos moradores: `AStarGrid2D` montado da própria região (chão sólido + corpos da camada "mundo" que pertencem à região).
+- `Main.change_region` (com escurecida) / `change_region_now` (carregar save, apagar às 2h, testes). O jogador é o mesmo nó, movido para `Entities` da região.
+- `RegionExit` (Area2D): pede a troca pelo `EventBus.region_change_requested`.
+- `NpcData` (data/npcs/*.tres): rotina, falas, loja. `Npc` (scripts/npc/npc.gd): segue a rotina a cada 10 min de jogo, anda pelo caminho A*, entra em casa ("!"), escolhe falas (`pick_lines`, sem efeito colateral e testável), amizade e loja. É `persistent` (amizade, conheceu, último dia de conversa).
+- `DialogueUI` e `ShopUI` abrem por sinais do `EventBus` (`dialogue_requested`, `shop_requested`) e pausam o mundo. O morador não conhece as telas.
+- `Interactable.target_priority`: desempate quando dois alvos estão perto (morador na frente de uma porta ganha).
+
 ## Tempo e clima (Fase 3)
 
 - `Calendar` (classe só com funções): converte o número do dia em mês, dia do mês, ano, dia da semana, período (chuvoso/seco) e safra do pequi.
@@ -60,10 +69,10 @@ Main (main.gd)
 Arquivo `user://vale_do_pequi_save.json` (no navegador: IndexedDB).
 
 ```
-{ "version": 2, "saved_at": "...",
+{ "version": 3, "saved_at": "...",
   "game":   GameState.to_data()  → dia, água, atalho, mochila,
   "clock":  Clock.to_data()      → minutos, clima, semente do clima   (desde a v2),
-  "player": {x, y, facing},
+  "player": {x, y, facing, region},           (region desde a v3; game.money também)
   "nodes":  { "Farm/FarmField": {...}, "Farm/Entities/BauDoAvo": {...}, "Farm/Entities/Pequizeiro1": {...} } }
 ```
 
@@ -124,6 +133,8 @@ Limitação conhecida: sem autotile, as bordas entre tipos de chão são retas. 
 - Publicação automática: `.github/workflows/publicar-web.yml` (testes → export → GitHub Pages).
 
 ## Testes
+
+> **Regra de exportação:** propriedade `@export` do tipo `PackedXArray` precisa de padrão do mesmo tipo (`PackedStringArray()`), nunca `[]`. Com `[]` o export para Web/Windows descarta os valores do `.tres` sem erro. Um teste varre os scripts e falha se isso aparecer.
 
 `tests/test_runner.tscn` — testes de integração (184 verificações; os da Fase 2 cobrem catálogo, mochila, atalhos, ciclo completo de plantio, regras do solo, regador, rebrota, baú, mochila, save/load e robustez do save, botões de toque). Usam um arquivo de save separado e nunca tocam no save do jogador. Antes: 85 verificações: controles, mapeamento de direções, estrutura da cena, movimento, velocidade na diagonal, as 8 direções do sprite, colisão com casa/água/árvore/cerca/bordas, interação com poço, coleta de pequi, pausa e controles de toque (analógico virtual, botão de interagir, botão de pausa, troca toque ↔ teclado). Rodam também no GitHub Actions antes de cada publicação.
 

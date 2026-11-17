@@ -366,8 +366,8 @@ Cada fase termina com uma versão jogável publicada no navegador.
 | — Web e celular | Export web, controles de toque, publicação automática | ✅ v0.2 |
 | 2 — Fazenda | Terreno, enxada, regador, plantio, colheita, inventário, baús, **save** | ✅ v0.3 (dormir provisório) |
 | 3 — Tempo | Relógio, calendário, período chuvoso/seco, clima | ✅ v0.4 |
-| 4 — Vila | Vila, NPCs, diálogos, lojas, economia | Próxima |
-| 5 — Atividades | Pesca, caça, criação de animais | |
+| 4 — Vila | Vila, NPCs, diálogos, lojas, economia | ✅ v0.5 |
+| 5 — Atividades | Pesca, caça, criação de animais | Próxima |
 | 6 — Combate | Hack-and-slash, armas, inimigos, habilidades | |
 | 7 — Aventura | Mineração, ruínas, masmorras, missões, **início da trama do Silêncio** | |
 | 8 — Conteúdo | Culinária, eventos/festividades, relacionamentos, construção | |

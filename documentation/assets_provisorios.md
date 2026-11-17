@@ -24,3 +24,7 @@ Ao trocar pela arte final, **mantenha nome, tamanho e layout** (ou ajuste o `off
 | assets/environments/bau_placeholder.png | 20×18 | baú |
 | assets/ui/tile_cursor_placeholder.png | 16×16 | cursor da célula-alvo |
 | assets/ui/touch_btn_bag_placeholder.png | 26 | botão de toque da mochila |
+| assets/npcs/<morador>_placeholder.png | 128×256 | mesmo layout do jogador (4×8 quadros 32×32) |
+| assets/environments/{igreja,mercearia,ferreiro,bar,clinica,casa_azul,casa_amarela}_placeholder.png | 96×80 (igreja 96×112) | prédios da vila; base na mesma posição da casa principal |
+| assets/environments/{cruzeiro,banco}_placeholder.png | 24×40 / 24×14 | decoração da praça |
+| farm_tiles_placeholder.png coluna 8 | 16×16 | calçamento de pedra (`p` no mapa) |

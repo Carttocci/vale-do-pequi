@@ -12,12 +12,14 @@ signal day_changed(day: int)
 signal day_advanced(day: int)
 signal selected_slot_changed(index: int)
 signal water_changed(amount: int)
+signal money_changed(amount: int)
 
 ## Versão do formato dos dados salvos (ver SaveManager.migrate).
-const DATA_VERSION := 2
+const DATA_VERSION := 3
 const INVENTORY_SIZE := 27
 const HOTBAR_SIZE := 9
 const WATER_MAX := 20
+const STARTING_MONEY := 200
 
 const STARTING_ITEMS := [
     ["enxada", 1], ["regador", 1], ["semente_milho", 12], ["semente_feijao", 8],
@@ -27,6 +29,7 @@ var inventory := Inventory.new(INVENTORY_SIZE)
 var selected_slot: int = 0
 var day: int = 1
 var water: int = WATER_MAX
+var money: int = STARTING_MONEY
 
 
 func _ready() -> void:
@@ -40,10 +43,28 @@ func new_game() -> void:
         inventory.add(StringName(entry[0]), entry[1])
     day = 1
     water = WATER_MAX
+    money = STARTING_MONEY
     Clock.reset()
     select_slot(0)
     water_changed.emit(water)
+    money_changed.emit(money)
     day_changed.emit(day)
+
+
+# --- dinheiro --------------------------------------------------------------
+
+func add_money(amount: int) -> void:
+    money += amount
+    money_changed.emit(money)
+
+
+## Gasta se tiver. Retorna false (sem gastar) se não tiver o suficiente.
+func spend_money(amount: int) -> bool:
+    if amount > money:
+        return false
+    money -= amount
+    money_changed.emit(money)
+    return true
 
 
 # --- itens -----------------------------------------------------------------
@@ -116,6 +137,7 @@ func to_data() -> Dictionary:
     return {
         "day": day,
         "water": water,
+        "money": money,
         "selected_slot": selected_slot,
         "inventory": inventory.to_data(),
     }
@@ -129,9 +151,11 @@ func from_data(data: Dictionary) -> void:
         data["inventory"] = inventory.to_data()
     day = maxi(1, int(data.get("day", 1)))
     water = clampi(int(data.get("water", WATER_MAX)), 0, WATER_MAX)
+    money = maxi(0, int(data.get("money", STARTING_MONEY)))
     inventory.from_data(data.get("inventory", []))
     select_slot(int(data.get("selected_slot", 0)))
     water_changed.emit(water)
+    money_changed.emit(money)
     day_changed.emit(day)
 
 

@@ -19,6 +19,15 @@ signal touch_mode_changed(enabled: bool)
 ## Um baú pediu para abrir a tela de transferência.
 signal chest_open_requested(chest: Node)
 
+## O jogador pediu para ir a outra região (saída do mapa).
+signal region_change_requested(region_id: StringName, spawn: StringName)
+
+## Abrir uma conversa. `on_option` recebe o índice escolhido (-1 = fechou sem escolher).
+signal dialogue_requested(speaker: String, lines: PackedStringArray, options: PackedStringArray, on_option: Callable)
+
+## Abrir uma loja (ver ShopUI.open_shop).
+signal shop_requested(shop: Dictionary)
+
 ## Jogo pausado/retomado pelo menu.
 signal pause_changed(paused: bool)
 
