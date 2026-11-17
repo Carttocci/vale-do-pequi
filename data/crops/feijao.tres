@@ -17,3 +17,4 @@ stage_textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtReso
 harvest_min = 2
 harvest_max = 4
 regrow_days = 2
+periods = PackedStringArray("chuvoso", "seco")

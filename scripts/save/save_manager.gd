@@ -7,6 +7,7 @@ extends Node
 ##     "version": int,          ← GameState.DATA_VERSION de quem salvou
 ##     "saved_at": "AAAA-MM-DDTHH:MM:SS",
 ##     "game":   {...},         ← GameState.to_data()
+##     "clock":  {...},         ← Clock.to_data() (desde a v2)
 ##     "player": {"x", "y", "facing"},
 ##     "nodes":  {"<caminho do nó>": {...}}   ← nós do grupo "persistent"
 ##   }
@@ -22,8 +23,13 @@ signal loaded
 var save_path: String = "user://vale_do_pequi_save.json"
 
 ## versão_de_origem -> Callable(data) que devolve os dados na versão seguinte.
-## Exemplo para o futuro:  1: func(d): d.game["energia"] = 100; return d
-var _MIGRATIONS: Dictionary = {}
+var _MIGRATIONS: Dictionary = {
+    # v1 (Fase 2) → v2 (Fase 3): entrou o relógio/clima. Saves antigos começam
+    # o dia às 06:00, ensolarado, e o pequizeiro respeita a safra.
+    1: func(d: Dictionary) -> Dictionary:
+        d["clock"] = {"minutes": Clock.DAY_START, "weather": "ensolarado", "seed": randi()}
+        return d,
+}
 
 
 func has_save() -> bool:
@@ -106,6 +112,7 @@ func _collect() -> Dictionary:
         "version": GameState.DATA_VERSION,
         "saved_at": Time.get_datetime_string_from_system(),
         "game": GameState.to_data(),
+        "clock": Clock.to_data(),
         "player": player_data,
         "nodes": nodes,
     }
@@ -113,6 +120,7 @@ func _collect() -> Dictionary:
 
 func _apply(data: Dictionary) -> void:
     GameState.from_data(data.get("game", {}))
+    Clock.from_data(data.get("clock", {}))
     var nodes: Dictionary = data.get("nodes", {})
     for node in get_tree().get_nodes_in_group("persistent"):
         var key := _key(node)

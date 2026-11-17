@@ -16,7 +16,9 @@ extends Resource
 @export var harvest_max: int = 1
 ## 0 = acaba depois da colheita. >0 = volta a produzir após esse número de dias regados.
 @export var regrow_days: int = 0
-## TODO(Fase 3): estações/períodos permitidos (chuvoso/seco).
+## Períodos em que dá para plantar e manter a cultura viva ("chuvoso", "seco").
+## Fora deles a planta morre na virada do período.
+@export var periods: PackedStringArray = PackedStringArray(["chuvoso", "seco"])
 
 
 func days_to_mature() -> int:
@@ -38,3 +40,13 @@ func stage_for_age(age: int) -> int:
 
 func is_mature(age: int) -> bool:
     return age >= days_to_mature()
+
+
+func can_grow_in(period: StringName) -> bool:
+    return String(period) in periods
+
+
+func periods_text() -> String:
+    if periods.size() >= 2:
+        return "o ano todo"
+    return "no período " + periods[0]

@@ -14,7 +14,7 @@ signal selected_slot_changed(index: int)
 signal water_changed(amount: int)
 
 ## Versão do formato dos dados salvos (ver SaveManager.migrate).
-const DATA_VERSION := 1
+const DATA_VERSION := 2
 const INVENTORY_SIZE := 27
 const HOTBAR_SIZE := 9
 const WATER_MAX := 20
@@ -40,6 +40,7 @@ func new_game() -> void:
         inventory.add(StringName(entry[0]), entry[1])
     day = 1
     water = WATER_MAX
+    Clock.reset()
     select_slot(0)
     water_changed.emit(water)
     day_changed.emit(day)
@@ -102,10 +103,10 @@ func refill_water() -> void:
 # --- tempo -----------------------------------------------------------------
 
 ## Dormir: avança um dia. Quem cuida do crescimento escuta `day_advanced`.
-## PROVISÓRIO: o relógio de verdade (horas, cansaço) entra na Fase 3.
 func sleep() -> void:
     day += 1
-    day_advanced.emit(day)
+    day_advanced.emit(day)   # 1º: plantas regadas ontem crescem
+    Clock.start_day(day)     # 2º: 06:00, clima novo (chuva rega tudo)
     day_changed.emit(day)
 
 

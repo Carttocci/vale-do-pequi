@@ -39,6 +39,20 @@ func _ready() -> void:
     await _frames(5)
     _shot("bau")
     ui.close()
+    # Fase 3: horários e climas
+    Clock.running = false
+    var wfx: WeatherFX = main.get_node("WeatherFX")
+    for cfg in [["tarde", 18 * 60 + 30, Clock.Weather.ENSOLARADO], ["noite", 23 * 60, Clock.Weather.ENSOLARADO],
+            ["chuva", 12 * 60, Clock.Weather.CHUVA], ["neblina", 6 * 60 + 30, Clock.Weather.NEBLINA]]:
+        Clock.minutes = cfg[1]
+        Clock.weather = cfg[2]
+        wfx.refresh()
+        main.get_node("HUD").update_clock()
+        await _frames(30)
+        _shot(cfg[0])
+    Clock.minutes = 9 * 60
+    Clock.weather = Clock.Weather.ENSOLARADO
+    wfx.refresh()
     var tc: TouchControls = main.get_node("TouchControls")
     tc.set_touch_mode(true)
     await _frames(10)

@@ -7,7 +7,7 @@
 script = ExtResource("1")
 id = &"semente_abobora"
 display_name = "Semente de abóbora"
-description = "Abóbora demora 6 dias regados, mas vale a pena."
+description = "Abóbora: 6 dias regados. Só no período chuvoso."
 icon = ExtResource("2")
 category = 1
 max_stack = 99

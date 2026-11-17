@@ -484,6 +484,14 @@ def make_farming():
     touch_btn("assets/ui/touch_btn_bag_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), bag_glyph)
 
 
+def make_weather():
+    """Fase 3: gota de chuva (partícula)."""
+    img = Image.new("RGBA", (2, 7), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.line([(1, 0), (0, 6)], fill=(200, 220, 255, 200))
+    img.save(out("assets/effects/gota_chuva_placeholder.png"))
+
+
 def make_app_icons():
     """Ícones do app web/PWA (pequi sobre terra vermelha)."""
     for size in (144, 180, 512):
@@ -498,6 +506,7 @@ def make_app_icons():
 if __name__ == "__main__":
     make_touch_ui()
     make_farming()
+    make_weather()
     make_app_icons()
     make_tileset()
     make_player()

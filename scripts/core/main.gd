@@ -14,6 +14,7 @@ var player: Player
 
 func _ready() -> void:
     _configure_scaling()
+    Clock.passed_out.connect(_on_passed_out)
     player = PLAYER_SCENE.instantiate() as Player
     player.position = level.get_spawn_position()
     level.get_entities_root().add_child(player)
@@ -41,3 +42,13 @@ func _unhandled_input(event: InputEvent) -> void:
         else:
             DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
         get_viewport().set_input_as_handled()
+
+
+## 02:00: o jogador apaga de cansaço e acorda em casa no dia seguinte.
+func _on_passed_out() -> void:
+    GameState.sleep()
+    player.global_position = level.get_spawn_position()
+    player.velocity = Vector2.ZERO
+    player.camera.reset_smoothing()
+    SaveManager.save_game()
+    EventBus.show_message("Você apagou de cansaço e acordou em casa. %s." % Calendar.format_date(GameState.day), 4.0)

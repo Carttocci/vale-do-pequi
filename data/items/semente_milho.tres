@@ -7,7 +7,7 @@
 script = ExtResource("1")
 id = &"semente_milho"
 display_name = "Semente de milho"
-description = "Milho cresce em 4 dias regados. Vira pamonha, curau..."
+description = "Milho: 4 dias regados. Só no período chuvoso. Vira pamonha, curau..."
 icon = ExtResource("2")
 category = 1
 max_stack = 99

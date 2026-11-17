@@ -7,7 +7,7 @@
 script = ExtResource("1")
 id = &"semente_feijao"
 display_name = "Semente de feijão"
-description = "Feijão cresce em 3 dias regados e continua produzindo."
+description = "Feijão: 3 dias regados e continua produzindo. O ano todo."
 icon = ExtResource("2")
 category = 1
 max_stack = 99

@@ -14,4 +14,5 @@ func _ready() -> void:
 func _on_interacted(_actor: Node) -> void:
     GameState.sleep()
     var ok := SaveManager.save_game()
-    EventBus.show_message("Bom dia! Dia %d.%s" % [GameState.day, " Jogo salvo." if ok else ""], 3.0)
+    EventBus.show_message("Bom dia! %s — %s.%s" % [Calendar.format_date(GameState.day), Clock.weather_name(),
+        " Jogo salvo." if ok else ""], 3.0)

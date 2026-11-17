@@ -35,6 +35,7 @@ Main (main.gd)
 |---|---|---|
 | `EventBus` | scripts/core/event_bus.gd | Sinais globais: mensagens, dica de interação, item coletado, baú aberto, pausa, modo toque |
 | `ItemDB` | scripts/core/item_db.gd | Catálogo: lê `data/items/*.tres` (ItemData) e `data/crops/*.tres` (CropData) |
+| `Clock` | scripts/core/clock.gd | Hora do dia, clima do dia, sinais `time_changed`, `day_started`, `passed_out` |
 | `GameState` | scripts/core/game_state.gd | Estado do jogador: mochila, atalho selecionado, água do regador, dia |
 | `SaveManager` | scripts/save/save_manager.gd | Salvar/carregar JSON com versão e migração |
 
@@ -47,13 +48,21 @@ Main (main.gd)
 - **Jogador sem acoplamento:** o Player chama `use_item(item, ponto, ator)` em todo nó do grupo `item_target` e `get_cell_prompt`/`interact_cell` nos do grupo `cell_interaction`. O FarmField é um deles; pesca, mineração etc. entram do mesmo jeito.
 - **Uso por eventos:** "usar" é ligado por evento (não por polling), para que clicar na interface não use a ferramenta; no celular, o clique emulado do toque é ignorado e o botão "usar" faz o papel.
 
+## Tempo e clima (Fase 3)
+
+- `Calendar` (classe só com funções): converte o número do dia em mês, dia do mês, ano, dia da semana, período (chuvoso/seco) e safra do pequi.
+- `Clock` (autoload): minutos do dia; pausa junto com o jogo. Ordem ao dormir: `GameState.day_advanced` (plantas regadas crescem) → `Clock.start_day` (06:00, sorteia clima, sinal `day_started`: chuva rega, plantas fora de época morrem) → `GameState.day_changed` (interface).
+- `WeatherFX` (scripts/weather/weather_fx.gd): só visual. `CanvasModulate` para a luz do dia (cor calculada por `Clock.daylight_color`, função pura testada) e uma camada com chuva (partículas), relâmpago e neblina.
+- Testes rodam com `Clock.running = false` e `Clock.forced_weather` fixo, para serem determinísticos.
+
 ## Save
 
 Arquivo `user://vale_do_pequi_save.json` (no navegador: IndexedDB).
 
 ```
-{ "version": 1, "saved_at": "...",
+{ "version": 2, "saved_at": "...",
   "game":   GameState.to_data()  → dia, água, atalho, mochila,
+  "clock":  Clock.to_data()      → minutos, clima, semente do clima   (desde a v2),
   "player": {x, y, facing},
   "nodes":  { "Farm/FarmField": {...}, "Farm/Entities/BauDoAvo": {...}, "Farm/Entities/Pequizeiro1": {...} } }
 ```

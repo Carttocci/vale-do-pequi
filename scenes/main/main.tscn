@@ -1,15 +1,19 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/main.gd" id="scr"]
 [ext_resource type="PackedScene" path="res://scenes/farm/farm.tscn" id="farm"]
 [ext_resource type="PackedScene" path="res://scenes/interface/hud.tscn" id="hud"]
 [ext_resource type="PackedScene" path="res://scenes/interface/touch_controls.tscn" id="touch"]
 [ext_resource type="Script" path="res://scripts/interface/inventory_ui.gd" id="inv"]
+[ext_resource type="Script" path="res://scripts/weather/weather_fx.gd" id="wfx"]
 
 [node name="Main" type="Node2D" groups=["save_root"]]
 script = ExtResource("scr")
 
 [node name="Farm" parent="." instance=ExtResource("farm")]
+
+[node name="WeatherFX" type="Node" parent="."]
+script = ExtResource("wfx")
 
 [node name="HUD" parent="." instance=ExtResource("hud")]
 

@@ -16,7 +16,9 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 | Pausa | Esc | botão ⏸ | Start |
 | Tela cheia | F11 | botão ⛶ (Android) | — |
 
-**Como jogar (Fase 2):** pegue a enxada (atalho 1) e aperte **E** na roça para capinar; com a semente na mão o E planta, com o regador o E rega (e enche no poço). A dica na tela mostra o que o E vai fazer. Durma na porta de casa para passar o dia. Mais sementes no baú do avô, ao lado da casa. O jogo salva ao dormir e pelo menu de pausa.
+**Tempo:** o dia vai das 06:00 às 02:00 (~14 min reais). Começa em 1º de outubro, no período chuvoso; chuva rega a roça sozinha. Milho e abóbora só no chuvoso; feijão e mandioca o ano todo. Pequi só cai de outubro a janeiro.
+
+**Como jogar:** pegue a enxada (atalho 1) e aperte **E** na roça para capinar; com a semente na mão o E planta, com o regador o E rega (e enche no poço). A dica na tela mostra o que o E vai fazer. Durma na porta de casa para passar o dia. Mais sementes no baú do avô, ao lado da casa. O jogo salva ao dormir e pelo menu de pausa.
 
 No celular o jogo é na horizontal. Dica: no Android, "Adicionar à tela inicial" abre o jogo em tela cheia, como um app.
 

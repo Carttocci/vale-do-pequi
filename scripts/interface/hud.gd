@@ -26,8 +26,10 @@ func _ready() -> void:
     pause_menu.hide()
     EventBus.interaction_prompt_changed.connect(_on_prompt_changed)
     EventBus.message_requested.connect(_on_message_requested)
-    GameState.day_changed.connect(func(d: int) -> void: day_label.text = "Dia %d" % d)
-    day_label.text = "Dia %d" % GameState.day
+    GameState.day_changed.connect(func(_d: int) -> void: update_clock())
+    Clock.time_changed.connect(func(_m: int) -> void: update_clock())
+    Clock.day_started.connect(func(_d: int, _w: int) -> void: update_clock())
+    update_clock()
     save_button.pressed.connect(_on_save_pressed)
     new_game_button.pressed.connect(_on_new_game_pressed)
     message_timer.timeout.connect(_fade_message)
@@ -114,3 +116,9 @@ func _on_new_game_pressed() -> void:
     GameState.new_game()
     get_tree().paused = false
     get_tree().reload_current_scene()
+
+
+## "Seg, 1 Out  06:00" / "Chuva · Período chuvoso"
+func update_clock() -> void:
+    day_label.text = "%s  %s\n%s · %s" % [Calendar.format_date(GameState.day), Calendar.format_time(Clock.minutes),
+        Clock.weather_name(), Calendar.period_name(GameState.day).trim_prefix("Período ")]

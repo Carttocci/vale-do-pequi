@@ -23,3 +23,15 @@
 | Mochila | 27 espaços, pilha 99, ferramentas 1 | `INVENTORY_SIZE`, `max_stack` |
 | Baú | 18 espaços; toque transfere a pilha | scripts/world/chest.gd |
 | Itens iniciais | enxada, regador, 12 milho, 8 feijão; baú: abóbora, mandioca, milho | `STARTING_ITEMS`, `starting_items` do baú |
+
+## Fase 3
+| Mecânica | Como funciona | Onde ajustar |
+|---|---|---|
+| Velocidade do tempo | 10 min de jogo a cada 7 s reais | `real_seconds_per_step` em scripts/core/clock.gd |
+| Duração do dia | 06:00 às 02:00; às 02:00 apaga e acorda em casa | `DAY_START`, `DAY_END` |
+| Calendário | 10 dias por mês, começa em 1º de outubro | `DAYS_PER_MONTH`, `START_MONTH` em scripts/core/calendar.gd |
+| Períodos | Chuvoso out–abr, seco mai–set | `DRY_MONTHS` |
+| Clima | Chances por período | `CHANCES_RAINY`, `CHANCES_DRY` em clock.gd |
+| Chuva | Rega toda a terra capinada no começo do dia | FarmField `_on_day_started` |
+| Época das culturas | `periods` em cada cultura | data/crops/*.tres |
+| Safra do pequi | outubro a janeiro | `PEQUI_MONTHS` |

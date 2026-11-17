@@ -256,8 +256,9 @@ Para quem prefere a vida rural, o combate continua sendo opcional na progressão
 
 O calendário é central para a rotina e segue a identidade climática do Cerrado — não só as quatro estações europeias.
 
-- **Período chuvoso** (aprox. outubro a abril): plantio, rios cheios, tempestades.
-- **Período seco** (aprox. maio a setembro): vegetação dourada, ipês florindo, queimadas a evitar, colheitas e festas.
+- **Período chuvoso** (outubro a abril): plantio, rios cheios, tempestades.
+- **Período seco** (maio a setembro): vegetação dourada, ipês florindo, queimadas a evitar, colheitas e festas.
+- **Implementado (v0.4):** ano de 12 meses com nomes reais, 10 dias por mês; começa em 1º de outubro; dia das 06:00 às 02:00.
 - Variações: tempestades, neblina, ventos, dias ensolarados.
 - Lugares e criaturas que **só aparecem em certas épocas** (gancho da história, §4.1).
 
@@ -364,8 +365,8 @@ Cada fase termina com uma versão jogável publicada no navegador.
 | 1 — Fundação | Projeto, personagem, 8 direções, câmera, fazenda provisória, colisões, interação | ✅ v0.1 |
 | — Web e celular | Export web, controles de toque, publicação automática | ✅ v0.2 |
 | 2 — Fazenda | Terreno, enxada, regador, plantio, colheita, inventário, baús, **save** | ✅ v0.3 (dormir provisório) |
-| 3 — Tempo | Relógio, calendário, período chuvoso/seco, clima | Próxima |
-| 4 — Vila | Vila, NPCs, diálogos, lojas, economia | |
+| 3 — Tempo | Relógio, calendário, período chuvoso/seco, clima | ✅ v0.4 |
+| 4 — Vila | Vila, NPCs, diálogos, lojas, economia | Próxima |
 | 5 — Atividades | Pesca, caça, criação de animais | |
 | 6 — Combate | Hack-and-slash, armas, inimigos, habilidades | |
 | 7 — Aventura | Mineração, ruínas, masmorras, missões, **início da trama do Silêncio** | |

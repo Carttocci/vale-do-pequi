@@ -23,6 +23,10 @@ func _ready() -> void:
     # Nunca toca no save real do jogador.
     SaveManager.save_path = TEST_SAVE
     SaveManager.delete_save()
+    # Tempo parado e sol todo dia: testes determinísticos. Os da Fase 3
+    # ligam o relógio e trocam o clima quando precisam.
+    Clock.running = false
+    Clock.forced_weather = Clock.Weather.ENSOLARADO
     GameState.new_game()
     EventBus.message_requested.connect(func(t: String, _d: float) -> void: _messages.append(t))
     EventBus.interaction_prompt_changed.connect(func(t: String) -> void: _prompts.append(t))
@@ -59,6 +63,13 @@ func _run_all() -> void:
     _test_save_robustness()
     await _test_touch_use_button()
     await _test_contextual_e()
+    _test_calendar()
+    await _test_clock()
+    _test_weather_rolls()
+    await _test_rain_and_periods()
+    await _test_pequi_season()
+    _test_daylight_and_hud()
+    await _test_save_v2_and_migration()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -774,3 +785,193 @@ func _test_contextual_e() -> void:
             row += 1
     check(row >= 3, "segurar E e andar capina vários quadrados (%d)" % row)
     check(not _player._interact_held, "soltar E para de repetir")
+
+
+# --- Fase 3 ----------------------------------------------------------------
+
+## Pula direto para um dia (sem passar pelos anteriores).
+func jump_to_day(d: int) -> void:
+    GameState.day = d - 1
+    GameState.sleep()
+
+
+func _test_calendar() -> void:
+    print("[Fase 3: calendário]")
+    check(Calendar.format_date(1) == "Seg, 1 Out", "dia 1 = Seg, 1 Out")
+    check(Calendar.period(1) == Calendar.PERIOD_RAINY, "outubro é período chuvoso")
+    check(Calendar.format_date(11) == "Qui, 1 Nov", "dia 11 = 1 Nov")
+    check(Calendar.month_index(31) == 0 and Calendar.year(31) == 2, "dia 31 = janeiro do ano 2")
+    check(Calendar.month_index(70) == 3 and Calendar.period(70) == Calendar.PERIOD_RAINY, "abril ainda é chuvoso")
+    check(Calendar.month_index(71) == 4 and Calendar.period(71) == Calendar.PERIOD_DRY, "maio começa o período seco")
+    check(Calendar.period(120) == Calendar.PERIOD_DRY and Calendar.period(121) == Calendar.PERIOD_RAINY, "outubro do ano 2 volta a chover")
+    check(Calendar.is_pequi_season(1) and Calendar.is_pequi_season(40) and not Calendar.is_pequi_season(41), "safra do pequi: outubro a janeiro")
+    check(Calendar.format_time(390) == "06:30" and Calendar.format_time(25 * 60) == "01:00", "formato da hora")
+    check(Calendar.format_date_long(1) == "1º de outubro, ano 1", "data por extenso")
+
+
+func _test_clock() -> void:
+    print("[Fase 3: relógio]")
+    GameState.new_game()
+    check(Clock.minutes == Clock.DAY_START, "dia começa às 06:00")
+    Clock.advance_minutes(90)
+    check(Calendar.format_time(Clock.minutes) == "07:30", "avança o relógio")
+    # passa sozinho com o relógio ligado
+    Clock.real_seconds_per_step = 0.02
+    Clock.running = true
+    var before := Clock.minutes
+    await get_tree().create_timer(0.25).timeout
+    Clock.running = false
+    Clock.real_seconds_per_step = 7.0
+    check(Clock.minutes > before, "o tempo passa sozinho (%s)" % Calendar.format_time(Clock.minutes))
+    # pausa congela o tempo
+    Clock.real_seconds_per_step = 0.02
+    Clock.running = true
+    get_tree().paused = true
+    before = Clock.minutes
+    await get_tree().create_timer(0.25, true, false, true).timeout
+    var during_pause := Clock.minutes
+    get_tree().paused = false
+    Clock.running = false
+    Clock.real_seconds_per_step = 7.0
+    check(during_pause == before, "o tempo para com o jogo pausado")
+    # apagar às 02:00
+    await place_player(Vector2(600, 300))
+    var day := GameState.day
+    _messages.clear()
+    Clock.advance_minutes(Clock.DAY_END - Clock.minutes)
+    await frames(2)
+    check(GameState.day == day + 1 and Clock.minutes == Clock.DAY_START, "às 02:00 apaga e acorda no dia seguinte às 06:00")
+    var spawn: Vector2 = _main.level.get_spawn_position()
+    check(_player.global_position.distance_to(spawn) < 2.0, "acorda na porta de casa")
+    check(_messages.size() > 0 and _messages[-1].contains("apagou"), "mensagem de que apagou")
+    var hud := _main.get_node("HUD")
+    check(hud.day_label.text.begins_with(Calendar.format_date(GameState.day) + "  06:00"), "HUD mostra data e hora")
+
+
+func _test_weather_rolls() -> void:
+    print("[Fase 3: clima]")
+    var saved_force := Clock.forced_weather
+    Clock.forced_weather = -1
+    var rain_wet := 0
+    var rain_dry := 0
+    for d in range(2, 72):          # out a abr (chuvoso)
+        if Clock.roll_weather(d) in [Clock.Weather.CHUVA, Clock.Weather.TEMPESTADE]:
+            rain_wet += 1
+    for d in range(71, 121):        # mai a set (seco)
+        if Clock.roll_weather(d) in [Clock.Weather.CHUVA, Clock.Weather.TEMPESTADE]:
+            rain_dry += 1
+    check(rain_wet >= 20, "chuvoso chove bastante (%d de 70 dias)" % rain_wet)
+    check(rain_dry <= 6, "seco quase não chove (%d de 50 dias)" % rain_dry)
+    check(Clock.roll_weather(1) == Clock.Weather.ENSOLARADO, "primeiro dia sempre ensolarado")
+    check(Clock.roll_weather(17) == Clock.roll_weather(17), "mesmo save, mesmo clima no mesmo dia")
+    var seco_tipos := {}
+    for d in range(71, 121):
+        seco_tipos[Clock.roll_weather(d)] = true
+    check(seco_tipos.has(Clock.Weather.NEBLINA) or seco_tipos.has(Clock.Weather.VENTANIA), "seco tem neblina/ventania")
+    Clock.forced_weather = saved_force
+
+
+func _test_rain_and_periods() -> void:
+    print("[Fase 3: chuva e períodos]")
+    GameState.new_game()
+    var f := field()
+    f.load_save_data({})
+    var cell := Vector2i(8, 11)
+    f.till(cell)
+    f.plant(cell, &"milho")
+    Clock.forced_weather = Clock.Weather.CHUVA
+    GameState.sleep()
+    check(Clock.weather == Clock.Weather.CHUVA and f.is_watered(cell), "dia de chuva rega a roça sozinho")
+    GameState.sleep()
+    check(f.cells[cell].age == 1, "planta cresceu com a chuva sem regar à mão")
+    var wfx := _main.get_node("WeatherFX") as WeatherFX
+    check(wfx.rain.emitting, "chuva aparece na tela")
+    Clock.forced_weather = Clock.Weather.ENSOLARADO
+    GameState.sleep()
+    check(not wfx.rain.emitting, "sol: sem chuva na tela")
+    # Virada para o período seco
+    var cell2 := Vector2i(9, 11)
+    f.till(cell2)
+    f.plant(cell2, &"feijao")
+    _messages.clear()
+    jump_to_day(71)
+    check(Calendar.period(GameState.day) == Calendar.PERIOD_DRY, "chegou maio (seco)")
+    check(f.get_crop_id(cell) == &"", "milho morre no período seco")
+    check(f.get_crop_id(cell2) == &"feijao", "feijão aguenta o seco")
+    check(_messages.size() > 0 and _messages[-1].contains("milho"), "avisa que o milho morreu")
+    # Não deixa plantar fora de época
+    await face_right_in_roca(Vector2(150, 160))
+    var target := f.cell_at(_player.get_target_position())
+    f.till(target)
+    select_item(&"semente_milho")
+    await frames(2)
+    check(_prompts[-1] == "Plantar milho (fora de época)", "dica avisa 'fora de época'")
+    await press_e()
+    check(f.get_crop_id(target) == &"" and _messages[-1].contains("chuvoso"), "não planta milho no seco e explica")
+    select_item(&"semente_feijao")
+    await frames(2)
+    await press_e()
+    check(f.get_crop_id(target) == &"feijao", "feijão planta no seco")
+
+
+func _test_pequi_season() -> void:
+    print("[Fase 3: safra do pequi]")
+    var tree := node("Farm/Entities/Pequizeiro4") as Pequizeiro
+    jump_to_day(80)  # maio/junho
+    check(tree.get_available() == 0, "fora da safra não cai pequi")
+    await place_player(tree.global_position + Vector2(0, 18))
+    _player.face(4)
+    GameState.select_slot(8)
+    await frames(3)
+    check(_prompts[-1] == "Pé de pequi (fora da safra)", "dica 'fora da safra'")
+    jump_to_day(121)  # outubro do ano 2
+    check(tree.get_available() == tree.fruits_on_ground, "em outubro volta a cair pequi")
+
+
+func _test_daylight_and_hud() -> void:
+    print("[Fase 3: luz]")
+    var noon := Clock.daylight_color(12 * 60, Clock.Weather.ENSOLARADO)
+    var night := Clock.daylight_color(23 * 60, Clock.Weather.ENSOLARADO)
+    var dusk := Clock.daylight_color(18 * 60, Clock.Weather.ENSOLARADO)
+    var rainy_noon := Clock.daylight_color(12 * 60, Clock.Weather.CHUVA)
+    check(noon.v > 0.95, "meio-dia claro")
+    check(night.v < 0.7 and night.b > night.r, "noite escura e azulada")
+    check(dusk.r > dusk.b, "fim de tarde alaranjado")
+    check(rainy_noon.v < noon.v, "dia de chuva mais escuro")
+    var wfx := _main.get_node("WeatherFX") as WeatherFX
+    Clock.minutes = 23 * 60
+    wfx.refresh()
+    check(wfx.daylight.color.is_equal_approx(night), "CanvasModulate segue o relógio")
+    Clock.minutes = Clock.DAY_START
+    Clock.weather = Clock.Weather.NEBLINA
+    wfx.refresh()
+    check(wfx.fog.color.a > 0.3, "neblina de manhã")
+    Clock.minutes = 11 * 60
+    wfx.refresh()
+    check(wfx.fog.color.a == 0.0, "neblina some até as 10h")
+    Clock.weather = Clock.Weather.ENSOLARADO
+    wfx.refresh()
+
+
+func _test_save_v2_and_migration() -> void:
+    print("[Fase 3: save v2]")
+    Clock.minutes = 15 * 60 + 40
+    Clock.weather = Clock.Weather.NUBLADO
+    var seed := Clock.world_seed
+    check(SaveManager.save_game(), "salva com relógio")
+    var raw := SaveManager.read_save_file()
+    check(int(raw.version) == 2 and raw.has("clock"), "save v2 tem relógio e clima")
+    Clock.reset()
+    check(SaveManager.load_game(), "carrega")
+    check(Clock.minutes == 15 * 60 + 40 and Clock.weather == Clock.Weather.NUBLADO and Clock.world_seed == seed, "hora, clima e semente restaurados")
+    # Save antigo da Fase 2 (v1)
+    var v1 := {"version": 1, "game": {"day": 5, "water": 3, "selected_slot": 0,
+        "inventory": [{"id": "enxada", "count": 1}]}, "player": {}, "nodes": {}}
+    var file := FileAccess.open(TEST_SAVE, FileAccess.WRITE)
+    file.store_string(JSON.stringify(v1))
+    file.close()
+    Clock.minutes = 20 * 60
+    check(SaveManager.load_game(), "save v1 (Fase 2) carrega na Fase 3")
+    check(GameState.day == 5 and GameState.water == 3, "dados da v1 preservados")
+    check(Clock.minutes == Clock.DAY_START and Clock.weather == Clock.Weather.ENSOLARADO, "migração v1→v2 começa o dia às 06:00, ensolarado")
+    SaveManager.delete_save()

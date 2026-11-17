@@ -48,6 +48,7 @@ func _ready() -> void:
     cursor.visible = false
     soil.add_child(cursor)
     GameState.day_advanced.connect(func(_d: int) -> void: advance_day())
+    Clock.day_started.connect(_on_day_started)
 
 
 func _process(_delta: float) -> void:
@@ -148,6 +149,25 @@ func advance_day() -> void:
         _refresh(cell)
 
 
+## Começo do dia: chuva rega tudo; plantas fora do período morrem.
+func _on_day_started(day: int, _weather: int) -> void:
+    var period := Calendar.period(day)
+    var lost := {}
+    for cell: Vector2i in cells:
+        var c: Dictionary = cells[cell]
+        var crop := ItemDB.get_crop(c.crop)
+        if crop and not crop.can_grow_in(period):
+            lost[crop.display_name] = int(lost.get(crop.display_name, 0)) + 1
+            c.crop = &""
+            c.age = 0
+        if Clock.is_raining():
+            c.watered = true
+        _refresh(cell)
+    if not lost.is_empty():
+        var names := ", ".join(lost.keys().map(func(n: String) -> String: return n.to_lower()))
+        EventBus.show_message("Mudou o período: as plantas de %s não aguentaram." % names, 4.0)
+
+
 # --- integração com o jogador ---------------------------------------------
 
 ## Grupo "item_target": o que o item faria na célula, sem fazer.
@@ -172,7 +192,10 @@ func get_item_action(item: ItemData, target_pos: Vector2, _actor: Node) -> Dicti
             if cells.has(cell) and cells[cell].crop == &"":
                 var crop := ItemDB.get_crop(item.crop_id)
                 if crop:
-                    return {"prompt": "Plantar " + crop.display_name.to_lower(), "priority": 5}
+                    var name := crop.display_name.to_lower()
+                    if not crop.can_grow_in(Calendar.period(GameState.day)):
+                        return {"prompt": "Plantar %s (fora de época)" % name, "priority": 5}
+                    return {"prompt": "Plantar " + name, "priority": 5}
     return {}
 
 
@@ -207,6 +230,10 @@ func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
         ItemData.Category.SEED:
             if not cells.has(cell):
                 EventBus.show_message("Capine a terra antes de plantar.", 1.5)
+                return false
+            var crop := ItemDB.get_crop(item.crop_id)
+            if crop and not crop.can_grow_in(Calendar.period(GameState.day)):
+                EventBus.show_message("%s só se planta %s." % [crop.display_name, crop.periods_text()], 2.5)
                 return false
             if plant(cell, item.crop_id):
                 GameState.consume_selected(1)

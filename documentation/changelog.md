@@ -1,5 +1,21 @@
 # Changelog — Vale do Pequi
 
+## 0.4.0 — Fase 3: Tempo e clima (17/11/2026)
+
+### Adicionado
+- Relógio (autoload `Clock`): dia das 06:00 às 02:00, 10 minutos de jogo a cada 7 s reais (~14 min por dia). Para com o jogo pausado.
+- Às 02:00 o jogador apaga, acorda na porta de casa no dia seguinte e o jogo salva.
+- Calendário (`Calendar`): meses com nomes reais, 10 dias por mês, dias da semana. O jogo começa em 1º de outubro.
+- Períodos do Cerrado: chuvoso (outubro a abril) e seco (maio a setembro).
+- Clima sorteado por dia conforme o período: ensolarado, nublado, chuva, tempestade (com relâmpagos), neblina (de manhã) e ventania. Mesmo save = mesmo clima no mesmo dia.
+- Chuva rega a roça sozinha.
+- Culturas com período: milho e abóbora só no chuvoso; feijão e mandioca o ano todo. Plantas fora de época morrem na virada do período; a dica avisa "(fora de época)".
+- Safra do pequi: só cai pequi de outubro a janeiro.
+- Luz do dia: amanhecer, entardecer alaranjado, noite azulada, dias de chuva mais escuros.
+- HUD com data, hora, clima e período.
+- Save v2 com relógio e clima; saves da Fase 2 (v1) são migrados automaticamente.
+- 51 testes novos (250 no total).
+
 ## 0.3.1 — E contextual (17/11/2026)
 - **E faz tudo:** escolhe a ação pelo que está à frente e pelo item na mão, nesta prioridade: colher > encher regador > objeto (porta, baú, poço...) > capinar/regar/plantar. A dica mostra a ação antes ("[E] Regar").
 - Segurar E repete ações de ferramenta/colheita enquanto anda (fileiras).
