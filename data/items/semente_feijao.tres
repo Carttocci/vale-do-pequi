@@ -12,6 +12,5 @@ icon = ExtResource("2")
 category = 1
 max_stack = 99
 sell_price = 4
-tool_type = 0
-crop_id = &"feijao"
 buy_price = 8
+crop_id = &"feijao"

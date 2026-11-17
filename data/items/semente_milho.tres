@@ -7,11 +7,10 @@
 script = ExtResource("1")
 id = &"semente_milho"
 display_name = "Semente de milho"
-description = "Milho: 4 dias regados. Só no período chuvoso. Vira pamonha, curau..."
+description = "Milho: 4 dias regados. Só no período chuvoso."
 icon = ExtResource("2")
 category = 1
 max_stack = 99
 sell_price = 5
-tool_type = 0
-crop_id = &"milho"
 buy_price = 10
+crop_id = &"milho"

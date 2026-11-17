@@ -4,9 +4,11 @@ extends Node
 
 const ITEMS_DIR := "res://data/items"
 const CROPS_DIR := "res://data/crops"
+const FISH_DIR := "res://data/fish"
 
 var _items: Dictionary = {}
 var _crops: Dictionary = {}
+var _fish: Array[FishData] = []
 
 
 func _ready() -> void:
@@ -18,6 +20,9 @@ func _ready() -> void:
         var crop := res as CropData
         if crop:
             _crops[crop.id] = crop
+    for res in _load_dir(FISH_DIR):
+        if res is FishData:
+            _fish.append(res)
 
 
 func get_item(id: StringName) -> ItemData:
@@ -26,6 +31,10 @@ func get_item(id: StringName) -> ItemData:
 
 func get_crop(id: StringName) -> CropData:
     return _crops.get(id)
+
+
+func all_fish() -> Array[FishData]:
+    return _fish
 
 
 func has_item(id: StringName) -> bool:

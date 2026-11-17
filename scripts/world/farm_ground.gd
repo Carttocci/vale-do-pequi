@@ -21,6 +21,7 @@ const LEGEND := {
     "m": 6,  # grama escura (mata)
     "^": 7,  # água com margem
     "p": 8,  # calçamento de pedra (praça)
+    "b": 9,  # ponte de madeira
 }
 ## Colunas do atlas que bloqueiam passagem.
 const SOLID_TILES := [5, 7]

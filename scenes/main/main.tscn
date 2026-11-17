@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/main.gd" id="scr"]
 [ext_resource type="PackedScene" path="res://scenes/farm/farm.tscn" id="farm"]
@@ -7,6 +7,10 @@
 [ext_resource type="Script" path="res://scripts/interface/inventory_ui.gd" id="inv"]
 [ext_resource type="Script" path="res://scripts/weather/weather_fx.gd" id="wfx"]
 [ext_resource type="PackedScene" path="res://scenes/vila/vila.tscn" id="vila"]
+[ext_resource type="PackedScene" path="res://scenes/mata/mata.tscn" id="mata"]
+[ext_resource type="Script" path="res://scripts/fishing/fishing.gd" id="fishing"]
+[ext_resource type="Script" path="res://scripts/world/placement.gd" id="placement"]
+[ext_resource type="Script" path="res://scripts/interface/fishing_ui.gd" id="fishui"]
 [ext_resource type="Script" path="res://scripts/interface/dialogue_ui.gd" id="dlg"]
 [ext_resource type="Script" path="res://scripts/interface/shop_ui.gd" id="shop"]
 
@@ -16,6 +20,14 @@ script = ExtResource("scr")
 [node name="Farm" parent="." instance=ExtResource("farm")]
 
 [node name="Vila" parent="." instance=ExtResource("vila")]
+
+[node name="Mata" parent="." instance=ExtResource("mata")]
+
+[node name="Fishing" type="Node" parent="."]
+script = ExtResource("fishing")
+
+[node name="Placement" type="Node" parent="."]
+script = ExtResource("placement")
 
 [node name="WeatherFX" type="Node" parent="."]
 script = ExtResource("wfx")
@@ -32,3 +44,6 @@ script = ExtResource("dlg")
 
 [node name="ShopUI" type="CanvasLayer" parent="."]
 script = ExtResource("shop")
+
+[node name="FishingUI" type="CanvasLayer" parent="."]
+script = ExtResource("fishui")

@@ -28,6 +28,10 @@ signal dialogue_requested(speaker: String, lines: PackedStringArray, options: Pa
 ## Abrir uma loja (ver ShopUI.open_shop).
 signal shop_requested(shop: Dictionary)
 
+## Pesca: lançou a linha (peixe já sorteado) e terminou (pegou ou não).
+signal fishing_started(fish: FishData)
+signal fishing_finished(success: bool, fish: FishData)
+
 ## Jogo pausado/retomado pelo menu.
 signal pause_changed(paused: bool)
 

@@ -37,6 +37,10 @@ var _MIGRATIONS: Dictionary = {
         d["player"] = d.get("player", {})
         d.player["region"] = "farm"
         return d,
+    # v3 (Fase 4) → v4 (Fase 5): habilidades, registro de peixes e fauna,
+    # criação de animais. Tudo começa vazio (valores padrão em from_data).
+    3: func(d: Dictionary) -> Dictionary:
+        return d,
 }
 
 

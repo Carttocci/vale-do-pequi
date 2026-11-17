@@ -7,11 +7,10 @@
 script = ExtResource("1")
 id = &"semente_mandioca"
 display_name = "Rama de mandioca"
-description = "Mandioca: 8 dias regados. Aguenta o ano todo. Dá farinha e muito mais."
+description = "Mandioca: 8 dias regados. Aguenta o ano todo."
 icon = ExtResource("2")
 category = 1
 max_stack = 99
 sell_price = 10
-tool_type = 0
-crop_id = &"mandioca"
 buy_price = 20
+crop_id = &"mandioca"

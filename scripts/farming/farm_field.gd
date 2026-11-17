@@ -130,6 +130,7 @@ func harvest(cell: Vector2i) -> Dictionary:
         EventBus.show_message("Mochila cheia! Guarde coisas no baú.", 2.0)
         return {}
     GameState.add_item(crop.harvest_item, amount)
+    GameState.add_xp(&"agricultura", 4 + crop.days_to_mature())
     if crop.regrow_days > 0:
         cells[cell].age = crop.days_to_mature() - crop.regrow_days
     else:

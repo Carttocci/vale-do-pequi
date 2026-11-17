@@ -86,6 +86,38 @@ func sell(item_id: StringName, amount: int = 1) -> int:
     return n
 
 
+## Compra de animal: vai direto para o cercado da fazenda.
+func buy_animal(kind: StringName) -> bool:
+    var ranch := get_tree().get_first_node_in_group("ranch") as Ranch
+    if ranch == null or not Ranch.ANIMALS.has(kind):
+        return false
+    var info: Dictionary = Ranch.ANIMALS[kind]
+    if not ranch.can_buy(kind):
+        _info.text = "Não cabe mais nenhum(a) %s no cercado." % info.name.to_lower()
+        return false
+    if not GameState.spend_money(int(info.price)):
+        _info.text = "Dinheiro não dá."
+        return false
+    ranch.add_animal(kind)
+    _info.text = "Comprou: %s! Já está te esperando na fazenda." % info.name.to_lower()
+    _refresh()
+    return true
+
+
+func _add_animal_row(kind: StringName) -> void:
+    if not Ranch.ANIMALS.has(kind):
+        return
+    var info: Dictionary = Ranch.ANIMALS[kind]
+    var ranch := get_tree().get_first_node_in_group("ranch") as Ranch
+    var tex := AtlasTexture.new()
+    tex.atlas = load(info.sprite)
+    tex.region = Rect2(0, 0, tex.atlas.get_width() / 4.0, tex.atlas.get_height())
+    var proxy := ItemData.new()
+    proxy.display_name = "%s (%d/%d)" % [info.name, ranch.count(kind) if ranch else 0, info.capacity]
+    proxy.icon = tex
+    _add_row(proxy, "R$ %d" % info.price, "", buy_animal.bind(kind), "", Callable())
+
+
 func buys(item: ItemData) -> bool:
     return item.sell_price > 0 and int(item.category) in Array(shop.get("buys", PackedInt32Array()))
 
@@ -108,6 +140,9 @@ func _refresh() -> void:
     if tab == Tab.BUY:
         var period := Calendar.period(GameState.day)
         for id in shop.get("sells", PackedStringArray()):
+            if String(id).begins_with("animal:"):
+                _add_animal_row(StringName(String(id).trim_prefix("animal:")))
+                continue
             var item := ItemDB.get_item(StringName(id))
             if item == null:
                 continue
@@ -149,6 +184,9 @@ func _add_row(item: ItemData, price: String, note: String, action: Callable, bul
     main_btn.pressed.connect(func() -> void: action.call())
     row.add_child(main_btn)
     row.add_child(_label(price, 9))
+    if bulk_text == "":
+        _list.add_child(row)
+        return
     var bulk_btn := Button.new()
     bulk_btn.text = bulk_text
     bulk_btn.focus_mode = Control.FOCUS_NONE

@@ -116,6 +116,10 @@ metadata/facing = 6
 position = Vector2(232, 456)
 metadata/facing = 4
 
+[node name="da_mata" type="Marker2D" parent="Markers"]
+position = Vector2(760, 328)
+metadata/facing = 6
+
 [node name="Entities" type="Node2D" parent="."]
 y_sort_enabled = true
 
@@ -185,11 +189,6 @@ position = Vector2(712, 232)
 [node name="Arbusto5" parent="Entities" instance=ExtResource("r15")]
 position = Vector2(104, 232)
 
-[node name="PlacaMata" parent="Entities" instance=ExtResource("r16")]
-position = Vector2(776, 298)
-prompt = "Ler placa"
-messages = PackedStringArray("TRILHA DA MATA DOS IPÊS  —  fechada por enquanto.")
-
 [node name="Helena" parent="Entities" instance=ExtResource("r4")]
 data = ExtResource("r17")
 
@@ -207,6 +206,15 @@ data = ExtResource("r21")
 
 [node name="JoaoPedro" parent="Entities" instance=ExtResource("r4")]
 data = ExtResource("r22")
+
+[node name="SaidaMata" type="Area2D" parent="."]
+position = Vector2(792, 320)
+script = ExtResource("r3")
+target_region = &"mata"
+target_spawn = &"da_vila"
+
+[node name="Shape" type="CollisionShape2D" parent="SaidaMata"]
+shape = SubResource("exit_shape")
 
 [node name="SaidaFazenda" type="Area2D" parent="."]
 position = Vector2(8, 320)

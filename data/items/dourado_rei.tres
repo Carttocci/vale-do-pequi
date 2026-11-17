@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/dourado_rei_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"dourado_rei"
+display_name = "Dourado-rei"
+description = "Lendário. Dizem que só aparece em noite de chuva no Rio das Araras."
+icon = ExtResource("2")
+category = 5
+max_stack = 1
+sell_price = 600
+buy_price = 0

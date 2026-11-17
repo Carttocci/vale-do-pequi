@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/armadilha_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"armadilha"
+display_name = "Armadilha de javali"
+description = "Arme na Mata dos Ipês. Na manhã seguinte pode ter javali."
+icon = ExtResource("2")
+category = 9
+max_stack = 20
+sell_price = 10
+buy_price = 40
+place_scene = "res://scenes/mata/armadilha.tscn"
+place_regions = PackedStringArray("mata")

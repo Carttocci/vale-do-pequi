@@ -77,6 +77,13 @@ func _run_all() -> void:
     await _test_dialogue_and_friendship()
     await _test_shop()
     await _test_save_v3()
+    await _test_mata_region()
+    await _test_fishing()
+    _test_fish_table()
+    await _test_ranch()
+    await _test_wildlife_and_traps()
+    _test_skills()
+    await _test_save_v4()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -1109,22 +1116,22 @@ func _test_npc_schedule_and_walk() -> void:
 func _test_dialogue_and_friendship() -> void:
     print("[Fase 4: conversa]")
     var dlg := _main.get_node("DialogueUI") as DialogueUI
-    var joao := npc("joao_pedro")
+    var joao := npc("benedito")
     joao.met = false
     joao.friendship = 0
     joao.last_talk_day = 0
     set_time(3, 9 * 60)
     Clock.weather = Clock.Weather.ENSOLARADO
     joao.snap_to_schedule()
-    await place_player(joao.global_position + Vector2(16, 0))
-    _player.face(6)
+    await place_player(joao.global_position + Vector2(0, 16))
+    _player.face(4)
     GameState.select_slot(8)
     await frames(3)
-    check(_prompts[-1] == "Conversar com João Pedro", "dica 'Conversar com João Pedro'")
+    check(_prompts[-1] == "Conversar com Seu Benedito", "dica 'Conversar com Seu Benedito'")
     await press_e()
     check(dlg.is_open() and get_tree().paused, "conversa abre e pausa")
     check(dlg.lines == joao.data.intro, "primeira conversa é a apresentação")
-    check(dlg.speaker == "João Pedro", "nome de quem fala")
+    check(dlg.speaker == "Seu Benedito", "nome de quem fala")
     for i in joao.data.intro.size():
         var ev := InputEventAction.new()
         ev.action = "interact"
@@ -1256,3 +1263,232 @@ func _collect_scripts(path: String, out: Array) -> void:
             out.append(path + "/" + f)
     for sub in d.get_directories():
         _collect_scripts(path + "/" + sub, out)
+
+
+# --- Fase 5 ----------------------------------------------------------------
+
+func mata() -> MataLevel:
+    return _main.get_region(&"mata") as MataLevel
+
+
+func _test_mata_region() -> void:
+    print("[Fase 5: Mata dos Ipês]")
+    _main.change_region_now(&"vila")
+    await place_player(Vector2(770, 320))
+    Input.action_press("move_right")
+    await frames(25)
+    Input.action_release("move_right")
+    await get_tree().create_timer(0.8).timeout
+    check(_main.level == mata(), "saída leste da vila leva à mata")
+    check(mata().ground.map_size == Vector2i(60, 34) and mata().water_habitat == "rio", "mapa da mata com rio")
+    check(not mata().is_walkable(Vector2(100, 420)) and mata().is_walkable(Vector2(472, 420)), "rio bloqueia, ponte deixa passar")
+    var path := mata().find_path(Vector2(40, 328), Vector2(472, 488))
+    check(path.size() > 5, "dá para atravessar o rio pela ponte")
+
+
+func _test_fishing() -> void:
+    print("[Fase 5: pesca]")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    var fishing := _main.get_node("Fishing") as Fishing
+    var ui := _main.get_node("FishingUI") as FishingUI
+    GameState.add_item(&"vara_bambu", 1)
+    select_item(&"vara_bambu")
+    await place_player(Vector2(140, 381))
+    _player.face(0)
+    await frames(3)
+    check(fishing.is_water(_player.get_target_position()), "de frente para a lagoa")
+    check(_prompts[-1] == "Pescar", "dica 'Pescar' com a vara na mão")
+    _messages.clear()
+    await press_e()
+    check(not ui.is_active() and _messages[-1].contains("isca"), "sem isca não pesca e avisa")
+    GameState.add_item(&"isca", 3)
+    await press_e()
+    check(ui.is_active() and ui.phase == FishingUI.Phase.WAIT and GameState.get_item_count(&"isca") == 2, "lançou: gastou 1 isca, esperando")
+    check(not _player.input_enabled, "jogador parado enquanto pesca")
+    ui.press()
+    check(not ui.is_active() and _player.input_enabled, "puxar cedo espanta o peixe")
+    # pescaria completa
+    Clock.minutes = 10 * 60
+    await press_e()
+    ui._timer = 0.0
+    await frames(2)
+    check(ui.phase == FishingUI.Phase.BITE, "peixe fisgou")
+    ui.press()
+    check(ui.phase == FishingUI.Phase.REEL, "começou a briga")
+    var fish := ui.fish
+    for i in ui.hits_needed:
+        ui.marker = ui.zone_center
+        ui.press()
+    check(not ui.is_active(), "acertos suficientes terminam a briga")
+    check(GameState.get_item_count(fish.item) == 1, "peixe na mochila (%s)" % fish.item)
+    check(GameState.fish_log.has(fish.item) and GameState.skill_xp.get(&"pesca", 0) > 0, "registrado e ganhou XP de pesca")
+    check(fish.item in [&"lambari", &"traira", &"tucunare"], "peixe de lagoa na lagoa")
+    # errar 3 vezes
+    await press_e()
+    ui._timer = 0.0
+    await frames(2)
+    ui.press()
+    for i in 3:
+        ui.marker = fposmod(ui.zone_center + 0.5, 1.0)
+        ui.press()
+    check(not ui.is_active() and _messages[-1].contains("fugiu"), "3 erros: o peixe foge")
+    # loja do João
+    var joao := npc("joao_pedro")
+    check(joao.data.has_shop() and "isca" in joao.data.shop_sells, "João Pedro vende vara e isca")
+
+
+func _test_fish_table() -> void:
+    var f := _main.get_node("Fishing") as Fishing
+    var seen := {}
+    for i in 600:
+        var fish := f.roll_fish("rio", 22 * 60, Calendar.PERIOD_RAINY, "chuva")
+        seen[fish.item] = true
+    check(seen.has(&"pintado") and seen.has(&"dourado_rei"), "noite de chuva no rio: pintado e às vezes o lendário")
+    check(not seen.has(&"traira") and not seen.has(&"dourado"), "sem peixe de lagoa no rio; dourado é do seco de manhã")
+    seen = {}
+    for i in 300:
+        seen[f.roll_fish("rio", 8 * 60, Calendar.PERIOD_DRY, "ensolarado").item] = true
+    check(seen.has(&"dourado") and not seen.has(&"dourado_rei"), "manhã de seca no rio: dourado, sem lendário")
+    seen = {}
+    for i in 200:
+        seen[f.roll_fish("lagoa", 7 * 60, Calendar.PERIOD_DRY, "ensolarado").item] = true
+    check(seen.size() == 1 and seen.has(&"lambari"), "lagoa cedo no seco: só lambari")
+
+
+func _test_ranch() -> void:
+    print("[Fase 5: criação]")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    var ranch := get_tree().get_first_node_in_group("ranch") as Ranch
+    ranch.load_save_data({})
+    var shop := _main.get_node("ShopUI") as ShopUI
+    shop.open_shop({"title": "Clínica", "sells": PackedStringArray(["animal:galinha", "racao"]), "buys": PackedInt32Array(), "tab": 0})
+    GameState.money = 1000
+    check(shop.buy_animal(&"galinha") and ranch.count(&"galinha") == 1 and GameState.money == 880, "comprou uma galinha (R$ 120)")
+    check(shop.buy(&"racao", 5) == 5, "comprou ração")
+    shop.close()
+    var hens := ranch.get_children().filter(func(c: Node) -> bool: return c is FarmAnimal)
+    check(hens.size() == 1 and ranch.chicken_pen.has_point(hens[0].position), "galinha aparece no galinheiro")
+    for i in 5:
+        ranch.add_animal(&"galinha")
+    check(not ranch.can_buy(&"galinha") and ranch.count(&"galinha") == 6, "galinheiro cabe 6")
+    # comedouro
+    select_item(&"racao")
+    var feeder := ranch.chicken_feeder
+    await place_player(feeder.global_position + Vector2(0, 18))
+    _player.face(4)
+    await frames(3)
+    check(_prompts[-1] == "Pôr no comedouro (0/20)", "dica 'Pôr no comedouro'")
+    for i in 5:
+        await press_e()
+    check(ranch.feed[&"galinheiro"] == 5 and GameState.get_item_count(&"racao") == 0, "5 porções no comedouro")
+    for a in ranch.animals:
+        a.happiness = 100
+    GameState.sleep()
+    var eggs := ranch.get_children().filter(func(c: Node) -> bool: return c is Pickup)
+    check(ranch.feed[&"galinheiro"] == 0, "galinhas comeram (5 porções)")
+    check(eggs.size() == 5, "galinhas alimentadas e felizes botaram ovos (%d)" % eggs.size())
+    var hungry := ranch.animals.filter(func(a: Dictionary) -> bool: return a.happiness < 100)
+    check(hungry.size() == 1, "a galinha que não comeu ficou triste")
+    var egg := eggs[0] as Pickup
+    await place_player(egg.global_position + Vector2(0, 14))
+    _player.face(4)
+    await frames(3)
+    check(_prompts[-1] == "Pegar ovo caipira", "dica 'Pegar ovo caipira'")
+    await press_e()
+    check(GameState.get_item_count(&"ovo") == 1 and ranch.pickups.size() == 4, "pegou o ovo")
+    var hen: FarmAnimal = ranch.get_children().filter(func(c: Node) -> bool: return c is FarmAnimal)[0]
+    var before: int = hen.record.happiness
+    hen.record.happiness = 50
+    hen.pet()
+    hen.pet()
+    check(hen.record.happiness == 58, "carinho: +8 felicidade, uma vez por dia")
+
+
+func _test_wildlife_and_traps() -> void:
+    print("[Fase 5: fauna e caça]")
+    _main.change_region_now(&"mata")
+    set_time(3, 10 * 60)
+    mata().respawn()
+    var animals := mata().animals()
+    var cap := animals.filter(func(a: WildAnimal) -> bool: return a.species == &"capivara")
+    var jav := animals.filter(func(a: WildAnimal) -> bool: return a.species == &"javali")
+    check(cap.size() == 3 and cap[0].visible, "capivaras à beira do rio de dia")
+    check(jav.size() == 3 and not jav[0].visible, "javali escondido de manhã")
+    check(get_tree().get_nodes_in_group("tracks").size() >= 1, "pegadas de javali na mata")
+    set_time(3, 18 * 60)
+    check(jav[0].visible, "javali aparece no fim da tarde")
+    set_time(3, 10 * 60)
+    GameState.species_seen.clear()
+    var c0 := cap[0] as WildAnimal
+    c0.observe()
+    check(GameState.species_seen.has(&"capivara") and _messages[-1].contains("Hydrochoerus"), "observar registra no caderno com nome científico")
+    var xp: int = GameState.skill_xp.get(&"caca", 0)
+    c0.observe()
+    check(GameState.skill_xp[&"caca"] == xp + 2, "repetir observação dá pouco XP")
+    # armadilha
+    GameState.add_item(&"armadilha", 1)
+    select_item(&"armadilha")
+    await place_player(Vector2(200, 328))
+    _player.face(2)
+    await frames(3)
+    check(_prompts[-1] == "Colocar armadilha de javali", "dica 'Colocar armadilha'")
+    await press_e()
+    var traps := get_tree().get_nodes_in_group("persistent").filter(func(n: Node) -> bool: return false)
+    var placed := mata().get_node("Entities/Placed").get_children()
+    check(placed.size() == 1 and GameState.get_item_count(&"armadilha") == 0, "armadilha armada na mata")
+    var trap := placed[0] as Armadilha
+    for d in 20:
+        if trap.caught:
+            break
+        GameState.sleep()
+    check(trap.caught, "armadilha pegou um javali depois de alguns dias")
+    trap.open()
+    check(GameState.get_item_count(&"carne_javali") == 2 and GameState.get_item_count(&"couro") == 1 and GameState.get_item_count(&"armadilha") == 1,
+        "abrir: carne, couro e a armadilha de volta")
+    _main.change_region_now(&"farm")
+    select_item(&"armadilha")
+    await face_right_in_roca(Vector2(150, 160))
+    check(_prompts[-1] != "Colocar armadilha de javali", "armadilha não pode ser colocada na fazenda")
+
+
+func _test_skills() -> void:
+    print("[Fase 5: habilidades]")
+    check(GameState.level_for_xp(0) == 0 and GameState.level_for_xp(50) == 1 and GameState.level_for_xp(4000) == 10, "tabela de níveis")
+    var before := GameState.skill_level(&"mineracao")
+    GameState.skill_xp[&"mineracao"] = 0
+    GameState.add_xp(&"mineracao", 150)
+    check(GameState.skill_level(&"mineracao") == 2 and _messages[-1].contains("nível 2"), "subir de nível avisa")
+
+
+func _test_save_v4() -> void:
+    print("[Fase 5: save v4]")
+    _main.change_region_now(&"mata")
+    var ranch := get_tree().get_first_node_in_group("ranch") as Ranch
+    GameState.add_item(&"armadilha", 1)
+    select_item(&"armadilha")
+    await place_player(Vector2(260, 328))
+    _player.face(2)
+    await frames(3)
+    await press_e()
+    var expected_ranch := ranch.get_save_data()
+    var expected_game := GameState.to_data()
+    check(SaveManager.save_game(), "salva")
+    ranch.load_save_data({})
+    GameState.new_game()
+    var cont := mata().get_node("Entities/Placed")
+    for c in cont.get_children():
+        c.free()
+    check(SaveManager.load_game(), "carrega")
+    check(JSON.stringify(ranch.get_save_data()) == JSON.stringify(expected_ranch), "animais, comedouro e ovos restaurados")
+    check(GameState.skill_xp == expected_game.skills or GameState.to_data().skills == expected_game.skills, "habilidades restauradas")
+    check(GameState.fish_log.size() == expected_game.fish_log.size() and GameState.species_seen.size() == expected_game.species_seen.size(), "caderno restaurado")
+    check(mata().get_node("Entities/Placed").get_child_count() >= 1, "armadilha armada restaurada")
+    var v3 := {"version": 3, "game": {"day": 3, "money": 50}, "player": {"region": "farm"}, "nodes": {}}
+    var file := FileAccess.open(TEST_SAVE, FileAccess.WRITE)
+    file.store_string(JSON.stringify(v3))
+    file.close()
+    check(SaveManager.load_game() and GameState.money == 50 and GameState.skill_xp.is_empty(), "save v3 migra para v4")
+    SaveManager.delete_save()
+    _main.change_region_now(&"farm")

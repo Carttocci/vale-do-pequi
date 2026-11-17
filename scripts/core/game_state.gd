@@ -13,13 +13,20 @@ signal day_advanced(day: int)
 signal selected_slot_changed(index: int)
 signal water_changed(amount: int)
 signal money_changed(amount: int)
+signal skill_changed(skill: StringName, level: int, xp: int)
+signal journal_changed
 
 ## Versão do formato dos dados salvos (ver SaveManager.migrate).
-const DATA_VERSION := 3
+const DATA_VERSION := 4
 const INVENTORY_SIZE := 27
 const HOTBAR_SIZE := 9
 const WATER_MAX := 20
 const STARTING_MONEY := 200
+## Habilidades (GDD §15). XP acumulada → nível 0..10.
+const SKILLS := [&"agricultura", &"pesca", &"caca", &"criacao", &"combate", &"mineracao", &"coleta", &"artesanato"]
+const SKILL_NAMES := {&"agricultura": "Agricultura", &"pesca": "Pesca", &"caca": "Caça e rastreio",
+    &"criacao": "Criação", &"combate": "Combate", &"mineracao": "Mineração", &"coleta": "Coleta", &"artesanato": "Artesanato"}
+const LEVEL_XP := [0, 50, 150, 300, 500, 800, 1200, 1700, 2300, 3000, 4000]
 
 const STARTING_ITEMS := [
     ["enxada", 1], ["regador", 1], ["semente_milho", 12], ["semente_feijao", 8],
@@ -30,6 +37,10 @@ var selected_slot: int = 0
 var day: int = 1
 var water: int = WATER_MAX
 var money: int = STARTING_MONEY
+var skill_xp: Dictionary = {}
+## Peixes pescados: id -> quantidade. Caderno de campo: espécie -> true.
+var fish_log: Dictionary = {}
+var species_seen: Dictionary = {}
 
 
 func _ready() -> void:
@@ -44,11 +55,52 @@ func new_game() -> void:
     day = 1
     water = WATER_MAX
     money = STARTING_MONEY
+    skill_xp = {}
+    fish_log = {}
+    species_seen = {}
     Clock.reset()
     select_slot(0)
     water_changed.emit(water)
     money_changed.emit(money)
     day_changed.emit(day)
+
+
+# --- habilidades e registros ----------------------------------------------
+
+static func level_for_xp(xp: int) -> int:
+    var lvl := 0
+    for i in LEVEL_XP.size():
+        if xp >= LEVEL_XP[i]:
+            lvl = i
+    return mini(lvl, 10)
+
+
+func skill_level(skill: StringName) -> int:
+    return level_for_xp(int(skill_xp.get(skill, 0)))
+
+
+func add_xp(skill: StringName, amount: int) -> void:
+    var before := skill_level(skill)
+    skill_xp[skill] = int(skill_xp.get(skill, 0)) + amount
+    var after := skill_level(skill)
+    skill_changed.emit(skill, after, skill_xp[skill])
+    if after > before:
+        EventBus.show_message("%s subiu para o nível %d!" % [SKILL_NAMES.get(skill, String(skill)), after], 3.0)
+
+
+func log_fish(id: StringName) -> bool:
+    var first := not fish_log.has(id)
+    fish_log[id] = int(fish_log.get(id, 0)) + 1
+    journal_changed.emit()
+    return first
+
+
+func log_species(id: StringName) -> bool:
+    if species_seen.has(id):
+        return false
+    species_seen[id] = true
+    journal_changed.emit()
+    return true
 
 
 # --- dinheiro --------------------------------------------------------------
@@ -138,6 +190,9 @@ func to_data() -> Dictionary:
         "day": day,
         "water": water,
         "money": money,
+        "skills": skill_xp.duplicate(),
+        "fish_log": fish_log.duplicate(),
+        "species_seen": species_seen.keys().map(func(k: StringName) -> String: return String(k)),
         "selected_slot": selected_slot,
         "inventory": inventory.to_data(),
     }
@@ -152,6 +207,15 @@ func from_data(data: Dictionary) -> void:
     day = maxi(1, int(data.get("day", 1)))
     water = clampi(int(data.get("water", WATER_MAX)), 0, WATER_MAX)
     money = maxi(0, int(data.get("money", STARTING_MONEY)))
+    skill_xp = {}
+    for k in data.get("skills", {}):
+        skill_xp[StringName(k)] = int(data.skills[k])
+    fish_log = {}
+    for k in data.get("fish_log", {}):
+        fish_log[StringName(k)] = int(data.fish_log[k])
+    species_seen = {}
+    for k in data.get("species_seen", []):
+        species_seen[StringName(k)] = true
     inventory.from_data(data.get("inventory", []))
     select_slot(int(data.get("selected_slot", 0)))
     water_changed.emit(water)

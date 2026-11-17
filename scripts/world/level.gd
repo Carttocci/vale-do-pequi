@@ -13,6 +13,8 @@ extends Node2D
 
 @export var region_id: StringName = &"farm"
 @export var display_name: String = "Fazenda do Pequi"
+## Tipo de água para a pesca: "lagoa" ou "rio".
+@export var water_habitat: String = "lagoa"
 
 @onready var ground: FarmGround = $Ground
 @onready var entities: Node2D = $Entities

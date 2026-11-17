@@ -1,5 +1,14 @@
 # Changelog — Vale do Pequi
 
+## 0.6.0 — Fase 5: Atividades (17/11/2026)
+- **Mata dos Ipês + Rio das Araras** (60×34), a leste da vila: mata fechada, campo de capim dourado, pequizeiros nativos, rio com ponte.
+- **Pesca**: vara de bambu + minhoca (loja do João Pedro na lagoa da vila). Minijogo de um botão: esperar, fisgar e acertar a faixa verde. 8 espécies por habitat (lagoa/rio), horário, período e clima — inclusive o lendário dourado-rei em noite de chuva. João compra peixe.
+- **Criação**: galinheiro e curral na fazenda; galinhas (ovo) e vacas (leite) compradas com a Mariana. Comedouro com ração ou milho; animal alimentado fica feliz e produz; carinho 1×/dia.
+- **Fauna e caça**: capivara, cutia, quati, seriema, ema, veado-campeiro (observar → caderno de campo com nome científico) e javali (invasor). Pegadas de javali para rastrear e armadilha de javali (carne + couro). Espécies nativas não são caçáveis (GDD §9).
+- **Habilidades** com XP e níveis 0–10 (agricultura, pesca, caça, criação; combate e mineração nas próximas fases).
+- Tabela única de itens (`tools/gerar_itens.py`) e de peixes (`tools/gerar_peixes.py`).
+- Save v4 (habilidades, caderno, criação, objetos colocados). 54 testes novos (366 no total).
+
 ## 0.5.0 — Fase 4: Vila (17/11/2026)
 
 ### Adicionado

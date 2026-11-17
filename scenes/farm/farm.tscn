@@ -1,7 +1,10 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/farm_level.gd" id="level"]
 [ext_resource type="Script" path="res://scripts/world/region_exit.gd" id="exit"]
+[ext_resource type="Script" path="res://scripts/animals/ranch.gd" id="ranch"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/comedouro.tscn" id="comedouro"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/galinheiro.tscn" id="galinheiro"]
 [ext_resource type="Script" path="res://scripts/world/farm_ground.gd" id="ground"]
 [ext_resource type="Script" path="res://scripts/world/fence_line.gd" id="fence"]
 [ext_resource type="Script" path="res://scripts/farming/farm_field.gd" id="field"]
@@ -72,8 +75,6 @@ position = Vector2(792, 232)
 [node name="Ipe1" parent="Entities" instance=ExtResource("ipe")]
 position = Vector2(168, 72)
 
-[node name="Ipe2" parent="Entities" instance=ExtResource("ipe")]
-position = Vector2(808, 72)
 
 [node name="Ipe3" parent="Entities" instance=ExtResource("ipe")]
 position = Vector2(328, 440)
@@ -116,6 +117,23 @@ position = Vector2(920, 232)
 
 [node name="Arbusto7" parent="Entities" instance=ExtResource("arbusto")]
 position = Vector2(264, 72)
+
+[node name="Galinheiro" parent="Entities" instance=ExtResource("galinheiro")]
+position = Vector2(552, 106)
+
+[node name="ComedouroGalinhas" parent="Entities" instance=ExtResource("comedouro")]
+position = Vector2(640, 130)
+
+[node name="ComedouroCurral" parent="Entities" instance=ExtResource("comedouro")]
+position = Vector2(824, 128)
+
+[node name="Ranch" type="Node2D" parent="Entities"]
+script = ExtResource("ranch")
+chicken_pen = Rect2(584, 98, 100, 22)
+cow_pen = Rect2(740, 66, 170, 50)
+chicken_feeder_path = NodePath("../ComedouroGalinhas")
+cow_feeder_path = NodePath("../ComedouroCurral")
+coop_path = NodePath("../Galinheiro")
 
 [node name="Fences" type="Node2D" parent="Entities"]
 y_sort_enabled = true
@@ -175,3 +193,17 @@ target_spawn = &"da_fazenda"
 
 [node name="Shape" type="CollisionShape2D" parent="SaidaVila"]
 shape = SubResource("exit_shape")
+
+[node name="CercaGalinheiro" type="Node2D" parent="Entities/Fences"]
+y_sort_enabled = true
+position = Vector2(584, 138)
+script = ExtResource("fence")
+length_tiles = 8
+vertical = false
+
+[node name="CercaCurral" type="Node2D" parent="Entities/Fences"]
+y_sort_enabled = true
+position = Vector2(736, 136)
+script = ExtResource("fence")
+length_tiles = 12
+vertical = false

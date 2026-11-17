@@ -20,6 +20,8 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 
 **Vila:** siga a estrada de terra para o leste (direita) da fazenda. Converse com os moradores (E). Na mercearia da Helena (seg–sáb, 07:30–18:00) você compra sementes e vende colheitas e pequi.
 
+**Mata e rio:** da vila, siga a estrada para o leste. Pesque com vara e minhoca (João Pedro, na lagoa da vila), observe os bichos (E) para o caderno de campo e arme armadilhas de javali. Galinhas e vacas: Mariana, na clínica.
+
 **Como jogar:** pegue a enxada (atalho 1) e aperte **E** na roça para capinar; com a semente na mão o E planta, com o regador o E rega (e enche no poço). A dica na tela mostra o que o E vai fazer. Durma na porta de casa para passar o dia. Mais sementes no baú do avô, ao lado da casa. O jogo salva ao dormir e pelo menu de pausa.
 
 No celular o jogo é na horizontal. Dica: no Android, "Adicionar à tela inicial" abre o jogo em tela cheia, como um app.

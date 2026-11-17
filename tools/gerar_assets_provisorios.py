@@ -75,7 +75,7 @@ def speckle(d, x0, y0, w, h, colors, n, rng):
 def make_tileset():
     """Atlas 8x1 de tiles 16x16. A ordem é usada por scripts/world/farm_ground.gd."""
     rng = random.Random(7)
-    names = ["grama", "grama_flor", "capim_seco", "terra_vermelha", "terra_arada", "agua", "grama_escura", "agua_borda", "pedra"]
+    names = ["grama", "grama_flor", "capim_seco", "terra_vermelha", "terra_arada", "agua", "grama_escura", "agua_borda", "pedra", "ponte"]
     img = Image.new("RGBA", (T * len(names), T), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
 
@@ -116,6 +116,11 @@ def make_tileset():
     for (x0, y0, x1, y1) in [(0, 0, 7, 5), (8, 0, 15, 5), (0, 6, 4, 10), (5, 6, 11, 10), (12, 6, 15, 10), (0, 11, 7, 15), (8, 11, 15, 15)]:
         d.rectangle([8 * T + x0, y0, 8 * T + x1, y1], outline=(130, 122, 110, 255))
     speckle(d, 8 * T, 0, T, T, [(186, 176, 160, 255)], 10, rng)
+    # 9 ponte de madeira (atravessa o rio)
+    base(9, C["water"])
+    d.rectangle([9 * T, 0, 9 * T + T - 1, T - 1], fill=C["wood_l"])
+    for y in range(0, T, 4):
+        d.line([(9 * T, y), (9 * T + T - 1, y)], fill=C["wood_d"])
     img.save(out("assets/tilesets/farm_tiles_placeholder.png"))
 
 
@@ -654,6 +659,149 @@ def make_weather():
     img.save(out("assets/effects/gota_chuva_placeholder.png"))
 
 
+def sheet(path, w, h, frames, draw):
+    """Folha de animação: `frames` quadros lado a lado, virados para a direita."""
+    img = Image.new("RGBA", (w * frames, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    for f in range(frames):
+        draw(d, f * w, f)
+    img.save(out(path))
+
+
+def make_fauna():
+    """Fase 5: bichos do Cerrado, criação, itens de pesca/caça/criação."""
+    o = C["outline"]
+
+    def quad(body, belly, head_dx, w, h, leg_len, tail=None, extra=None):
+        def draw(d, ox, f):
+            by = h - leg_len - 2
+            d.ellipse([ox + 1, h - 3, ox + w - 2, h - 1], fill=(0, 0, 0, 60))
+            step = (f % 2) * 2 - 1
+            for lx in (ox + 3, ox + w - 6):
+                d.line([(lx + step, by + 2), (lx + step, h - 2)], fill=o, width=2)
+            d.ellipse([ox + 1, by - (h - leg_len) // 2 + 1, ox + w - 4, by + 3], fill=body, outline=o)
+            d.ellipse([ox + 4, by - 1, ox + w - 8, by + 2], fill=belly)
+            hx = ox + w - 6 + head_dx
+            d.ellipse([hx - 3, by - (h - leg_len) // 2 - 2, hx + 4, by - 1], fill=body, outline=o)
+            d.point((hx + 2, by - (h - leg_len) // 2 + 1), fill=o)
+            if tail:
+                tail(d, ox, by)
+            if extra:
+                extra(d, ox, by)
+        return draw
+
+    sheet("assets/animals/capivara_placeholder.png", 24, 16, 4, quad((140, 100, 70, 255), (170, 130, 95, 255), 1, 24, 16, 3))
+    sheet("assets/animals/cutia_placeholder.png", 16, 12, 4, quad((170, 110, 50, 255), (200, 150, 90, 255), 1, 16, 12, 3))
+    sheet("assets/animals/quati_placeholder.png", 20, 14, 4, quad((150, 100, 60, 255), (190, 150, 110, 255), 2, 20, 14, 3,
+          tail=lambda d, ox, by: [d.line([(ox + 1, by - 2), (ox - 1 + 0, by - 7)], fill=(90, 60, 40, 255), width=2)]))
+    sheet("assets/animals/veado_placeholder.png", 24, 24, 4, quad((190, 130, 70, 255), (230, 200, 160, 255), 1, 24, 24, 8,
+          extra=lambda d, ox, by: d.line([(ox + 20, by - 10), (ox + 22, by - 15)], fill=(90, 60, 40, 255))))
+    sheet("assets/animals/javali_placeholder.png", 24, 16, 4, quad((70, 55, 45, 255), (100, 80, 64, 255), 2, 24, 16, 3,
+          extra=lambda d, ox, by: d.point((ox + 22, by - 2), fill=C["white"])))
+    sheet("assets/animals/vaca_placeholder.png", 32, 24, 4, quad((240, 236, 224, 255), (210, 200, 190, 255), 1, 32, 24, 6,
+          extra=lambda d, ox, by: [d.ellipse([ox + 8, by - 8, ox + 15, by - 3], fill=(40, 30, 28, 255)),
+                                   d.ellipse([ox + 18, by - 6, ox + 23, by - 1], fill=(40, 30, 28, 255))]))
+
+    def bird(body, w, h, neck, leg):
+        def draw(d, ox, f):
+            d.ellipse([ox + 3, h - 3, ox + w - 3, h - 1], fill=(0, 0, 0, 60))
+            step = (f % 2) * 2 - 1
+            bx = ox + w // 2
+            d.line([(bx - 1 + step, h - leg - 2), (bx - 1 + step, h - 2)], fill=(200, 150, 60, 255))
+            d.line([(bx + 2 - step, h - leg - 2), (bx + 2 - step, h - 2)], fill=(200, 150, 60, 255))
+            d.ellipse([ox + 2, h - leg - 9, ox + w - 4, h - leg - 1], fill=body, outline=o)
+            d.line([(bx + 3, h - leg - 7), (bx + 4, h - leg - 7 - neck)], fill=body, width=2)
+            d.ellipse([bx + 2, h - leg - 10 - neck, bx + 7, h - leg - 6 - neck], fill=body, outline=o)
+            d.point((bx + 6, h - leg - 8 - neck), fill=(200, 60, 40, 255))
+        return draw
+    sheet("assets/animals/seriema_placeholder.png", 16, 24, 4, bird((180, 170, 150, 255), 16, 24, 5, 8))
+    sheet("assets/animals/ema_placeholder.png", 24, 32, 4, bird((130, 120, 110, 255), 24, 32, 8, 12))
+    sheet("assets/animals/galinha_placeholder.png", 16, 16, 4, bird((240, 236, 224, 255), 16, 16, 1, 4))
+
+    def icon(name, draw):
+        im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        draw(ImageDraw.Draw(im))
+        im.save(out(f"assets/items/{name}_placeholder.png"))
+
+    def fish(color, belly, size=1.0, fin=None):
+        def f(d):
+            w = int(12 * size)
+            d.ellipse([8 - w // 2, 5, 8 + w // 2, 11], fill=color, outline=o)
+            d.polygon([(8 - w // 2, 8), (8 - w // 2 - 3, 5), (8 - w // 2 - 3, 11)], fill=color, outline=o)
+            d.line([(8 - w // 2 + 2, 9), (8 + w // 2 - 2, 9)], fill=belly)
+            d.point((8 + w // 2 - 2, 7), fill=o)
+            if fin:
+                fin(d)
+        return f
+    icon("lambari", fish((180, 190, 200, 255), (230, 220, 160, 255), 0.7))
+    icon("traira", fish((90, 90, 60, 255), (140, 130, 80, 255), 1.0))
+    icon("piau", fish((160, 150, 120, 255), (200, 190, 140, 255), 0.9, lambda d: d.line([(6, 6), (10, 6)], fill=(60, 60, 60, 255))))
+    icon("tucunare", fish((140, 170, 60, 255), (240, 200, 60, 255), 1.0, lambda d: d.ellipse([3, 6, 5, 8], fill=(40, 40, 40, 255))))
+    icon("pacu", fish((120, 120, 130, 255), (220, 120, 60, 255), 1.0))
+    icon("pintado", fish((150, 150, 160, 255), (220, 220, 220, 255), 1.2, lambda d: [d.point((5, 7), fill=o), d.point((8, 6), fill=o), d.point((10, 8), fill=o)]))
+    icon("dourado", fish((240, 170, 40, 255), (250, 220, 120, 255), 1.1))
+    icon("dourado_rei", fish((255, 210, 60, 255), (255, 250, 200, 255), 1.3, lambda d: d.polygon([(7, 2), (9, 2), (10, 5), (6, 5)], fill=C["pequi"], outline=o)))
+
+    def vara(d):
+        d.line([(2, 14), (13, 2)], fill=(170, 160, 90, 255), width=2)
+        d.line([(13, 2), (14, 9)], fill=(220, 220, 220, 255))
+    def isca(d):
+        d.arc([3, 5, 13, 13], 200, 340, fill=(200, 110, 110, 255), width=2)
+    def ovo(d):
+        d.ellipse([4, 3, 12, 14], fill=(240, 226, 200, 255), outline=o)
+    def leite(d):
+        d.rectangle([4, 4, 12, 14], fill=C["white"], outline=o)
+        d.rectangle([6, 1, 10, 4], fill=(120, 160, 200, 255), outline=o)
+    def racao(d):
+        d.polygon([(3, 5), (13, 5), (14, 14), (2, 14)], fill=(190, 160, 100, 255), outline=o)
+        for (x, y) in [(6, 9), (9, 11), (10, 8)]:
+            d.point((x, y), fill=C["ipe"])
+    def carne(d):
+        d.ellipse([2, 4, 13, 13], fill=(170, 60, 60, 255), outline=o)
+        d.ellipse([9, 5, 13, 9], fill=C["white"])
+    def couro(d):
+        d.polygon([(2, 4), (14, 3), (12, 14), (3, 12)], fill=(150, 100, 60, 255), outline=o)
+    def armadilha(d):
+        d.rectangle([2, 5, 14, 14], fill=C["wood"], outline=o)
+        for x in range(4, 14, 3):
+            d.line([(x, 5), (x, 14)], fill=C["wood_d"])
+    for n, fn in [("vara_bambu", vara), ("isca", isca), ("ovo", ovo), ("leite", leite), ("racao", racao),
+                  ("carne_javali", carne), ("couro", couro), ("armadilha", armadilha)]:
+        icon(n, fn)
+
+    # mundo: galinheiro, comedouro, pegadas, armadilha armada, produto no chão
+    img = Image.new("RGBA", (48, 44), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([2, 40, 46, 43], fill=(0, 0, 0, 60))
+    d.rectangle([4, 18, 44, 41], fill=C["wood_l"], outline=o)
+    for x in range(8, 44, 5):
+        d.line([(x, 18), (x, 41)], fill=C["wood"])
+    d.polygon([(0, 20), (8, 4), (40, 4), (48, 20)], fill=C["terracota"], outline=o)
+    d.rectangle([20, 30, 28, 41], fill=C["wood_d"], outline=o)
+    img.save(out("assets/environments/galinheiro_placeholder.png"))
+    img = Image.new("RGBA", (20, 12), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([1, 3, 18, 10], fill=C["wood"], outline=o)
+    d.rectangle([3, 4, 16, 6], fill=(60, 40, 30, 255))
+    img.save(out("assets/environments/comedouro_placeholder.png"))
+    img = Image.new("RGBA", (20, 12), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([1, 3, 18, 10], fill=C["wood"], outline=o)
+    d.rectangle([3, 4, 16, 6], fill=C["ipe_d"])
+    img.save(out("assets/environments/comedouro_cheio_placeholder.png"))
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    for (x, y) in [(3, 11), (6, 8), (9, 6), (12, 3)]:
+        d.ellipse([x, y, x + 2, y + 3], fill=(90, 60, 40, 200))
+    img.save(out("assets/environments/pegadas_placeholder.png"))
+    img = Image.new("RGBA", (18, 14), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle([1, 2, 16, 12], fill=C["wood"], outline=o)
+    for x in range(3, 16, 3):
+        d.line([(x, 2), (x, 12)], fill=C["wood_d"])
+    img.save(out("assets/environments/armadilha_armada_placeholder.png"))
+
+
 def make_app_icons():
     """Ícones do app web/PWA (pequi sobre terra vermelha)."""
     for size in (144, 180, 512):
@@ -670,6 +818,7 @@ if __name__ == "__main__":
     make_farming()
     make_npcs()
     make_village()
+    make_fauna()
     make_weather()
     make_app_icons()
     make_tileset()

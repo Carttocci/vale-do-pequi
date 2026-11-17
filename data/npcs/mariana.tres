@@ -20,3 +20,7 @@ lines_dry = PackedStringArray("Na seca os bichos procuram água. A lagoa da vila
 lines_friend = PackedStringArray("Posso te contar uma coisa? Tem trilha na mata que aparece no mapa antigo e não existe mais. Como some uma trilha?")
 lines_generic = PackedStringArray("Capivara não é bicho de estimação, viu? Por mais fofa que seja.", "Respeita os bichos da mata que eles te respeitam.")
 lines_repeat = PackedStringArray("Tô no meio de umas anotações, depois a gente conversa!", "Até mais!")
+shop_marker = &"clinica_frente"
+shop_title = "Clínica da Mariana"
+shop_sells = PackedStringArray("animal:galinha", "animal:vaca", "racao")
+shop_buys = PackedInt32Array()

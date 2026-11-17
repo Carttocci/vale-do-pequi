@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/dourado_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"dourado"
+display_name = "Dourado"
+description = "O rei do rio: briga muito e brilha como ouro."
+icon = ExtResource("2")
+category = 5
+max_stack = 99
+sell_price = 90
+buy_price = 0

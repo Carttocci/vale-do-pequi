@@ -20,3 +20,7 @@ lines_dry = PackedStringArray("Na seca o rio baixa e aparece cada pedra... e cad
 lines_friend = PackedStringArray("Vou te ensinar a pescar qualquer dia desses. Assim que tiver uma vara sobrando.")
 lines_generic = PackedStringArray("Paciência é a isca mais importante.", "Meu avô contava causo de pescador toda semana. Engraçado... não lembro de nenhum.")
 lines_repeat = PackedStringArray("Shh... acho que beliscou!", "Tô de olho na boia, depois a gente prosa.")
+shop_marker = &"lagoa_pier"
+shop_title = "Pesca do João"
+shop_sells = PackedStringArray("vara_bambu", "isca")
+shop_buys = PackedInt32Array(5)

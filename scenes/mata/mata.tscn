@@ -1,0 +1,238 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/mata_level.gd" id="r1"]
+[ext_resource type="Script" path="res://scripts/world/farm_ground.gd" id="r2"]
+[ext_resource type="Script" path="res://scripts/world/region_exit.gd" id="r3"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/ipe_amarelo.tscn" id="r4"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/pequizeiro.tscn" id="r5"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/arbusto.tscn" id="r6"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/cupinzeiro.tscn" id="r7"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/placa.tscn" id="r8"]
+
+[sub_resource type="RectangleShape2D" id="exit_shape"]
+size = Vector2(16, 32)
+
+[node name="Mata" type="Node2D"]
+script = ExtResource("r1")
+region_id = &"mata"
+display_name = "Mata dos Ipês — Rio das Araras"
+water_habitat = "rio"
+
+[node name="Ground" type="TileMapLayer" parent="."]
+script = ExtResource("r2")
+map_path = "res://data/maps/mata.txt"
+
+[node name="PlayerSpawn" type="Marker2D" parent="."]
+position = Vector2(40, 328)
+
+[node name="Markers" type="Node2D" parent="."]
+
+[node name="da_vila" type="Marker2D" parent="Markers"]
+position = Vector2(40, 328)
+metadata/facing = 2
+
+[node name="da_serra" type="Marker2D" parent="Markers"]
+position = Vector2(472, 40)
+metadata/facing = 0
+
+[node name="Entities" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Ipe1" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(664, 174)
+
+[node name="Ipe2" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(792, 222)
+
+[node name="Ipe3" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(840, 366)
+
+[node name="Ipe4" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(568, 46)
+
+[node name="Ipe5" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(888, 270)
+
+[node name="Ipe6" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(824, 158)
+
+[node name="Ipe7" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(696, 62)
+
+[node name="Ipe8" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(200, 94)
+
+[node name="Ipe9" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(408, 286)
+
+[node name="Ipe10" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(920, 158)
+
+[node name="Ipe11" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(280, 46)
+
+[node name="Ipe12" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(776, 142)
+
+[node name="Ipe13" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(216, 238)
+
+[node name="Ipe14" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(664, 270)
+
+[node name="Pequizeiro1" parent="Entities" instance=ExtResource("r5")]
+position = Vector2(168, 110)
+
+[node name="Pequizeiro2" parent="Entities" instance=ExtResource("r5")]
+position = Vector2(40, 46)
+
+[node name="Pequizeiro3" parent="Entities" instance=ExtResource("r5")]
+position = Vector2(248, 142)
+
+[node name="Pequizeiro4" parent="Entities" instance=ExtResource("r5")]
+position = Vector2(200, 126)
+
+[node name="Pequizeiro5" parent="Entities" instance=ExtResource("r5")]
+position = Vector2(328, 206)
+
+[node name="Pequizeiro6" parent="Entities" instance=ExtResource("r5")]
+position = Vector2(728, 366)
+
+[node name="Pequizeiro7" parent="Entities" instance=ExtResource("r5")]
+position = Vector2(744, 142)
+
+[node name="Pequizeiro8" parent="Entities" instance=ExtResource("r5")]
+position = Vector2(424, 190)
+
+[node name="Arbusto1" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(56, 222)
+
+[node name="Arbusto2" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(184, 174)
+
+[node name="Arbusto3" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(104, 206)
+
+[node name="Arbusto4" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(632, 46)
+
+[node name="Arbusto5" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(648, 206)
+
+[node name="Arbusto6" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(392, 190)
+
+[node name="Arbusto7" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(520, 206)
+
+[node name="Arbusto8" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(216, 286)
+
+[node name="Arbusto9" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(520, 126)
+
+[node name="Arbusto10" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(88, 174)
+
+[node name="Arbusto11" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(904, 238)
+
+[node name="Arbusto12" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(840, 254)
+
+[node name="Arbusto13" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(408, 238)
+
+[node name="Arbusto14" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(664, 142)
+
+[node name="Arbusto15" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(152, 158)
+
+[node name="Arbusto16" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(296, 270)
+
+[node name="Arbusto17" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(920, 190)
+
+[node name="Arbusto18" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(72, 254)
+
+[node name="Arbusto19" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(120, 142)
+
+[node name="Arbusto20" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(184, 206)
+
+[node name="Arbusto21" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(728, 206)
+
+[node name="Arbusto22" parent="Entities" instance=ExtResource("r6")]
+position = Vector2(344, 126)
+
+[node name="Cupinzeiro1" parent="Entities" instance=ExtResource("r7")]
+position = Vector2(856, 78)
+
+[node name="Cupinzeiro2" parent="Entities" instance=ExtResource("r7")]
+position = Vector2(680, 110)
+
+[node name="Cupinzeiro3" parent="Entities" instance=ExtResource("r7")]
+position = Vector2(776, 190)
+
+[node name="Cupinzeiro4" parent="Entities" instance=ExtResource("r7")]
+position = Vector2(776, 62)
+
+[node name="Cupinzeiro5" parent="Entities" instance=ExtResource("r7")]
+position = Vector2(904, 126)
+
+[node name="Cupinzeiro6" parent="Entities" instance=ExtResource("r7")]
+position = Vector2(872, 318)
+
+[node name="Cupinzeiro7" parent="Entities" instance=ExtResource("r7")]
+position = Vector2(920, 302)
+
+[node name="Cupinzeiro8" parent="Entities" instance=ExtResource("r7")]
+position = Vector2(840, 222)
+
+[node name="IpeSul1" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(744, 510)
+
+[node name="IpeSul2" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(712, 478)
+
+[node name="IpeSul3" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(808, 494)
+
+[node name="IpeSul4" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(312, 494)
+
+[node name="IpeSul5" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(216, 510)
+
+[node name="IpeSul6" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(904, 478)
+
+[node name="IpeSul7" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(696, 510)
+
+[node name="IpeSul8" parent="Entities" instance=ExtResource("r4")]
+position = Vector2(856, 494)
+
+[node name="PlacaSerra" parent="Entities" instance=ExtResource("r8")]
+position = Vector2(504, 44)
+prompt = "Ler placa"
+messages = PackedStringArray("SERRA DO CRISTAL  ↑  (a trilha está fechada por desabamento)")
+
+[node name="PlacaRio" parent="Entities" instance=ExtResource("r8")]
+position = Vector2(440, 372)
+prompt = "Ler placa"
+messages = PackedStringArray("RIO DAS ARARAS. Proibido pescar de rede. Vara e anzol, pode.")
+
+[node name="SaidaVila" type="Area2D" parent="."]
+position = Vector2(8, 320)
+script = ExtResource("r3")
+target_region = &"vila"
+target_spawn = &"da_mata"
+
+[node name="Shape" type="CollisionShape2D" parent="SaidaVila"]
+shape = SubResource("exit_shape")
