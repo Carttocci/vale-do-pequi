@@ -15,9 +15,31 @@ const ZOOM_STEP := 0.25
 var camera_zoom: float = 1.75 if DisplayServer.is_touchscreen_available() else 1.0
 
 
+const FONT_SMALL := preload("res://assets/fonts/Jersey10.ttf")
+
+
 func _ready() -> void:
     load_settings()
     lock_escape_key()
+    get_tree().node_added.connect(func(n: Node) -> void:
+        if n is Control:
+            _pixel_font.call_deferred(n))
+
+
+## Fonte de pixel só fica nítida no tamanho em que foi desenhada. Texto pequeno
+## (até 8: contadores, notas) vira Jersey 10 no tamanho 10; o resto vira Pixelify no 13
+## (padrão do tema); título grande (20+) fica como está.
+func _pixel_font(c: Control) -> void:
+    if not is_instance_valid(c) or not c.has_theme_font_size_override("font_size"):
+        return
+    if c.has_theme_font_override("font"):
+        return  # fonte escolhida a dedo (título)
+    var size := c.get_theme_font_size("font_size")
+    if size <= 8:
+        c.add_theme_font_override("font", FONT_SMALL)
+        c.add_theme_font_size_override("font_size", 10)
+    elif size < 20:
+        c.add_theme_font_size_override("font_size", 13)
 
 
 ## No navegador, em tela cheia o Esc é do navegador (sai da tela cheia antes de

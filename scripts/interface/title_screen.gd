@@ -9,6 +9,7 @@ var new_button: Button
 var options: OptionsPanel
 var credits: PanelContainer
 var _buttons: VBoxContainer
+var sub: Label
 
 
 func _ready() -> void:
@@ -22,46 +23,59 @@ func _ready() -> void:
     add_child(bg)
     var title := Label.new()
     title.text = "Vale do Pequi"
-    title.add_theme_font_size_override("font_size", 40)
+    title.add_theme_font_override("font", load("res://assets/fonts/Jersey10.ttf"))
+    title.add_theme_font_size_override("font_size", 60)
     title.add_theme_color_override("font_color", Color(0.98, 0.8, 0.2))
     title.add_theme_color_override("font_outline_color", Color(0.25, 0.14, 0.08))
-    title.add_theme_constant_override("outline_size", 10)
+    title.add_theme_constant_override("outline_size", 8)
+    title.add_theme_color_override("font_shadow_color", Color(0.2, 0.1, 0.05, 0.6))
+    title.add_theme_constant_override("shadow_offset_x", 0)
+    title.add_theme_constant_override("shadow_offset_y", 4)
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.set_anchors_preset(Control.PRESET_CENTER_TOP)
-    title.position = Vector2(-200, 34)
-    title.size = Vector2(400, 50)
+    title.position = Vector2(-200, 26)
+    title.size = Vector2(400, 64)
     add_child(title)
-    var sub := Label.new()
+    sub = Label.new()
     sub.text = "Uma fazenda no Cerrado goiano"
-    sub.add_theme_font_size_override("font_size", 11)
+    sub.add_theme_font_size_override("font_size", 13)
+    sub.add_theme_color_override("font_color", Color(1, 0.95, 0.82))
     sub.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
     sub.add_theme_constant_override("outline_size", 4)
     sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     sub.set_anchors_preset(Control.PRESET_CENTER_TOP)
-    sub.position = Vector2(-200, 86)
+    sub.position = Vector2(-200, 90)
     sub.size = Vector2(400, 20)
     add_child(sub)
     _buttons = VBoxContainer.new()
     _buttons.add_theme_constant_override("separation", 6)
     _buttons.set_anchors_preset(Control.PRESET_CENTER)
-    _buttons.position = Vector2(-70, -20)
-    _buttons.custom_minimum_size = Vector2(140, 0)
+    _buttons.position = Vector2(-75, -14)
+    _buttons.custom_minimum_size = Vector2(150, 0)
     add_child(_buttons)
     continue_button = _button("Continuar", continue_game)
     new_button = _button("Novo jogo", _on_new_pressed)
-    _button("Opções", func() -> void: options.open())
+    _button("Opções", func() -> void:
+        _buttons.hide()
+        sub.hide()
+        options.open())
     _button("Créditos", func() -> void: credits.visible = not credits.visible)
     if not OS.has_feature("web"):
         _button("Sair", func() -> void: get_tree().quit())
     var version := Label.new()
     version.text = "v" + str(ProjectSettings.get_setting("application/config/version", ""))
-    version.add_theme_font_size_override("font_size", 9)
+    version.add_theme_font_size_override("font_size", 13)
+    version.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+    version.add_theme_constant_override("outline_size", 2)
     version.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
     version.position = Vector2(-60, -18)
     add_child(version)
     _build_credits()
     options = OptionsPanel.new()
     add_child(options)
+    options.closed.connect(func() -> void:
+        _buttons.show()
+        sub.show())
     continue_button.visible = SaveManager.has_save()
     if continue_button.visible:
         var info := SaveManager.read_save_file()
@@ -73,8 +87,7 @@ func _ready() -> void:
 func _button(text: String, cb: Callable) -> Button:
     var b := Button.new()
     b.text = text
-    b.add_theme_font_size_override("font_size", 12)
-    b.custom_minimum_size = Vector2(140, 26)
+    b.custom_minimum_size = Vector2(150, 24)
     b.pressed.connect(func() -> void:
         Audio.play(&"clique", 0.0)
         cb.call())
@@ -109,7 +122,7 @@ func _build_credits() -> void:
     credits.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
     credits.position = Vector2(10, -110)
     var l := Label.new()
-    l.text = "Vale do Pequi — um jogo de Carttocci\nFeito com Godot 4. Arte baseada no Ninja Adventure de pixel-boy e AAA (CC0),\nrepintada para o Cerrado; o resto da arte e os sons são gerados por código.\nInspirado no Cerrado goiano: o pequi, o ipê, as festas,\nas receitas e a memória do povo do interior."
+    l.text = "Vale do Pequi — um jogo de Carttocci\nFeito com Godot 4. Arte baseada no Ninja Adventure de pixel-boy e AAA (CC0),\nrepintada para o Cerrado. Fontes Pixelify Sans e Jersey 10 (OFL).\nO resto da arte e os sons são gerados por código.\nInspirado no Cerrado goiano: o pequi, o ipê, as festas,\nas receitas e a memória do povo do interior."
     l.add_theme_font_size_override("font_size", 9)
     credits.add_child(l)
     credits.hide()

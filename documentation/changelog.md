@@ -1,5 +1,11 @@
 # Changelog — Vale do Pequi
 
+## 1.2.3 — Letras nítidas e menu novo (17/11/2026)
+- Fontes de pixel art de verdade (licença OFL, do Google Fonts): **Pixelify Sans** no jogo e **Jersey 10** no título. Sem suavização, então ficam nítidas ao ampliar a tela.
+- Cada tamanho de texto cai no tamanho em que a fonte foi desenhada (texto normal em 13, notinhas em Jersey 10), sem letra deformada.
+- Tema novo nos botões de todo o jogo: madeira com borda dourada, destaque amarelo ao passar o mouse e sombra.
+- Tela de título: título maior com sombra, e os botões somem enquanto as Opções estão abertas.
+
 ## 1.2.2 — Esc fecha janela, não a tela cheia (17/11/2026)
 - No navegador (Chrome/Edge), o Esc agora vem pro jogo mesmo em tela cheia, usando o Keyboard Lock. Pra sair da tela cheia: **segurar** o Esc, ou F11/botão de tela cheia. No Firefox e no Safari o navegador não deixa; lá o Esc continua saindo da tela cheia.
 - Esc fecha o que estiver aberto (mochila, baú, loja, cozinha/bancada, diário, conversa, opções) e só abre a pausa quando não tem nada aberto. Na pesca, Esc recolhe a linha.

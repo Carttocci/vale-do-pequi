@@ -49,4 +49,4 @@ A cada `push` na `main`, o workflow `.github/workflows/publicar-web.yml` roda os
   (Abrir o `index.html` direto do disco não funciona — o navegador bloqueia.)
 
 Documentação em `documentation/`: arquitetura, mecânicas, changelog e assets provisórios.
-A arte do chão, dos personagens e das árvores vem do pacote **Ninja Adventure** (pixel-boy e AAA, CC0), repintado por `tools/aplicar_arte_ninja.py`. Os PNGs provisórios restantes são gerados por `tools/gerar_assets_provisorios.py` (Python + Pillow) e os sons e músicas por `tools/gerar_audio.py` (Python + numpy). Itens: `tools/gerar_itens.py`; peixes: `tools/gerar_peixes.py`.
+A arte do chão, dos personagens e das árvores vem do pacote **Ninja Adventure** (pixel-boy e AAA, CC0), repintado por `tools/aplicar_arte_ninja.py`. Fontes: Pixelify Sans e Jersey 10 (SIL OFL, `assets/fonts/`). Os PNGs provisórios restantes são gerados por `tools/gerar_assets_provisorios.py` (Python + Pillow) e os sons e músicas por `tools/gerar_audio.py` (Python + numpy). Itens: `tools/gerar_itens.py`; peixes: `tools/gerar_peixes.py`.
