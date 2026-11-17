@@ -16,20 +16,23 @@ var _summoned := false
 
 func _process(delta: float) -> void:
     super._process(delta)
-    if is_dead():
-        return
-    if phase == 1 and hp <= max_hp * 0.5:
-        phase = 2
-        phase_changed.emit(2)
-        if not _summoned:
-            _summoned = true
-            _summon()
-    if _stun > 0.0:
+    if is_dead() or _stun > 0.0:
         return
     _special -= delta
     if _special <= 0.0:
         _special = SPECIAL_EVERY * (0.75 if phase == 2 else 1.0)
         special_attack()
+
+
+## A segunda fase começa no golpe que leva a vida abaixo da metade.
+func take_hit(amount: int, dir: Vector2, knockback: float, stun: float = 0.0) -> void:
+    super.take_hit(amount, dir, knockback, stun)
+    if not is_dead() and phase == 1 and hp <= max_hp * 0.5:
+        phase = 2
+        phase_changed.emit(2)
+        if not _summoned:
+            _summoned = true
+            _summon.call_deferred()
 
 
 func special_attack() -> void:
