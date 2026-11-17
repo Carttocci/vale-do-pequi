@@ -1,5 +1,8 @@
 # Changelog — Vale do Pequi
 
+## Documentação — GDD 1.1 (17/11/2026)
+- GDD atualizado com a direção oficial revisada: definição oficial, pilares, identidade cultural, nova história (O Silêncio), regras de folclore, eventos e festividades. Nenhum sistema da v1.0 foi removido. Ver `documentation/GDD.md` §23.
+
 ## 0.2.0 — Navegador e celular (16/11/2026)
 
 ### Adicionado
