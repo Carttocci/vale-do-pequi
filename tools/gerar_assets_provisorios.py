@@ -470,23 +470,17 @@ def make_farming():
     d.rectangle([8, 6, 11, 10], fill=C["pequi"], outline=o)
     img.save(out("assets/environments/bau_placeholder.png"))
 
-    # botões de toque: usar item e mochila
+    # botão de toque da mochila
     def touch_btn(path, size, fill, ring, glyph):
         im = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         d = ImageDraw.Draw(im)
         d.ellipse([0, 0, size - 1, size - 1], fill=fill, outline=ring, width=2)
         glyph(d, size)
         im.save(out(path))
-    def tool_glyph(d, s):
-        c = s // 2
-        d.line([(c - 7, c + 7), (c + 4, c - 4)], fill=C["wood_l"], width=3)
-        d.polygon([(c + 1, c - 9), (c + 9, c - 9), (c + 9, c - 3), (c + 4, c - 4)], fill=C["stone"], outline=o)
     def bag_glyph(d, s):
         c = s // 2
         d.rectangle([c - 6, c - 3, c + 6, c + 7], fill=C["bege"], outline=o)
         d.arc([c - 4, c - 8, c + 4, c - 1], 180, 360, fill=C["bege"], width=2)
-    touch_btn("assets/ui/touch_btn_use_placeholder.png", 36, (178, 84, 52, 190), (246, 196, 28, 230), tool_glyph)
-    touch_btn("assets/ui/touch_btn_use_pressed_placeholder.png", 36, (246, 196, 28, 230), (178, 84, 52, 230), tool_glyph)
     touch_btn("assets/ui/touch_btn_bag_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), bag_glyph)
 
 

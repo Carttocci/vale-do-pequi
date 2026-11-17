@@ -58,6 +58,7 @@ func _run_all() -> void:
     await _test_save_load()
     _test_save_robustness()
     await _test_touch_use_button()
+    await _test_contextual_e()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -223,9 +224,11 @@ func _test_inspect_well() -> void:
     _messages.clear()
     check(_player.try_interact(), "interação acontece")
     check(_messages.size() == 1 and _messages[0].contains("Água"), "poço responde com mensagem")
+    GameState.select_slot(8)  # mão vazia: sem ação de ferramenta no chão
     await place_player(Vector2(600, 300))
     await frames(3)
     check(_player.get_interaction_target() == null and _prompts[-1] == "", "dica some longe dos objetos")
+    GameState.select_slot(0)
 
 
 func _test_collect_pequi() -> void:
@@ -653,13 +656,14 @@ func _test_touch_use_button() -> void:
     var cell := f.cell_at(_player.get_target_position())
     select_item(&"enxada")
     _player._use_cooldown = 0.0
-    var btn := tc.get_node("Use") as TouchScreenButton
+    await frames(2)
+    var btn := tc.get_node("Interact") as TouchScreenButton
     var center := btn.position + btn.texture_normal.get_size() / 2.0
     touch(3, center, true)
-    await frames(3)
+    await frames(1)
     touch(3, center, false)
     await frames(2)
-    check(f.is_tilled(cell), "botão de toque 'usar' capina")
+    check(f.is_tilled(cell), "botão verde de toque capina (um botão só)")
     var bag := tc.get_node("Bag") as TouchScreenButton
     var bc := bag.position + bag.texture_normal.get_size() / 2.0
     touch(4, bc, true)
@@ -674,3 +678,99 @@ func _test_touch_use_button() -> void:
     await frames(1)
     check(not ui.is_open(), "botão da mochila fecha a mochila")
     tc.set_touch_mode(false)
+
+
+func press_e() -> void:
+    _player._use_cooldown = 0.0
+    var ev := InputEventAction.new()
+    ev.action = "interact"
+    ev.pressed = true
+    Input.parse_input_event(ev)
+    Input.flush_buffered_events()
+    await frames(1)
+    var up := InputEventAction.new()
+    up.action = "interact"
+    up.pressed = false
+    Input.parse_input_event(up)
+    Input.flush_buffered_events()
+    await frames(1)
+
+
+func _test_contextual_e() -> void:
+    print("[E contextual]")
+    GameState.new_game()
+    var f := field()
+    await face_right_in_roca(Vector2(150, 160))
+    var cell := f.cell_at(_player.get_target_position())
+    select_item(&"enxada")
+    await frames(2)
+    check(_prompts[-1] == "Capinar", "dica '[E] Capinar' com a enxada na roça")
+    await press_e()
+    check(f.is_tilled(cell), "E capina")
+    select_item(&"semente_milho")
+    await frames(2)
+    check(_prompts[-1] == "Plantar milho", "dica 'Plantar milho'")
+    await press_e()
+    check(f.get_crop_id(cell) == &"milho", "E planta")
+    select_item(&"regador")
+    await frames(2)
+    check(_prompts[-1] == "Regar", "dica 'Regar'")
+    await press_e()
+    check(f.is_watered(cell), "E rega")
+    # Poço: com regador cheio, E olha o poço; com regador gasto, E enche
+    var well := node("Farm/Entities/Poco")
+    await place_player(well.global_position + Vector2(0, 16))
+    _player.face(4)
+    await frames(2)
+    check(GameState.water < GameState.WATER_MAX and _prompts[-1] == "Encher regador", "regador gasto: dica 'Encher regador' no poço")
+    _messages.clear()
+    await press_e()
+    check(GameState.water == GameState.WATER_MAX, "E enche o regador no poço")
+    await frames(2)
+    check(_prompts[-1] == "Olhar o poço", "regador cheio: E volta a olhar o poço")
+    # Porta: segurando a enxada, E dorme (não tenta capinar)
+    var house := node("Farm/Entities/CasaPrincipal")
+    select_item(&"enxada")
+    await place_player(house.global_position + Vector2(0, 14))
+    _player.face(4)
+    await frames(2)
+    var day := GameState.day
+    check(_prompts[-1].begins_with("Dormir"), "na porta com a enxada a dica é Dormir")
+    await press_e()
+    check(GameState.day == day + 1, "E dorme mesmo segurando a enxada")
+    # Colher tem prioridade sobre a ferramenta
+    await face_right_in_roca(Vector2(150, 160))
+    f.cells[cell].age = 99
+    f._refresh(cell)
+    select_item(&"regador")
+    await frames(2)
+    check(_prompts[-1] == "Colher milho", "planta madura: colher ganha do regador")
+    var milho := GameState.get_item_count(&"milho")
+    await press_e()
+    check(GameState.get_item_count(&"milho") > milho, "E colhe")
+    # Segurar E capina uma fileira andando
+    select_item(&"enxada")
+    await place_player(Vector2(120, 256))
+    _player.face(2)
+    await frames(2)
+    _player._use_cooldown = 0.0
+    var hold := InputEventAction.new()
+    hold.action = "interact"
+    hold.pressed = true
+    Input.parse_input_event(hold)
+    Input.flush_buffered_events()
+    Input.action_press("move_right")
+    await frames(40)
+    Input.action_release("move_right")
+    var rel := InputEventAction.new()
+    rel.action = "interact"
+    rel.pressed = false
+    Input.parse_input_event(rel)
+    Input.flush_buffered_events()
+    await frames(2)
+    var row := 0
+    for x in range(6, 18):
+        if f.is_tilled(Vector2i(x, 15)):
+            row += 1
+    check(row >= 3, "segurar E e andar capina vários quadrados (%d)" % row)
+    check(not _player._interact_held, "soltar E para de repetir")

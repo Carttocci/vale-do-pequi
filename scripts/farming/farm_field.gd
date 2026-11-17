@@ -150,6 +150,32 @@ func advance_day() -> void:
 
 # --- integração com o jogador ---------------------------------------------
 
+## Grupo "item_target": o que o item faria na célula, sem fazer.
+## Retorna {"prompt": String, "priority": int} ou {} se nada.
+## Prioridade 20 = ação especial que deve ganhar de objetos (encher regador no poço).
+func get_item_action(item: ItemData, target_pos: Vector2, _actor: Node) -> Dictionary:
+    if item == null:
+        return {}
+    var cell := cell_at(target_pos)
+    match item.category:
+        ItemData.Category.TOOL:
+            match item.tool_type:
+                ItemData.ToolType.HOE:
+                    if can_till(cell):
+                        return {"prompt": "Capinar", "priority": 5}
+                ItemData.ToolType.WATERING_CAN:
+                    if _near_water(target_pos) and GameState.water < GameState.WATER_MAX:
+                        return {"prompt": "Encher regador", "priority": 20}
+                    if cells.has(cell) and not is_watered(cell):
+                        return {"prompt": "Regar" if GameState.water > 0 else "Regar (regador vazio)", "priority": 5}
+        ItemData.Category.SEED:
+            if cells.has(cell) and cells[cell].crop == &"":
+                var crop := ItemDB.get_crop(item.crop_id)
+                if crop:
+                    return {"prompt": "Plantar " + crop.display_name.to_lower(), "priority": 5}
+    return {}
+
+
 ## Grupo "item_target": usa o item selecionado na célula à frente do jogador.
 func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
     if item == null:

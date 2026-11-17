@@ -23,4 +23,4 @@ Ao trocar pela arte final, **mantenha nome, tamanho e layout** (ou ajuste o `off
 | assets/items/*_placeholder.png | 16×16 | ícones de ferramentas, sementes e colheitas |
 | assets/environments/bau_placeholder.png | 20×18 | baú |
 | assets/ui/tile_cursor_placeholder.png | 16×16 | cursor da célula-alvo |
-| assets/ui/touch_btn_use*/bag_placeholder.png | 36 / 26 | botões de toque usar e mochila |
+| assets/ui/touch_btn_bag_placeholder.png | 26 | botão de toque da mochila |

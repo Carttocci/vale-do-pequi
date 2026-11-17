@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/interface/touch_controls.gd" id="scr"]
 [ext_resource type="Script" path="res://scripts/interface/virtual_joystick.gd" id="joy"]
@@ -8,8 +8,6 @@
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_interact_pressed_placeholder.png" id="act_p"]
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_pause_placeholder.png" id="pause"]
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_fullscreen_placeholder.png" id="full"]
-[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_use_placeholder.png" id="use"]
-[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_use_pressed_placeholder.png" id="use_p"]
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_bag_placeholder.png" id="bag"]
 
 [node name="TouchControls" type="CanvasLayer"]
@@ -56,12 +54,6 @@ action = "menu"
 position = Vector2(576, 6)
 texture_normal = ExtResource("full")
 action = "toggle_fullscreen"
-
-[node name="Use" type="TouchScreenButton" parent="."]
-position = Vector2(524, 306)
-texture_normal = ExtResource("use")
-texture_pressed = ExtResource("use_p")
-action = "use_item"
 
 [node name="Bag" type="TouchScreenButton" parent="."]
 position = Vector2(544, 6)

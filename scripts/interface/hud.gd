@@ -64,7 +64,7 @@ func _on_prompt_changed(text: String) -> void:
     _prompt_text = text
     prompt_label.visible = text != ""
     # No celular a dica aponta para o botão verde, não para a tecla E.
-    prompt_label.text = (text + "  (toque no botão)") if _touch_mode else ("[E] " + text)
+    prompt_label.text = (text + "  (botão verde)") if _touch_mode else ("[E] " + text)
 
 
 func _on_touch_mode_changed(enabled: bool) -> void:

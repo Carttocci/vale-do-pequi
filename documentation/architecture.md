@@ -43,6 +43,7 @@ Main (main.gd)
 - **Dados:** `ItemData` (id, nome, ícone, categoria, pilha, ferramenta, cultura da semente) e `CropData` (estágios por dias regados, texturas, colheita, rebrota). Itens novos = só um `.tres` novo, sem código.
 - **Inventory** (`scripts/inventory/inventory.gd`): slots `null` ou `{id, count}`; pilhas, transferência, serialização tolerante a itens que deixarem de existir.
 - **FarmField** (`scripts/farming/farm_field.gd`): estado por célula `{watered, crop, age}`, TileMapLayer `Soil` para a terra, um `Sprite2D` por planta dentro de `Entities/Crops` (y-sort com o jogador). Cresce no sinal `GameState.day_advanced` (só dormir; carregar save não faz crescer).
+- **Botão contextual (E):** a cada quadro o Player calcula a melhor ação possível e mostra a dica: `get_cell_prompt` (grupo `cell_interaction`, prioridade 30), `get_item_action` (grupo `item_target`, prioridade que o alvo informar: 20 para encher regador, 5 para capinar/regar/plantar) e o `Interactable` à frente (10). O E executa a de maior prioridade.
 - **Jogador sem acoplamento:** o Player chama `use_item(item, ponto, ator)` em todo nó do grupo `item_target` e `get_cell_prompt`/`interact_cell` nos do grupo `cell_interaction`. O FarmField é um deles; pesca, mineração etc. entram do mesmo jeito.
 - **Uso por eventos:** "usar" é ligado por evento (não por polling), para que clicar na interface não use a ferramenta; no celular, o clique emulado do toque é ignorado e o botão "usar" faz o papel.
 

@@ -1,5 +1,12 @@
 # Changelog — Vale do Pequi
 
+## 0.3.1 — E contextual (17/11/2026)
+- **E faz tudo:** escolhe a ação pelo que está à frente e pelo item na mão, nesta prioridade: colher > encher regador > objeto (porta, baú, poço...) > capinar/regar/plantar. A dica mostra a ação antes ("[E] Regar").
+- Segurar E repete ações de ferramenta/colheita enquanto anda (fileiras).
+- Celular: um botão só (verde) para tudo; botão laranja removido.
+- Tecla C removida; clique e X continuam como "usar só a ferramenta".
+- 15 testes novos (199 no total).
+
 ## 0.3.0 — Fase 2: Fazenda (17/11/2026)
 
 ### Adicionado

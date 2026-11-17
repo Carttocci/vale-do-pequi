@@ -332,7 +332,7 @@ HUD limpo: vida, energia, dinheiro, relógio, dia e estação, atalho de ferrame
 | Andar | WASD / setas | Analógico virtual (esquerda) | Analógico / direcional |
 | Atacar | Clique esquerdo | Botão de ataque (Fase 6) | X |
 | Esquivar | Espaço | Botão de esquiva (Fase 6) | B |
-| Interagir | E | Botão verde | A |
+| Interagir / ação contextual (capinar, regar, plantar, colher, abrir...) | E (segurar repete) | Botão verde | A |
 | Inventário / Mapa / Diário | I / M / J | Botões no HUD (fases futuras) | Y / Back / — |
 | Ferramentas | 1–9 | Barra tocável (Fase 2) | — |
 | Menu | Esc | Botão ⏸ | Start |
