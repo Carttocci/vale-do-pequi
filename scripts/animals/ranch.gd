@@ -44,8 +44,18 @@ func _ready() -> void:
         it.interacted.connect(_on_feeder_interacted.bind(feeder))
     coop.get_node("Interactable").interacted.connect(func(_a: Node) -> void:
         EventBus.show_message("Galinheiro: %d/%d galinhas. Curral: %d/%d vacas." % [
-            count(&"galinha"), ANIMALS[&"galinha"].capacity, count(&"vaca"), ANIMALS[&"vaca"].capacity], 2.5))
+            count(&"galinha"), capacity(&"galinha"), count(&"vaca"), capacity(&"vaca")], 2.5))
     _rebuild()
+
+
+## Lugares no cercado (obras da fazenda aumentam).
+func capacity(kind: StringName) -> int:
+    var base := int(ANIMALS[kind].capacity)
+    if kind == &"galinha" and GameState.has_flag(&"obra_galinheiro_maior"):
+        return 10
+    if kind == &"vaca" and GameState.has_flag(&"obra_curral_maior"):
+        return 6
+    return base
 
 
 func count(kind: StringName) -> int:
@@ -53,7 +63,7 @@ func count(kind: StringName) -> int:
 
 
 func can_buy(kind: StringName) -> bool:
-    return ANIMALS.has(kind) and count(kind) < int(ANIMALS[kind].capacity)
+    return ANIMALS.has(kind) and count(kind) < capacity(kind)
 
 
 ## Compra (já pago): o animal aparece no cercado.

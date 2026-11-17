@@ -9,12 +9,22 @@ signal arrived(marker: StringName)
 const SPEED := 42.0
 const FRAMES_PER_DIRECTION := 4
 const TALK_FRIENDSHIP := 10
+## Pontos de amizade por coração (máximo 10 corações).
+const HEART_POINTS := 100
+const GIFT_POINTS := {&"love": 80, &"like": 45, &"neutral": 20, &"hate": -20}
+const GIFT_LINES := {
+    &"love": ["Nossa, %s! É o que eu mais gosto nesse mundo. Muito obrigado!", "Ô trem bão! %s! Você me conhece mesmo."],
+    &"like": ["%s? Que agrado! Obrigado.", "Gostei do %s, viu? Brigado."],
+    &"neutral": ["Ah, %s. Obrigado pela lembrança.", "Um %s... valeu."],
+    &"hate": ["%s?! Isso aí eu não suporto, viu...", "Hum... %s. Não precisava."],
+}
 
 @export var data: NpcData
 
 var friendship: int = 0
 var met: bool = false
 var last_talk_day: int = 0
+var gift_day: int = 0
 var inside: bool = false
 
 var _path := PackedVector2Array()
@@ -158,6 +168,11 @@ func talk() -> void:
         EventBus.dialogue_requested.emit(data.display_name, quest.lines, PackedStringArray(),
             func(_i: int) -> void: Quests.finish_talk(quest.quest))
         return
+    var ev := HeartEvents.pending(String(data.id), hearts())
+    if not ev.is_empty() and met:
+        EventBus.dialogue_requested.emit(data.display_name, PackedStringArray(ev.lines), PackedStringArray(),
+            func(_i: int) -> void: HeartEvents.complete(ev, data.display_name))
+        return
     var lines := pick_lines()
     var first_today := last_talk_day != GameState.day
     if first_today:
@@ -215,14 +230,50 @@ func _shop_dict(tab: int) -> Dictionary:
     return {"title": data.shop_title, "sells": data.shop_sells, "buys": data.shop_buys, "tab": tab, "npc": self}
 
 
+# --- presentes e corações -----------------------------------------------------
+
+func hearts() -> int:
+    return clampi(friendship / HEART_POINTS, 0, 10)
+
+
+## "love", "like", "hate" ou "neutral".
+func gift_taste(item_id: StringName) -> StringName:
+    var s := String(item_id)
+    if s in data.gifts_love:
+        return &"love"
+    if s in data.gifts_like:
+        return &"like"
+    if s in data.gifts_hate:
+        return &"hate"
+    return &"neutral"
+
+
+func can_receive_gift() -> bool:
+    return gift_day != GameState.day
+
+
+## Recebe 1 unidade do item (o chamador tira da mochila). Retorna o gosto.
+func receive_gift(item: ItemData) -> StringName:
+    var taste := gift_taste(item.id)
+    friendship = maxi(0, friendship + int(GIFT_POINTS[taste]))
+    gift_day = GameState.day
+    met = true
+    var lines: Array = GIFT_LINES[taste]
+    var line: String = lines[(GameState.day + String(data.id).length()) % lines.size()]
+    EventBus.dialogue_requested.emit(data.display_name,
+        PackedStringArray([line % item.display_name.to_lower()]), PackedStringArray(), Callable())
+    return taste
+
+
 # --- save --------------------------------------------------------------------
 
 func get_save_data() -> Dictionary:
-    return {"friendship": friendship, "met": met, "last_talk_day": last_talk_day}
+    return {"friendship": friendship, "met": met, "last_talk_day": last_talk_day, "gift_day": gift_day}
 
 
 func load_save_data(d: Dictionary) -> void:
     friendship = maxi(0, int(d.get("friendship", 0)))
     met = bool(d.get("met", false))
     last_talk_day = int(d.get("last_talk_day", 0))
+    gift_day = int(d.get("gift_day", 0))
     snap_to_schedule()

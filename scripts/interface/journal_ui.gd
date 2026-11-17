@@ -3,7 +3,7 @@ extends CanvasLayer
 ## Diário (J / botão do caderno): Missões, Caderno de campo e Habilidades.
 ## Pausa o mundo enquanto está aberto. No toque: abas e botões grandes.
 
-const TABS := ["Missões", "Caderno", "Habilidades"]
+const TABS := ["Missões", "Caderno", "Habilidades", "Amizades"]
 const PATH_NAMES := {&"guerreiro": "Guerreiro (dano e defesa)", &"cacador": "Caçador (arco)", &"explorador": "Explorador (energia)"}
 
 var tab: int = 0
@@ -84,9 +84,15 @@ func refresh() -> void:
         0: _fill_quests()
         1: _fill_notebook()
         2: _fill_skills()
+        3: _fill_friends()
 
 
 func _fill_quests() -> void:
+    _label("✦ Lembranças do vale: %d" % GameState.memories, 10, Color(0.75, 0.85, 1))
+    var nf := Festivals.next(GameState.day)
+    if not nf.is_empty():
+        var when := "hoje!" if nf.day == GameState.day else Calendar.format_date_long(nf.day)
+        _label("Próxima festa: %s — %s" % [Festivals.name_of(nf.id), when], 9, Color(1, 0.75, 0.55))
     var any := false
     for id in Quests.order:
         if not Quests.is_active(id):
@@ -147,6 +153,23 @@ func _fill_skills() -> void:
     reset.add_theme_font_size_override("font_size", 9)
     reset.pressed.connect(GameState.reset_paths)
     _body.add_child(reset)
+
+
+func _fill_friends() -> void:
+    for n in get_tree().get_nodes_in_group("npc"):
+        var npc := n as Npc
+        if not npc.met:
+            continue
+        var h := npc.hearts()
+        _label("%s   %s%s" % [npc.data.display_name, "♥".repeat(h), "♡".repeat(maxi(0, 10 - h))], 10)
+        var notes := PackedStringArray()
+        notes.append(npc.data.profession)
+        notes.append("presente hoje: " + ("já ganhou" if not npc.can_receive_gift() else "ainda não"))
+        var ev := HeartEvents.pending(String(npc.data.id), 10)
+        if not ev.is_empty():
+            notes.append("próxima conversa especial: %d ♥" % int(ev.hearts))
+        _label("   " + " · ".join(notes), 8, Color(0.8, 0.75, 0.65))
+    _label("Dica: dê presentes (item na mão + E). Cada um tem seus preferidos.", 8, Color(0.7, 0.95, 0.7))
 
 
 func _label(text: String, size: int = 10, color := Color.WHITE) -> Label:

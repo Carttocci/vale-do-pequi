@@ -1074,6 +1074,170 @@ def make_app_icons():
         img.resize((size, size), Image.NEAREST).save(out(f"assets/ui/app_icon_{size}.png"))
 
 
+def make_content():
+    """Fase 8: comidas, ingredientes, fogão a lenha, bancada, decoração e festas."""
+    o = C["outline"]
+
+    def icon(name, draw):
+        im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        draw(ImageDraw.Draw(im))
+        im.save(out(f"assets/items/{name}_placeholder.png"))
+
+    def plate(fill, top=None):
+        def f(d):
+            d.ellipse([1, 8, 14, 14], fill=C["white"], outline=o)
+            d.ellipse([3, 5, 12, 12], fill=fill, outline=o)
+            if top:
+                for (x, y) in [(5, 7), (8, 8), (10, 7), (7, 10)]:
+                    d.rectangle([x, y, x, y], fill=top)
+        return f
+
+    def bowl(fill, top=None):
+        def f(d):
+            d.chord([2, 4, 13, 15], 0, 180, fill=C["terracota"], outline=o)
+            d.ellipse([2, 5, 13, 10], fill=fill, outline=o)
+            if top:
+                d.rectangle([6, 6, 8, 7], fill=top)
+        return f
+
+    def sack(fill, label):
+        def f(d):
+            d.polygon([(4, 3), (11, 3), (13, 14), (2, 14)], fill=C["bege"], outline=o)
+            d.rectangle([4, 7, 11, 11], fill=fill)
+            d.line([(5, 3), (10, 3)], fill=label)
+        return f
+
+    def pamonha(d):
+        d.polygon([(3, 13), (6, 3), (10, 3), (13, 13)], fill=(150, 170, 80, 255), outline=o)
+        d.line([(8, 3), (8, 13)], fill=(120, 140, 60, 255))
+        d.rectangle([5, 7, 11, 8], fill=C["bege_d"])
+    def doce_leite(d):
+        d.rectangle([4, 5, 11, 14], fill=(240, 240, 230, 200), outline=o)
+        d.rectangle([5, 8, 10, 13], fill=(170, 110, 50, 255))
+        d.rectangle([3, 3, 12, 5], fill=C["shirt"], outline=o)
+    def lambari_frito(d):
+        plate((200, 150, 70, 255))(d)
+        d.polygon([(4, 8), (10, 6), (12, 8), (10, 10)], fill=(220, 170, 80, 255), outline=o)
+    def empadao(d):
+        d.ellipse([1, 9, 14, 14], fill=C["terracota_d"], outline=o)
+        d.chord([2, 3, 13, 14], 180, 360, fill=(230, 180, 90, 255), outline=o)
+        d.line([(5, 6), (10, 6)], fill=(190, 140, 60, 255))
+    def pao_queijo(d):
+        for (x, y) in [(2, 8), (8, 8), (5, 3)]:
+            d.ellipse([x, y, x + 6, y + 6], fill=(236, 200, 120, 255), outline=o)
+    for n, fn in [
+        ("pamonha", pamonha), ("canjica", bowl((245, 236, 210, 255), (180, 130, 60, 255))),
+        ("arroz_pequi", plate((236, 200, 60, 255), C["pequi"])),
+        ("feijao_tropeiro", plate((150, 100, 60, 255), (230, 200, 120, 255))),
+        ("doce_leite", doce_leite), ("lambari_frito", lambari_frito),
+        ("caldo_mandioca", bowl((236, 214, 150, 255), (120, 70, 40, 255))),
+        ("empadao", empadao), ("pao_queijo", pao_queijo),
+        ("arroz", sack((240, 240, 236, 255), C["wood"])), ("acucar", sack((250, 250, 250, 255), C["jeans"])),
+        ("farinha", sack((236, 214, 160, 255), C["terracota"])),
+    ]:
+        icon(n, fn)
+
+    # decoração: ícone 16x16 + objeto no mundo
+    def world(name, w, h, draw):
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        d.ellipse([2, h - 4, w - 3, h - 1], fill=(0, 0, 0, 60))
+        draw(d, w, h)
+        im.save(out(f"assets/environments/{name}_placeholder.png"))
+        ic = im.copy()
+        ic.thumbnail((16, 16), Image.NEAREST)
+        canvas = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        canvas.paste(ic, ((16 - ic.width) // 2, (16 - ic.height) // 2))
+        canvas.save(out(f"assets/items/{name}_placeholder.png"))
+
+    def banco(d, w, h):
+        d.rectangle([1, 6, w - 2, 9], fill=C["wood_l"], outline=o)
+        d.rectangle([2, 9, 4, h - 2], fill=C["wood_d"]); d.rectangle([w - 5, 9, w - 3, h - 2], fill=C["wood_d"])
+    def vaso(d, w, h):
+        d.polygon([(4, h - 2), (3, 9), (w - 4, 9), (w - 5, h - 2)], fill=C["terracota"], outline=o)
+        for (x, y, c) in [(5, 3, C["ipe"]), (9, 2, C["shirt"]), (7, 5, (230, 120, 170, 255))]:
+            d.ellipse([x - 2, y, x + 2, y + 4], fill=c, outline=o)
+        d.line([(7, 6), (7, 9)], fill=C["grass_d"])
+    def lampiao(d, w, h):
+        d.line([(w // 2, 2), (w // 2, h - 2)], fill=C["wood_d"], width=2)
+        d.rectangle([w // 2 - 3, 2, w // 2 + 3, 9], fill=(250, 220, 120, 255), outline=o)
+    def espantalho(d, w, h):
+        d.line([(w // 2, 4), (w // 2, h - 2)], fill=C["wood"], width=2)
+        d.line([(2, 9), (w - 3, 9)], fill=C["wood"], width=2)
+        d.rectangle([w // 2 - 4, 8, w // 2 + 3, 15], fill=C["jeans"], outline=o)
+        d.ellipse([w // 2 - 3, 2, w // 2 + 3, 8], fill=C["bege"], outline=o)
+        d.rectangle([w // 2 - 5, 1, w // 2 + 5, 3], fill=C["hat"], outline=o)
+    def trofeu(d, w, h):
+        d.rectangle([4, h - 4, w - 5, h - 2], fill=C["wood"], outline=o)
+        d.polygon([(3, 2), (w - 4, 2), (w - 6, 8), (6, 8)], fill=(240, 200, 50, 255), outline=o)
+        d.rectangle([w // 2 - 1, 8, w // 2, h - 4], fill=(220, 180, 40, 255))
+        d.ellipse([w // 2 - 2, 3, w // 2 + 1, 6], fill=C["pequi_g"])
+    def mascara(d, w, h):
+        d.line([(w // 2, 9), (w // 2, h - 2)], fill=C["wood_d"], width=2)
+        d.ellipse([2, 1, w - 3, 10], fill=(240, 240, 240, 255), outline=o)
+        d.rectangle([4, 4, 5, 5], fill=o); d.rectangle([w - 6, 4, w - 5, 5], fill=o)
+        d.polygon([(2, 1), (w // 2, -3), (w - 3, 1)], fill=C["shirt"])
+        for x in range(3, w - 3, 3):
+            d.rectangle([x, 0, x + 1, 1], fill=C["ipe"])
+    world("banco_madeira", 20, 14, banco)
+    world("vaso_flores", 14, 16, vaso)
+    world("lampiao", 10, 22, lampiao)
+    world("espantalho", 16, 24, espantalho)
+    world("trofeu_pequi", 14, 18, trofeu)
+    world("mascara_cavalhada", 14, 20, mascara)
+
+    def simple(name, w, h, draw):
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw(ImageDraw.Draw(im), w, h)
+        im.save(out(f"assets/environments/{name}_placeholder.png"))
+    def fogao(d, w, h):
+        d.ellipse([1, h - 4, w - 2, h - 1], fill=(0, 0, 0, 60))
+        d.rectangle([1, 8, w - 2, h - 2], fill=(200, 190, 170, 255), outline=o)
+        d.rectangle([1, 6, w - 2, 9], fill=C["stone_d"], outline=o)
+        d.rectangle([4, 12, 9, h - 4], fill=(30, 20, 18, 255))
+        d.rectangle([5, 14, 8, h - 5], fill=(240, 120, 40, 255))
+        d.rectangle([w - 7, 0, w - 4, 6], fill=C["stone_d"], outline=o)
+        d.ellipse([12, 3, 18, 7], fill=(60, 56, 54, 255), outline=o)
+    def bancada(d, w, h):
+        d.ellipse([1, h - 4, w - 2, h - 1], fill=(0, 0, 0, 60))
+        d.rectangle([1, 5, w - 2, 9], fill=C["wood_l"], outline=o)
+        d.rectangle([2, 9, 4, h - 2], fill=C["wood_d"]); d.rectangle([w - 5, 9, w - 3, h - 2], fill=C["wood_d"])
+        d.line([(5, 4), (12, 2)], fill=(190, 190, 200, 255), width=1)
+        d.rectangle([15, 2, 19, 5], fill=C["wood"], outline=o)
+    def barraca(d, w, h):
+        d.ellipse([1, h - 4, w - 2, h - 1], fill=(0, 0, 0, 60))
+        d.rectangle([3, 14, w - 4, h - 2], fill=C["wood_l"], outline=o)
+        for i, x in enumerate(range(1, w - 1, 5)):
+            d.polygon([(x, 2), (x + 5, 2), (x + 5, 12), (x, 12)], fill=C["shirt"] if i % 2 == 0 else C["white"])
+        d.rectangle([1, 2, w - 2, 12], outline=o)
+        d.line([(3, 12), (3, h - 2)], fill=C["wood_d"]); d.line([(w - 4, 12), (w - 4, h - 2)], fill=C["wood_d"])
+    def fogueira(d, w, h):
+        d.ellipse([1, h - 5, w - 2, h - 1], fill=(0, 0, 0, 70))
+        for x in range(2, w - 2, 3):
+            d.line([(x, h - 2), (w // 2, h - 9)], fill=C["wood"], width=2)
+        d.polygon([(w // 2 - 5, h - 4), (w // 2, 1), (w // 2 + 5, h - 4)], fill=(250, 130, 30, 255))
+        d.polygon([(w // 2 - 2, h - 4), (w // 2, 6), (w // 2 + 2, h - 4)], fill=(255, 220, 90, 255))
+    def bandeira(d, w, h):
+        d.ellipse([w // 2 - 4, h - 4, w // 2 + 4, h - 1], fill=(0, 0, 0, 60))
+        d.line([(w // 2, 1), (w // 2, h - 2)], fill=C["wood_d"], width=2)
+        d.rectangle([w // 2 + 1, 2, w - 1, 14], fill=C["shirt"], outline=o)
+        d.rectangle([w // 2 + 4, 5, w - 4, 11], fill=C["white"])
+        for i in range(4):
+            d.line([(w // 2 + 2 + i * 2, 14), (w // 2 + 2 + i * 2, 20)], fill=[C["ipe"], C["jeans"], C["grass"], C["shirt"]][i])
+    def arquibancada(d, w, h):
+        d.ellipse([1, h - 4, w - 2, h - 1], fill=(0, 0, 0, 60))
+        for i in range(3):
+            y = 4 + i * 5
+            d.rectangle([1 + i * 2, y, w - 2 - i * 2, y + 3], fill=C["wood_l"] if i % 2 == 0 else C["wood"], outline=o)
+        d.rectangle([2, 4, 4, h - 2], fill=C["wood_d"]); d.rectangle([w - 5, 4, w - 3, h - 2], fill=C["wood_d"])
+    simple("fogao_lenha", 24, 22, fogao)
+    simple("bancada", 24, 18, bancada)
+    simple("barraca", 34, 26, barraca)
+    simple("fogueira", 18, 20, fogueira)
+    simple("bandeira_folia", 20, 26, bandeira)
+    simple("arquibancada", 40, 22, arquibancada)
+
+
 if __name__ == "__main__":
     make_touch_ui()
     make_farming()
@@ -1082,6 +1246,7 @@ if __name__ == "__main__":
     make_fauna()
     make_combat()
     make_adventure()
+    make_content()
     make_weather()
     make_app_icons()
     make_tileset()

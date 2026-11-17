@@ -37,6 +37,9 @@ signal npc_talked(npc_id: StringName)
 signal region_entered(region_id: StringName)
 signal enemy_killed(kind: StringName)
 
+## Fogão a lenha ("cozinha") ou bancada ("bancada") pedindo a tela de receitas.
+signal craft_requested(station: String)
+
 ## Jogo pausado/retomado pelo menu.
 signal pause_changed(paused: bool)
 

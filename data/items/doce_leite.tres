@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/doce_leite_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"doce_leite"
+display_name = "Doce de leite"
+description = "Doce de leite de corte, na lata. Dá pernas (+velocidade até dormir)."
+icon = ExtResource("2")
+category = 8
+max_stack = 99
+sell_price = 55
+buy_price = 0
+energy = 30
+health = 5
+buff = &"rapidez"

@@ -47,6 +47,10 @@ var _MIGRATIONS: Dictionary = {
     # v5 (Fase 6) → v6 (Fase 7): marcos da história e missões (começam vazios).
     5: func(d: Dictionary) -> Dictionary:
         return d,
+    # v6 (Fase 7) → v7 (Fase 8): comida/efeitos, lembranças e receitas. Quem
+    # vem de save antigo ganha as receitas iniciais (GameState.from_data).
+    6: func(d: Dictionary) -> Dictionary:
+        return d,
 }
 
 

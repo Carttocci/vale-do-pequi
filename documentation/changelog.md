@@ -1,5 +1,17 @@
 # Changelog — Vale do Pequi
 
+## 0.9.0 — Fase 8: Conteúdo (17/11/2026)
+- **Fogão a lenha** na fazenda: 10 receitas goianas (pamonha, canjica, arroz com pequi, feijão tropeiro, doce de leite, lambari frito, caldo de mandioca, empadão goiano, pão de queijo) e farinha de mandioca. 4 receitas no começo; as outras 6 são **receitas de família** que os moradores ensinam.
+- **Comer** (comida na mão + E): recupera energia e vida, e algumas dão efeito até dormir: valentia (+25% de dano), fôlego (ferramentas gastam metade), pernas leves (+20% de velocidade) e paciência (peixe morde mais rápido).
+- **Presentes e corações**: item na mão + E no morador. Cada um adora, gosta ou detesta certas coisas; um presente por dia. 100 de amizade = 1 coração.
+- **Conversas especiais** aos 2 corações (receita de família) e aos 4 (lembrança + presente) para os 6 moradores, com pistas do Silêncio.
+- **Festas tradicionais** na praça, todo ano: Festa do Pequi (5/dez, concurso com troféu), Folia de Reis (6/jan, bênção dos foliões), Cavalhadas (8/mai) e Festa Junina (9/jun, fogueira, quadrilha e pescaria). Bandeirinhas, barraca de comidas e o povo todo na praça.
+- **Lembranças do vale**: cada receita feita pela primeira vez, festa vivida e história de morador conta uma lembrança (no diário). É a base da luta contra o Silêncio.
+- **Bancada**: banco, vaso de flores, lampião (acende à noite), espantalho, flechas e armadilha. Decoração colocada na fazenda e recolhida com E.
+- **Obras da fazenda**: caixa d'água (regador 40), galinheiro maior (10 galinhas) e curral maior (6 vacas).
+- Diário ganhou a aba **Amizades** e mostra lembranças e a próxima festa. Helena vende arroz e açúcar; Toninho vende madeira.
+- Save v7. 70 testes novos (562 no total).
+
 ## 0.8.0 — Fase 7: Aventura (17/11/2026)
 - **História do Ato 1** ("Uma nova vida" → "Ruínas do Cerrado"), 7 missões em cadeia: luzes na mata, fragmentos do Silêncio, a trilha da serra, a mina, o Guardião de Cristal e as ruínas. Termina com a **Mãe-do-Ouro** revelando o que é o Silêncio (*lembrança fecha as brechas*).
 - **Missões secundárias** no **mural da praça** (6 pedidos dos moradores: entregas, caça de javali corrompido, censo da fauna), liberadas com os dias.

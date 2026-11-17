@@ -66,6 +66,15 @@ Main (main.gd)
 - `Boss` herda de `Enemy` e adiciona ataque especial, segunda fase e ajudantes; `Projectile` acerta o jogador.
 - `Quests` escuta `EventBus.region_entered`, `enemy_killed`, `GameState.flag_set`, mochila e relógio para concluir etapas sozinhas; `Npc.talk()` pergunta `Quests.dialogue_for(id)` antes da conversa normal. `QuestBoard` (mural) e `JournalUI` (diário) só leem o autoload.
 
+## Conteúdo (Fase 8)
+
+- `Recipes` (scripts/crafting/recipes.gd) lê data/recipes.json; `RecipeUI` abre por `EventBus.craft_requested("cozinha" | "bancada")` (fogão e bancada são `Prop` montados pelo `FarmLevel`).
+- Provedores novos do botão contextual: `Eating` (comer, prioridade 3) e `Gifting` (presentear, 11). Ações com `"once": true` não repetem segurando o E.
+- `HeartEvents` (data/heart_events.json) é consultado em `Npc.talk()` depois das falas de missão.
+- `Festivals` (calendário fixo) + `VilaLevel.refresh_festival()` montam a festa; `NpcData.schedule_for_day` troca a rotina pelo `festival_marker` em dia de festa.
+- `Decor` (scenes/decor/decor.tscn): uma cena para toda decoração; a `Placement` chama `setup_from_item(item)` e salva `{"item": id}`.
+- `GameState`: `buff`, `memories`, `known_recipes`; obras são marcos `obra_<id>`.
+
 ## Tempo e clima (Fase 3)
 
 - `Calendar` (classe só com funções): converte o número do dia em mês, dia do mês, ano, dia da semana, período (chuvoso/seco) e safra do pequi.

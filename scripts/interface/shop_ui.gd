@@ -113,7 +113,7 @@ func _add_animal_row(kind: StringName) -> void:
     tex.atlas = load(info.sprite)
     tex.region = Rect2(0, 0, tex.atlas.get_width() / 4.0, tex.atlas.get_height())
     var proxy := ItemData.new()
-    proxy.display_name = "%s (%d/%d)" % [info.name, ranch.count(kind) if ranch else 0, info.capacity]
+    proxy.display_name = "%s (%d/%d)" % [info.name, ranch.count(kind) if ranch else 0, ranch.capacity(kind) if ranch else int(info.capacity)]
     proxy.icon = tex
     _add_row(proxy, "R$ %d" % info.price, "", buy_animal.bind(kind), "", Callable())
 

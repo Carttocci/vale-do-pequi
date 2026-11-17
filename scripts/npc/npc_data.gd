@@ -31,6 +31,14 @@ extends Resource
 ## Quando já conversaram hoje.
 @export var lines_repeat: PackedStringArray = PackedStringArray()
 
+@export_group("Presentes e festas")
+## Itens que o morador adora / gosta / detesta (ids). O resto é "neutro".
+@export var gifts_love: PackedStringArray = PackedStringArray()
+@export var gifts_like: PackedStringArray = PackedStringArray()
+@export var gifts_hate: PackedStringArray = PackedStringArray()
+## Onde fica em dia de festa (marcador da praça). Vazio = não vai à festa.
+@export var festival_marker: StringName = &""
+
 @export_group("Loja")
 ## Marcador onde o morador atende. Loja aberta = morador parado ali.
 @export var shop_marker: StringName = &""
@@ -49,6 +57,15 @@ func has_shop() -> bool:
 
 ## Rotina válida para o dia (domingo pode ser diferente).
 func schedule_for_day(day: int) -> PackedStringArray:
+    if festival_marker != &"" and Festivals.today(day) != &"":
+        var home := ""
+        for line in schedule:
+            if line.ends_with("!"):
+                home = line.split(" ", false)[1]
+                break
+        if home != "":
+            return PackedStringArray(["06:00 " + home, "09:00 " + String(festival_marker), "22:00 " + home])
+        return PackedStringArray(["06:00 " + String(festival_marker)])
     if Calendar.weekday(day) == "Dom" and not schedule_sunday.is_empty():
         return schedule_sunday
     return schedule

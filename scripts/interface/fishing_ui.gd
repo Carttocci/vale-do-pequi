@@ -44,7 +44,7 @@ func start(f: FishData) -> void:
     hits = 0
     misses = 0
     var lvl := GameState.skill_level(&"pesca")
-    _timer = _rng.randf_range(1.2, 4.0) * (1.0 - lvl * 0.04)
+    _timer = _rng.randf_range(1.2, 4.0) * (1.0 - lvl * 0.04) * (0.5 if GameState.buff == &"pesca" else 1.0)
     hits_needed = 2 + (1 if f.difficulty >= 4 else 0) + (1 if f.difficulty >= 5 else 0)
     zone_width = clampf(lerpf(0.42, 0.14, (f.difficulty - 1) / 4.0) + lvl * 0.012, 0.1, 0.5)
     _speed = 0.7 + f.difficulty * 0.25

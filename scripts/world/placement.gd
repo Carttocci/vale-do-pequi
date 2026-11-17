@@ -32,11 +32,13 @@ func use_item(item: ItemData, target_pos: Vector2, actor: Node) -> bool:
         if item and item.category == ItemData.Category.PLACEABLE and not item.place_regions.is_empty():
             var level := _level()
             if level and not String(level.region_id) in item.place_regions:
-                EventBus.show_message("Isso só pode ser colocado na Mata dos Ipês.", 2.0)
+                EventBus.show_message("Isso só pode ser colocado %s." % ("na fazenda" if "farm" in item.place_regions else "na Mata dos Ipês"), 2.0)
         return false
     var level := _level()
     var obj := (load(item.place_scene) as PackedScene).instantiate() as Node2D
     obj.position = _snap(level, target_pos)
+    if obj.has_method("setup_from_item"):
+        obj.setup_from_item(item)
     _container(level).add_child(obj)
     GameState.consume_selected(1)
     return true

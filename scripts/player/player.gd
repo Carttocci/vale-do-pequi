@@ -168,6 +168,8 @@ func try_interact() -> bool:
         ActionKind.CELL:
             return _action.provider.interact_cell(get_target_position(), self)
         ActionKind.ITEM:
+            if _action.get("once", false):
+                _interact_held = false  # comer/presentear: um por aperto
             return _action.provider.use_item(GameState.get_selected_item(), get_target_position(), self)
         ActionKind.INTERACTABLE:
             _action.provider.interact(self)
@@ -237,7 +239,7 @@ func face(direction_index: int) -> void:
 
 func _apply_movement(input_dir: Vector2, delta: float) -> void:
     if input_dir != Vector2.ZERO:
-        velocity = velocity.move_toward(input_dir * max_speed, acceleration * delta)
+        velocity = velocity.move_toward(input_dir * max_speed * GameState.speed_multiplier(), acceleration * delta)
     else:
         velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
 
@@ -299,7 +301,8 @@ func _resolve_action(interactable: Interactable) -> Dictionary:
         for target in get_tree().get_nodes_in_group("item_target"):
             var a: Dictionary = target.get_item_action(item, pos, self)
             if a.get("prompt", "") != "" and int(a.priority) > best.priority:
-                best = {"kind": ActionKind.ITEM, "prompt": a.prompt, "priority": int(a.priority), "provider": target}
+                best = {"kind": ActionKind.ITEM, "prompt": a.prompt, "priority": int(a.priority), "provider": target,
+                    "once": a.get("once", false)}
     if item and item.is_weapon() and 4 > best.priority:
         best = {"kind": ActionKind.ATTACK, "prompt": "Atirar" if item.ranged else "Atacar", "priority": 4, "provider": null}
     if interactable and PRIORITY_INTERACTABLE > best.priority:

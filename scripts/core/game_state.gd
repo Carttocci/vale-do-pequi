@@ -19,9 +19,11 @@ signal health_changed(value: int, max_value: int)
 signal energy_changed(value: int, max_value: int)
 signal fainted
 signal flag_set(flag: StringName)
+signal buff_changed(buff: StringName)
+signal memories_changed(count: int)
 
 ## Versão do formato dos dados salvos (ver SaveManager.migrate).
-const DATA_VERSION := 6
+const DATA_VERSION := 7
 const INVENTORY_SIZE := 27
 const HOTBAR_SIZE := 9
 const WATER_MAX := 20
@@ -53,6 +55,12 @@ var flags: Dictionary = {}
 ## Peixes pescados: id -> quantidade. Caderno de campo: espécie -> true.
 var fish_log: Dictionary = {}
 var species_seen: Dictionary = {}
+## Efeito de comida até dormir: "combate", "folego", "rapidez", "pesca" (vazio = nenhum).
+var buff: StringName = &""
+## Lembranças do vale: tradições vividas (receitas, festas, histórias dos moradores).
+var memories: int = 0
+## Receitas que o jogador sabe fazer (id -> true).
+var known_recipes: Dictionary = {}
 
 
 func _ready() -> void:
@@ -74,6 +82,11 @@ func new_game() -> void:
     energy = MAX_ENERGY
     paths = {&"guerreiro": 0, &"cacador": 0, &"explorador": 0}
     flags = {}
+    buff = &""
+    memories = 0
+    known_recipes = {}
+    for r in Recipes.starting_known():
+        known_recipes[r] = true
     Clock.reset()
     var quests := get_node_or_null("/root/Quests")
     if quests:
@@ -92,6 +105,8 @@ func new_game() -> void:
 func use_energy(amount: int) -> bool:
     if amount <= 0:
         return true
+    if buff == &"folego":
+        amount = ceili(amount / 2.0)
     if energy < amount:
         EventBus.show_message("Você está sem energia. Coma alguma coisa ou durma.", 2.0)
         return false
@@ -160,11 +175,11 @@ func reset_paths() -> void:
 
 ## Multiplicador de dano corpo a corpo: nível de combate + Guerreiro.
 func melee_multiplier() -> float:
-    return 1.0 + skill_level(&"combate") * 0.04 + int(paths[&"guerreiro"]) * 0.08
+    return (1.0 + skill_level(&"combate") * 0.04 + int(paths[&"guerreiro"]) * 0.08) * (1.25 if buff == &"combate" else 1.0)
 
 
 func ranged_multiplier() -> float:
-    return 1.0 + skill_level(&"combate") * 0.04 + int(paths[&"cacador"]) * 0.12
+    return (1.0 + skill_level(&"combate") * 0.04 + int(paths[&"cacador"]) * 0.12) * (1.25 if buff == &"combate" else 1.0)
 
 
 ## Defesa (fração de dano evitada).
@@ -267,6 +282,11 @@ func consume_selected(count: int = 1) -> bool:
 
 # --- regador ---------------------------------------------------------------
 
+## Caixa d'água (obra da fazenda) dobra a capacidade do regador.
+func water_max() -> int:
+    return WATER_MAX * 2 if has_flag(&"obra_caixa_dagua") else WATER_MAX
+
+
 func use_water() -> bool:
     if water <= 0:
         return false
@@ -276,7 +296,7 @@ func use_water() -> bool:
 
 
 func refill_water() -> void:
-    water = WATER_MAX
+    water = water_max()
     water_changed.emit(water)
 
 
@@ -285,6 +305,7 @@ func refill_water() -> void:
 ## Dormir: avança um dia. Quem cuida do crescimento escuta `day_advanced`.
 func sleep() -> void:
     day += 1
+    set_buff(&"")
     health = MAX_HEALTH
     energy = MAX_ENERGY
     health_changed.emit(health, MAX_HEALTH)
@@ -307,6 +328,9 @@ func to_data() -> Dictionary:
         "paths": {"guerreiro": paths[&"guerreiro"], "cacador": paths[&"cacador"], "explorador": paths[&"explorador"]},
         "flags": _flags_to_data(),
         "fish_log": fish_log.duplicate(),
+        "buff": String(buff),
+        "memories": memories,
+        "known_recipes": known_recipes.keys().map(func(k: StringName) -> String: return String(k)),
         "species_seen": species_seen.keys().map(func(k: StringName) -> String: return String(k)),
         "selected_slot": selected_slot,
         "inventory": inventory.to_data(),
@@ -320,7 +344,6 @@ func from_data(data: Dictionary) -> void:
         data = data.duplicate()
         data["inventory"] = inventory.to_data()
     day = maxi(1, int(data.get("day", 1)))
-    water = clampi(int(data.get("water", WATER_MAX)), 0, WATER_MAX)
     money = maxi(0, int(data.get("money", STARTING_MONEY)))
     skill_xp = {}
     for k in data.get("skills", {}):
@@ -337,6 +360,13 @@ func from_data(data: Dictionary) -> void:
     var fd: Dictionary = data.get("flags", {})
     for k in fd:
         flags[StringName(k)] = fd[k]
+    water = clampi(int(data.get("water", WATER_MAX)), 0, water_max())
+    buff = StringName(data.get("buff", ""))
+    memories = maxi(0, int(data.get("memories", 0)))
+    if data.has("known_recipes"):
+        known_recipes = {}
+        for k in data.known_recipes:
+            known_recipes[StringName(k)] = true
     var pd: Dictionary = data.get("paths", {})
     for k in paths:
         paths[k] = maxi(0, int(pd.get(String(k), 0)))
@@ -358,3 +388,57 @@ func _flags_to_data() -> Dictionary:
     for k in flags:
         out[String(k)] = flags[k]
     return out
+
+
+
+# --- comida, efeitos e lembranças --------------------------------------------
+
+const BUFF_NAMES := {&"combate": "Valentia (+25% de dano)", &"folego": "Fôlego (ferramentas gastam metade)",
+    &"rapidez": "Pernas leves (+20% de velocidade)", &"pesca": "Paciência (peixe morde mais rápido)"}
+
+
+## Come o item: recupera vida/energia e aplica o efeito (até dormir).
+func eat(item: ItemData) -> bool:
+    if item == null or item.category != ItemData.Category.FOOD:
+        return false
+    restore(item.health, item.energy)
+    if item.buff != &"":
+        set_buff(item.buff)
+    EventBus.show_message("Comeu %s. +%d energia%s" % [item.display_name.to_lower(), item.energy,
+        ("  · " + BUFF_NAMES.get(item.buff, "")) if item.buff != &"" else ""], 2.5)
+    return true
+
+
+func set_buff(b: StringName) -> void:
+    if buff == b:
+        return
+    buff = b
+    buff_changed.emit(buff)
+
+
+func speed_multiplier() -> float:
+    return 1.2 if buff == &"rapidez" else 1.0
+
+
+## Uma lembrança nova do vale (cada `key` conta uma vez só). Retorna true se for nova.
+func add_memory(key: String, text: String) -> bool:
+    var flag := StringName("lembranca_" + key)
+    if has_flag(flag):
+        return false
+    flags[flag] = true
+    memories += 1
+    memories_changed.emit(memories)
+    EventBus.show_message("✦ Lembrança do vale: %s" % text, 3.5)
+    return true
+
+
+func knows_recipe(id: StringName) -> bool:
+    return known_recipes.has(id)
+
+
+func learn_recipe(id: StringName) -> bool:
+    if known_recipes.has(id):
+        return false
+    known_recipes[id] = true
+    journal_changed.emit()
+    return true

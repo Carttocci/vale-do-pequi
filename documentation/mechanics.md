@@ -59,3 +59,15 @@
 | Guardião de Cristal | 260 de vida; a cada 3,2 s estilhaços (8, depois 12) + investida; metade da vida chama 2 morcegos | `KINDS` em enemy.gd, scripts/combat/boss.gd |
 | Eco do Silêncio | 320 de vida; reaparece ao lado do jogador e solta 3 orbes (8 de dano, −10 de energia) | idem |
 | Enigma dos totens | Ordem sol → chuva → lua; errar apaga todos | `ORDER` em scripts/world/ruinas_level.gd |
+
+## Fase 8
+| Mecânica | Como funciona | Onde ajustar |
+|---|---|---|
+| Receitas | Fogão (cozinha), bancada e obras; `known` = sabe desde o começo, `teacher` = morador que ensina aos 2 ♥ | data/recipes.json |
+| Comida | energia, vida e efeito por item | `energy`, `health`, `buff` em tools/gerar_itens.py |
+| Efeitos | combate ×1,25 dano · folego: energia ÷2 (arredonda pra cima) · rapidez ×1,2 velocidade · pesca: espera ÷2. Acaba ao dormir | game_state.gd (`melee_multiplier`, `use_energy`, `speed_multiplier`), fishing_ui.gd |
+| Amizade | 100 pontos = 1 ♥ (máx. 10). Conversa +10/dia; presente adorado +80, gostou +45, neutro +20, detestou −20 (1 por dia) | `HEART_POINTS`, `GIFT_POINTS` em npc.gd; gostos em data/npcs/*.tres |
+| Conversas especiais | 2 ♥ ensina receita; 4 ♥ lembrança + presente | data/heart_events.json |
+| Festas | Festa do Pequi 5/dez, Folia de Reis 6/jan, Cavalhadas 8/mai, Festa Junina 9/jun; moradores na praça das 9h às 22h | `ALL` em scripts/events/festivals.gd; atrações em vila_level.gd |
+| Lembranças do vale | 1ª vez de cada receita, cada festa (por ano), cada conversa especial | `GameState.add_memory` |
+| Obras | caixa d'água (regador 40), galinheiro 10, curral 6 | data/recipes.json (`obras`), ranch.gd `capacity` |

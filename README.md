@@ -26,6 +26,8 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 
 **Aventura:** a história começa conversando com o Seu Benedito na vila; a missão atual aparece no canto da tela e no diário (J). Pedidos do povo ficam no mural da praça. Com a picareta do Toninho, abra a trilha no norte da mata até a Serra do Cristal, desça a mina (elevador nos andares 5 e 10) e descubra as Ruínas do Cerrado.
 
+**Vida no vale:** cozinhe no fogão a lenha (ao lado da casa) e coma com a comida na mão (E). Dê presentes aos moradores (item na mão + E): com 2 corações eles ensinam receitas de família. Na bancada você faz decoração e obras da fazenda. Fique de olho nas festas da praça: Festa do Pequi (5/dez), Folia de Reis (6/jan), Cavalhadas (8/mai) e Festa Junina (9/jun).
+
 **Como jogar:** pegue a enxada (atalho 1) e aperte **E** na roça para capinar; com a semente na mão o E planta, com o regador o E rega (e enche no poço). A dica na tela mostra o que o E vai fazer. Durma na porta de casa para passar o dia. Mais sementes no baú do avô, ao lado da casa. O jogo salva ao dormir e pelo menu de pausa.
 
 No celular o jogo é na horizontal. Dica: no Android, "Adicionar à tela inicial" abre o jogo em tela cheia, como um app.

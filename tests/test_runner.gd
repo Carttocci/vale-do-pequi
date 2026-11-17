@@ -97,6 +97,12 @@ func _run_all() -> void:
     await _test_side_quests_and_board()
     await _test_journal_ui()
     await _test_save_v6()
+    await _test_cooking()
+    await _test_eating_and_buffs()
+    await _test_gifts_and_hearts()
+    await _test_festivals()
+    await _test_decor_and_obras()
+    await _test_save_v7()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -1974,7 +1980,7 @@ func _test_save_v6() -> void:
     _main.change_region_now(&"ruinas", &"da_serra")
     check(SaveManager.save_game(), "salva dentro das ruínas")
     var saved := SaveManager.read_save_file()
-    check(saved.version == 6 and saved.player.region == "serra", "dentro de ruínas/mina o save fica na porta da serra")
+    check(saved.version == GameState.DATA_VERSION and saved.player.region == "serra", "dentro de ruínas/mina o save fica na porta da serra")
     GameState.new_game()
     for r: Rock in mata().pedregulhos:
         r.load_save_data({"broken": false})
@@ -1987,7 +1993,255 @@ func _test_save_v6() -> void:
     check(mata().trail_open(), "pedregulhos quebrados continuam quebrados")
     var old := {"version": 5, "game": {"day": 3}, "nodes": {}}
     var mig := SaveManager.migrate(old)
-    check(mig.version == 6, "save v5 migra para v6")
+    check(mig.version == GameState.DATA_VERSION, "save v5 migra até a versão atual")
     SaveManager.delete_save()
     GameState.new_game()
     _main.change_region_now(&"farm")
+
+
+# --- Fase 8: conteúdo ----------------------------------------------------------
+
+func _test_cooking() -> void:
+    print("[Fase 8: fogão a lenha]")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    var farm := _main.get_region(&"farm") as FarmLevel
+    check(GameState.knows_recipe(&"pamonha") and not GameState.knows_recipe(&"canjica"), "receitas iniciais; as de família faltam")
+    await place_player(farm.fogao.position + Vector2(0, 16))
+    _player.face(4)
+    GameState.select_slot(8)
+    await frames(3)
+    check(_prompts[-1] == "Cozinhar no fogão a lenha", "dica 'Cozinhar no fogão a lenha'")
+    await press_e()
+    var ui := _main.get_node("RecipeUI") as RecipeUI
+    check(ui.is_open() and ui.station == "cozinha" and get_tree().paused, "fogão abre a tela de receitas e pausa")
+    check(ui.entries().size() == 4, "mostra só as 4 receitas conhecidas")
+    check(not ui.make("pamonha"), "sem milho não cozinha")
+    GameState.add_item(&"milho", 6)
+    var mem := GameState.memories
+    check(ui.make("pamonha") and GameState.get_item_count(&"pamonha") == 1 and GameState.get_item_count(&"milho") == 3,
+        "pamonha: gasta 3 milhos")
+    check(GameState.memories == mem + 1, "primeira pamonha vira lembrança do vale")
+    ui.make("pamonha")
+    check(GameState.memories == mem + 1 and GameState.get_item_count(&"pamonha") == 2, "repetir a receita não conta de novo")
+    check(not ui.make("canjica"), "receita desconhecida não aparece")
+    GameState.add_item(&"mandioca", 1)
+    ui.make("farinha")
+    check(GameState.get_item_count(&"farinha") == 2, "farinha de mandioca: 1 mandioca vira 2")
+    check(GameState.skill_xp.get(&"artesanato", 0) > 0, "cozinhar dá XP de artesanato")
+    ui.close()
+    check(not get_tree().paused, "fechar despausa")
+
+
+func _test_eating_and_buffs() -> void:
+    print("[Fase 8: comer e efeitos]")
+    select_item(&"pamonha")
+    await place_player(Vector2(600, 300))
+    await frames(3)
+    check(_prompts[-1] == "Comer pamonha", "com comida na mão o E vira 'Comer'")
+    GameState.energy = 30
+    var n := GameState.get_item_count(&"pamonha")
+    await press_e()
+    await frames(2)
+    check(GameState.energy == 70 and GameState.get_item_count(&"pamonha") == n - 1, "comer recupera energia e gasta 1")
+    var base := GameState.melee_multiplier()
+    GameState.add_item(&"arroz_pequi", 1)
+    GameState.eat(ItemDB.get_item(&"arroz_pequi"))
+    check(GameState.buff == &"combate" and is_equal_approx(GameState.melee_multiplier(), base * 1.25), "arroz com pequi: +25% de dano")
+    var hud := _main.get_node("HUD")
+    check(hud.buff_label.text.contains("Valentia"), "HUD mostra o efeito")
+    GameState.set_buff(&"folego")
+    GameState.energy = 50
+    GameState.use_energy(4)
+    check(GameState.energy == 48, "fôlego: ferramentas gastam metade")
+    GameState.set_buff(&"rapidez")
+    check(is_equal_approx(GameState.speed_multiplier(), 1.2), "pernas leves: +20% de velocidade")
+    GameState.sleep()
+    check(GameState.buff == &"" and hud.buff_label.text == "", "efeito acaba ao dormir")
+
+
+func _test_gifts_and_hearts() -> void:
+    print("[Fase 8: presentes e corações]")
+    _main.change_region_now(&"vila")
+    Quests.active.clear()
+    var helena := npc("helena")
+    helena.friendship = 0
+    helena.met = true
+    helena.gift_day = 0
+    set_time(GameState.day, 9 * 60)
+    helena.snap_to_schedule()
+    GameState.add_item(&"pequi", 3)
+    select_item(&"pequi")
+    await place_player(helena.global_position + Vector2(0, 16))
+    _player.face(4)
+    await frames(3)
+    check(_prompts[-1] == "Presentear Helena", "item na mão + morador = 'Presentear'")
+    check(helena.gift_taste(&"pequi") == &"love" and helena.gift_taste(&"pedra") == &"hate", "cada morador tem seus gostos")
+    await press_e()
+    var dlg := _main.get_node("DialogueUI") as DialogueUI
+    check(dlg.is_open() and dlg.lines[0].contains("pequi"), "reação ao presente")
+    dlg.close()
+    await frames(1)
+    check(helena.friendship == 80 and GameState.get_item_count(&"pequi") == 2, "presente adorado: +80 de amizade")
+    check(not _player.try_interact() or helena.friendship == 80, "um presente por dia")
+    dlg.close()
+    await frames(1)
+    check(helena.friendship == 80 and GameState.get_item_count(&"pequi") == 2, "segundo presente no dia é recusado")
+    helena.friendship = 200
+    check(helena.hearts() == 2, "100 pontos = 1 coração")
+    GameState.select_slot(8)
+    var mem := GameState.memories
+    helena.talk()
+    check(dlg.lines[0].contains("canjica"), "2 corações: conversa especial")
+    dlg.close()
+    await frames(1)
+    check(GameState.knows_recipe(&"canjica") and GameState.memories == mem + 1, "Helena ensina a canjica (lembrança)")
+    helena.talk()
+    check(not dlg.lines[0].contains("canjica"), "conversa especial só acontece uma vez")
+    dlg.close()
+    helena.friendship = 400
+    var arroz := GameState.get_item_count(&"arroz")
+    helena.talk()
+    dlg.close()
+    await frames(1)
+    check(GameState.get_item_count(&"arroz") == arroz + 5, "4 corações: presente da Helena")
+    # missão de entrega tem preferência sobre presente
+    GameState.day = 2
+    Quests.start("s_alzira_milho")
+    GameState.add_item(&"milho", 5)
+    var alz := npc("alzira")
+    var gifting := _main.get_node("Gifting") as Gifting
+    check(gifting.get_item_action(ItemDB.get_item(&"milho"), alz.global_position + Vector2(0, -8), _player).is_empty(),
+        "com entrega de missão pendente, o E conversa em vez de presentear")
+    Quests.reset()
+    var j := _main.get_node("JournalUI") as JournalUI
+    j.open(3)
+    check(j.body_text().contains("Helena   ♥♥♥♥"), "diário: aba Amizades com corações")
+    j.close()
+
+
+func _test_festivals() -> void:
+    print("[Fase 8: festas]")
+    check(Festivals.today(25) == &"festa_pequi" and Festivals.today(36) == &"folia_reis"
+        and Festivals.today(78) == &"cavalhadas" and Festivals.today(89) == &"festa_junina", "4 festas no calendário")
+    check(Festivals.today(145) == &"festa_pequi", "repetem todo ano")
+    check(Festivals.next(1).day == 25, "próxima festa a partir do dia 1: Festa do Pequi (5 de dezembro)")
+    var v := vila() as VilaLevel
+    _main.change_region_now(&"vila")
+    jump_to_day(24)
+    check(v.festa_root == null, "dia comum: praça sem festa")
+    jump_to_day(25)
+    check(_messages.any(func(m: String) -> bool: return m.contains("Festa do Pequi na praça")), "aviso de festa de manhã")
+    check(v.festa_root != null and v.festival == &"festa_pequi", "dia 25: praça enfeitada")
+    set_time(25, 10 * 60)
+    var helena := npc("helena")
+    helena.snap_to_schedule()
+    check(helena.is_at_marker(&"festa_1") and not helena.is_shop_open(), "moradores vão para a festa (loja fechada)")
+    var mem := GameState.memories
+    v.concurso_pequi()
+    check(GameState.get_item_count(&"trofeu_pequi") == 0, "sem 10 pequis não entra no concurso")
+    GameState.add_item(&"pequi", 10)
+    var money := GameState.money
+    v.concurso_pequi()
+    var dlg := _main.get_node("DialogueUI") as DialogueUI
+    dlg.close()
+    check(GameState.get_item_count(&"trofeu_pequi") == 1 and GameState.money == money + 300, "campeão do pequi: troféu e R$ 300")
+    check(GameState.memories == mem + 1, "festa vira lembrança do vale")
+    GameState.add_item(&"pequi", 10)
+    v.concurso_pequi()
+    check(GameState.get_item_count(&"trofeu_pequi") == 1, "concurso uma vez por ano")
+    jump_to_day(36)
+    check(v.festival == &"folia_reis", "6 de janeiro: Folia de Reis")
+    GameState.inventory.clear()
+    v.receber_folia()
+    check(not GameState.has_flag(StringName("festa_folia_reis_ano%d" % Calendar.year(36))), "folia pede comida")
+    GameState.add_item(&"pamonha", 1)
+    v.receber_folia()
+    dlg.close()
+    check(GameState.get_item_count(&"pamonha") == 0 and GameState.buff == &"folego", "prato para a folia: bênção (fôlego)")
+    jump_to_day(78)
+    v.assistir_cavalhadas()
+    dlg.close()
+    check(v.festival == &"cavalhadas" and GameState.has_flag(StringName("festa_cavalhadas_ano%d" % Calendar.year(78))), "Cavalhadas assistidas")
+    jump_to_day(89)
+    check(v.festival == &"festa_junina" and v.festa_root.get_child_count() >= 4, "Festa Junina: fogueira e pescaria")
+    GameState.money = 5
+    check(v.pescaria() == null and GameState.money == 5, "pescaria custa R$ 10")
+    GameState.money = 100
+    v.pescaria()
+    check(GameState.money == 90, "pagou a pescaria")
+    v.dancar_quadrilha()
+    dlg.close()
+    check(GameState.has_flag(StringName("festa_festa_junina_ano%d" % Calendar.year(89))), "dançou a quadrilha")
+    jump_to_day(90)
+    check(v.festa_root == null, "no dia seguinte a praça volta ao normal")
+
+
+func _test_decor_and_obras() -> void:
+    print("[Fase 8: bancada, decoração e obras]")
+    _main.change_region_now(&"farm")
+    var ui := _main.get_node("RecipeUI") as RecipeUI
+    ui.open("bancada")
+    check(ui.entries().size() == 9, "bancada: 6 objetos + 3 obras")
+    GameState.add_item(&"madeira", 6)
+    check(ui.make("banco_madeira") and GameState.get_item_count(&"banco_madeira") == 1, "banco de madeira feito")
+    ui.close()
+    select_item(&"banco_madeira")
+    await place_player(Vector2(600, 300))
+    _player.face(2)
+    await frames(3)
+    check(_prompts[-1] == "Colocar banco de madeira", "dica 'Colocar banco de madeira'")
+    await press_e()
+    var placed: Array = _main.get_region(&"farm").get_node("Entities/Placed").get_children()
+    var banco: Decor = null
+    for c in placed:
+        if c is Decor:
+            banco = c
+    check(banco != null and banco.item_id == &"banco_madeira" and banco.sprite.texture != null, "banco colocado na fazenda")
+    check(SaveManager.save_game(), "salva com decoração")
+    banco.queue_free()
+    await frames(1)
+    SaveManager.load_game()
+    await frames(1)
+    var again: Array = _main.get_region(&"farm").get_node("Entities/Placed").get_children().filter(
+        func(c: Node) -> bool: return c is Decor and c.item_id == &"banco_madeira")
+    check(again.size() == 1, "decoração volta ao carregar")
+    var n := GameState.get_item_count(&"banco_madeira")
+    (again[0] as Decor).pick_up()
+    check(GameState.get_item_count(&"banco_madeira") == n + 1, "E recolhe a decoração")
+    GameState.add_item(&"pedra", 20)
+    GameState.add_item(&"madeira", 10)
+    GameState.money = 1000
+    ui.open("bancada")
+    check(ui.make("caixa_dagua") and GameState.has_flag(&"obra_caixa_dagua") and GameState.money == 700, "obra: caixa d'água")
+    check(not ui.make("caixa_dagua"), "obra só se faz uma vez")
+    ui.close()
+    GameState.refill_water()
+    check(GameState.water == 40, "regador agora enche 40")
+    var ranch := get_tree().get_first_node_in_group("ranch") as Ranch
+    check(ranch.capacity(&"galinha") == 6, "galinheiro: 6 lugares")
+    GameState.set_flag(&"obra_galinheiro_maior")
+    check(ranch.capacity(&"galinha") == 10, "galinheiro maior: 10 lugares")
+    SaveManager.delete_save()
+
+
+func _test_save_v7() -> void:
+    print("[Fase 8: save v7]")
+    GameState.set_buff(&"pesca")
+    GameState.learn_recipe(&"empadao")
+    var mem := GameState.memories
+    var helena := npc("helena")
+    helena.gift_day = GameState.day
+    check(SaveManager.save_game(), "salva")
+    GameState.new_game()
+    helena.gift_day = 0
+    check(SaveManager.load_game(), "carrega")
+    check(GameState.buff == &"pesca" and GameState.knows_recipe(&"empadao") and GameState.memories == mem, "efeito, receitas e lembranças")
+    check(not helena.can_receive_gift(), "presente do dia lembrado")
+    var old := {"version": 6, "game": {"day": 3}, "nodes": {}}
+    var mig := SaveManager.migrate(old)
+    check(mig.version == GameState.DATA_VERSION, "save v6 migra para v7")
+    GameState.from_data(mig.game)
+    check(GameState.knows_recipe(&"pamonha"), "save antigo ganha as receitas iniciais")
+    SaveManager.delete_save()
+    GameState.new_game()

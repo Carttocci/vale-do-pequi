@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/mascara_cavalhada_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"mascara_cavalhada"
+display_name = "Máscara de mascarado"
+description = "Lembrança das Cavalhadas de Pirenópolis."
+icon = ExtResource("2")
+category = 9
+max_stack = 5
+sell_price = 40
+buy_price = 150
+place_scene = "res://scenes/decor/decor.tscn"
+place_regions = PackedStringArray("farm")

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/lambari_frito_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"lambari_frito"
+display_name = "Lambari frito"
+description = "Petisco de beira de rio. Dá paciência de pescador (peixe morde mais rápido)."
+icon = ExtResource("2")
+category = 8
+max_stack = 99
+sell_price = 40
+buy_price = 0
+energy = 35
+health = 20
+buff = &"pesca"

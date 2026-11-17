@@ -185,7 +185,7 @@ func get_item_action(item: ItemData, target_pos: Vector2, _actor: Node) -> Dicti
                     if can_till(cell):
                         return {"prompt": "Capinar", "priority": 5}
                 ItemData.ToolType.WATERING_CAN:
-                    if _near_water(target_pos) and GameState.water < GameState.WATER_MAX:
+                    if _near_water(target_pos) and GameState.water < GameState.water_max():
                         return {"prompt": "Encher regador", "priority": 20}
                     if cells.has(cell) and not is_watered(cell):
                         return {"prompt": "Regar" if GameState.water > 0 else "Regar (regador vazio)", "priority": 5}
@@ -217,7 +217,7 @@ func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
                 ItemData.ToolType.WATERING_CAN:
                     if _near_water(target_pos):
                         GameState.refill_water()
-                        EventBus.show_message("Regador cheio! (%d)" % GameState.WATER_MAX, 1.5)
+                        EventBus.show_message("Regador cheio! (%d)" % GameState.water_max(), 1.5)
                         return true
                     if not cells.has(cell):
                         EventBus.show_message("Só dá pra regar terra capinada.", 1.5)

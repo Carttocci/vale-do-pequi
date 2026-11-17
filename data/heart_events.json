@@ -1,0 +1,56 @@
+{
+  "events": [
+    {"npc": "helena", "hearts": 2, "lines": [
+      "Ô, chega aqui. Deixa eu te contar uma coisa: minha mãe fazia uma canjica que o povo vinha de longe pra provar.",
+      "Ninguém mais faz do jeito dela. Eu mesma quase esqueci... mas anotei aqui num papelzinho, olha.",
+      "Milho, leite e açúcar, e paciência no fogo baixo. Leva a receita. Comida que ninguém cozinha morre, sabia?"]},
+    {"npc": "helena", "hearts": 4, "lines": [
+      "Sabe que depois que você chegou a mercearia anda mais animada? O povo vem, conversa, compra fiado...",
+      "Toma esse saco de arroz e esse de açúcar. Presente, não precisa pagar. Faz uma comida boa e chama a gente."],
+     "items": {"arroz": 5, "acucar": 5}},
+    {"npc": "benedito", "hearts": 2, "lines": [
+      "Senta aqui no banco. No meu tempo a gente tocava boiada pra Goiás Velho, semanas de estrada.",
+      "Comida de tropeiro tinha que aguentar a viagem: feijão, farinha, ovo e torresmo. Feijão tropeiro, uai!",
+      "Aprende aí, que receita é igual moda de viola: se ninguém repete, o vento leva."]},
+    {"npc": "benedito", "hearts": 4, "lines": [
+      "Lembrei de uma coisa... seu avô cantava uma moda na colheita do pequi. Eu esqueci a letra, acredita?",
+      "Esses dias, sentado aqui, voltou um pedacinho: 'pequi caiu do pé, ô morena, quem pegou foi o luar'.",
+      "Engraçado: desde que você começou a tocar a fazenda, umas lembranças estão voltando. Toma, guarda essas sementes de abóbora do meu quintal."],
+     "items": {"semente_abobora": 10}},
+    {"npc": "toninho", "hearts": 2, "lines": [
+      "Fica pra almoçar, rapaz. Lá em casa a gente faz caldo de mandioca com carne quando o serviço aperta.",
+      "Mandioca cozida até desmanchar, a carne picadinha... é o que me dá força pra bater ferro o dia inteiro.",
+      "Pode levar a receita. Meu avô era ferreiro também e dizia que ferro e caldo grosso não se apressa."]},
+    {"npc": "toninho", "hearts": 4, "lines": [
+      "Achei nas coisas velhas da ferraria um molde que tem o mesmo desenho daqueles totens das ruínas. Sol, chuva, lua.",
+      "O povo antigo daqui sabia coisa que a gente esqueceu. Toma esse minério que eu guardava. Faz bom uso."],
+     "items": {"minerio_ferro": 5, "ouro": 1}},
+    {"npc": "alzira", "hearts": 2, "lines": [
+      "Ah, você é das minhas! Senta, que hoje vou te ensinar o empadão goiano da minha bisavó.",
+      "Massa podre, recheio de carne, milho, ovo... cada família põe um segredo. O meu é farinha de mandioca na massa.",
+      "Faz em casa e depois me conta. Receita boa é a que passa de mão em mão."]},
+    {"npc": "alzira", "hearts": 4, "lines": [
+      "Teve um ano que ninguém lembrou de montar a Festa do Pequi. Ninguém! Parece que a data sumiu da cabeça do povo.",
+      "Eu fiquei com um aperto no peito. Desde então eu anoto tudo nesse caderno: as festas, os santos, as comidas.",
+      "Toma uma cópia. Se um dia eu esquecer, você me lembra, combinado?"],
+     "items": {"pamonha": 3}},
+    {"npc": "mariana", "hearts": 2, "lines": [
+      "Sabe o que eu faço quando sobra leite das vacas da clínica? Doce de leite de corte, na lata, que nem minha vó.",
+      "Leite, açúcar e mexer, mexer, mexer até soltar da panela. Toma a receita.",
+      "Engraçado: os bichos ficam mais calmos quando tem cheiro de doce no ar. Ou sou eu que fico mais calma."]},
+    {"npc": "mariana", "hearts": 4, "lines": [
+      "Andei estudando os fragmentos do Silêncio. Quando eu ponho um perto de uma planta nativa, ela murcha um pouco.",
+      "Mas perto do pequizeiro velho da sua fazenda o caco quase não esfria. Acho que lugar cuidado resiste.",
+      "Toma esse cristal que um paciente me deu de presente. Você vai saber usar melhor que eu."],
+     "items": {"cristal_vale": 1}},
+    {"npc": "joao_pedro", "hearts": 2, "lines": [
+      "Pescador que se preza come pão de queijo na beira da lagoa. É lei!",
+      "Polvilho... quer dizer, farinha bem fininha, leite, ovo e queijo. Minha mãe fazia de madrugada pra eu levar.",
+      "Toma, aprende. Aí você para de roubar os meus."]},
+    {"npc": "joao_pedro", "hearts": 4, "lines": [
+      "Vou te contar um segredo de pescador: o dourado-rei existe. Eu vi, numa noite de chuva, no Rio das Araras.",
+      "Brilhava igual ao cristal da serra. Desde então eu não conto pra ninguém, que o povo ri.",
+      "Toma essas iscas boas. Se você pegar ele, me mostra, pelo amor de Deus."],
+     "items": {"isca": 30}}
+  ]
+}

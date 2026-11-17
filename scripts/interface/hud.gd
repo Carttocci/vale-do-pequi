@@ -163,6 +163,7 @@ func _make_bar(color: Color, value: Callable) -> Control:
 # --- missão atual (canto esquerdo) -----------------------------------------
 
 var quest_label: Label
+var buff_label: Label
 
 
 func _build_tracker() -> void:
@@ -178,6 +179,15 @@ func _build_tracker() -> void:
     $Root.add_child(quest_label)
     for sig in [Quests.quest_started, Quests.quest_updated, Quests.quest_completed]:
         sig.connect(func(_id: String) -> void: update_tracker())
+    buff_label = Label.new()
+    buff_label.position = Vector2(8, 120)
+    buff_label.add_theme_font_size_override("font_size", 8)
+    buff_label.add_theme_color_override("font_color", Color(0.7, 0.95, 0.7))
+    buff_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+    buff_label.add_theme_constant_override("outline_size", 3)
+    buff_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    $Root.add_child(buff_label)
+    GameState.buff_changed.connect(func(_b: StringName) -> void: update_tracker())
     update_tracker()
 
 
@@ -190,3 +200,4 @@ func update_tracker() -> void:
             if Quests.defs[id].get("main", false):
                 break
     quest_label.text = text
+    buff_label.text = ("◆ " + GameState.BUFF_NAMES[GameState.buff]) if GameState.buff != &"" else ""
