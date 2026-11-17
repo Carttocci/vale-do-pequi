@@ -1,5 +1,30 @@
 # Changelog — Vale do Pequi
 
+## 0.3.0 — Fase 2: Fazenda (17/11/2026)
+
+### Adicionado
+- Catálogo de itens e culturas em dados (`data/items/*.tres`, `data/crops/*.tres`), carregado pelo autoload `ItemDB`.
+- Mochila de 27 espaços com pilhas (máx. 99; ferramentas 1) e barra de atalhos (9 primeiros espaços).
+- Ferramentas: enxada (capina) e regador (20 de água; enche no poço ou na lagoa).
+- Plantio e colheita: milho (4 dias), feijão (3 dias, rebrota em 2), abóbora (6 dias), mandioca (8 dias). Só cresce nos dias em que foi regado.
+- Cursor mostrando a célula onde a ferramenta vai agir.
+- Dormir na porta da casa: passa o dia e salva (provisório até o relógio da Fase 3).
+- Baú do avô com sementes; tela de transferência baú ↔ mochila.
+- Tela da mochila (I): ver descrição e reorganizar itens.
+- Save em JSON com versão, migração e tolerância a dados faltando/corrompidos. No navegador fica salvo no próprio navegador (IndexedDB).
+- Menu de pausa: Salvar jogo e Novo jogo (pede confirmação com segundo toque).
+- Celular: botão "usar" (ferramenta/semente), botão da mochila e toque na barra de atalhos.
+- Teclado: C ou clique usa o item; 1–9 e rodinha do mouse trocam o atalho. Controle: X usa, LB/RB trocam.
+- 99 testes novos (184 no total).
+
+### Alterado
+- Pequizeiros soltam pequi a cada novo dia (antes: a cada 20 s).
+- Contador de pequi do HUD substituído pelo dia atual + barra de atalhos.
+- Pequi agora é um item da mochila.
+
+### Corrigido
+- No celular, tocar em qualquer botão não usa mais a ferramenta junto (clique emulado do toque é ignorado para "usar").
+
 ## Documentação — GDD 1.1 (17/11/2026)
 - GDD atualizado com a direção oficial revisada: definição oficial, pilares, identidade cultural, nova história (O Silêncio), regras de folclore, eventos e festividades. Nenhum sistema da v1.0 foi removido. Ver `documentation/GDD.md` §23.
 

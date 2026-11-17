@@ -10,11 +10,11 @@ size = Vector2(22, 8)
 [sub_resource type="CircleShape2D" id="area"]
 radius = 14.0
 
-[node name="Poco" type="StaticBody2D"]
+[node name="Poco" type="StaticBody2D" groups=["water_source"]]
 collision_mask = 0
 script = ExtResource("scr")
 prompt = "Olhar o poço"
-messages = PackedStringArray("Água limpinha e gelada. O regador chega na Fase 2.", "O balde ainda funciona. Já é um começo.")
+messages = PackedStringArray("Água limpinha e gelada. Use o regador aqui pra encher.", "O balde ainda funciona. Já é um começo.")
 
 [node name="Sprite" type="Sprite2D" parent="."]
 texture = ExtResource("tex")

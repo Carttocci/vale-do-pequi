@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CropData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/farming/crop_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/crops/mandioca_0_placeholder.png" id="t0"]
+[ext_resource type="Texture2D" path="res://assets/crops/mandioca_1_placeholder.png" id="t1"]
+[ext_resource type="Texture2D" path="res://assets/crops/mandioca_2_placeholder.png" id="t2"]
+[ext_resource type="Texture2D" path="res://assets/crops/mandioca_3_placeholder.png" id="t3"]
+
+[resource]
+script = ExtResource("1")
+id = &"mandioca"
+display_name = "Mandioca"
+seed_item = &"semente_mandioca"
+harvest_item = &"mandioca"
+stage_days = PackedInt32Array(2, 3, 3)
+stage_textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3")])
+harvest_min = 2
+harvest_max = 3
+regrow_days = 0

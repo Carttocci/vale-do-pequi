@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CropData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/farming/crop_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/crops/feijao_0_placeholder.png" id="t0"]
+[ext_resource type="Texture2D" path="res://assets/crops/feijao_1_placeholder.png" id="t1"]
+[ext_resource type="Texture2D" path="res://assets/crops/feijao_2_placeholder.png" id="t2"]
+[ext_resource type="Texture2D" path="res://assets/crops/feijao_3_placeholder.png" id="t3"]
+
+[resource]
+script = ExtResource("1")
+id = &"feijao"
+display_name = "Feijão"
+seed_item = &"semente_feijao"
+harvest_item = &"feijao"
+stage_days = PackedInt32Array(1, 1, 1)
+stage_textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3")])
+harvest_min = 2
+harvest_max = 4
+regrow_days = 2

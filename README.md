@@ -9,9 +9,14 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 | Ação | Computador | Celular | Controle |
 |---|---|---|---|
 | Andar | WASD / setas | analógico na esquerda (encoste o dedo em qualquer lugar) | analógico / direcional |
-| Interagir | E | botão verde à direita | A |
+| Usar ferramenta/semente | clique ou C | botão laranja | X |
+| Trocar atalho | 1–9 / rodinha | tocar na barra de baixo | LB / RB |
+| Interagir / colher | E | botão verde à direita | A |
+| Mochila | I | botão da mochila | Y |
 | Pausa | Esc | botão ⏸ | Start |
 | Tela cheia | F11 | botão ⛶ (Android) | — |
+
+**Como jogar (Fase 2):** pegue a enxada (atalho 1) e capine a roça, plante (atalhos das sementes), regue e durma na porta de casa para passar o dia. Mais sementes no baú do avô, ao lado da casa. O jogo salva ao dormir e pelo menu de pausa.
 
 No celular o jogo é na horizontal. Dica: no Android, "Adicionar à tela inicial" abre o jogo em tela cheia, como um app.
 

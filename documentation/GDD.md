@@ -363,8 +363,8 @@ Cada fase termina com uma versão jogável publicada no navegador.
 |---|---|---|
 | 1 — Fundação | Projeto, personagem, 8 direções, câmera, fazenda provisória, colisões, interação | ✅ v0.1 |
 | — Web e celular | Export web, controles de toque, publicação automática | ✅ v0.2 |
-| 2 — Fazenda | Terreno, enxada, regador, plantio, colheita, inventário, baús, **save** | Próxima |
-| 3 — Tempo | Relógio, calendário, período chuvoso/seco, clima | |
+| 2 — Fazenda | Terreno, enxada, regador, plantio, colheita, inventário, baús, **save** | ✅ v0.3 (dormir provisório) |
+| 3 — Tempo | Relógio, calendário, período chuvoso/seco, clima | Próxima |
 | 4 — Vila | Vila, NPCs, diálogos, lojas, economia | |
 | 5 — Atividades | Pesca, caça, criação de animais | |
 | 6 — Combate | Hack-and-slash, armas, inimigos, habilidades | |

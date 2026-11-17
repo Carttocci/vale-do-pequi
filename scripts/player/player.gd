@@ -33,6 +33,14 @@ var input_enabled: bool = true
 
 var _anim_time: float = 0.0
 var _current_target: Interactable = null
+var _current_prompt: String = ""
+var _use_cooldown: float = 0.0
+## Botão de usar segurado. Controlado por eventos (não por Input.is_action_pressed)
+## para que um clique na interface não use a ferramenta no mundo.
+var _use_held: bool = false
+
+## Intervalo mínimo entre usos de ferramenta (evita spam ao segurar o botão).
+const USE_COOLDOWN := 0.22
 
 @onready var sprite: Sprite2D = $Sprite
 @onready var interaction_area: Area2D = $InteractionArea
@@ -50,12 +58,46 @@ func _physics_process(delta: float) -> void:
     move_and_slide()
     _update_state(input_dir, delta)
     _refresh_interaction_target()
+    _use_cooldown = maxf(0.0, _use_cooldown - delta)
+    # Segurar o botão de usar repete a ação (capinar/regar em sequência).
+    if input_enabled and _use_held and _use_cooldown <= 0.0:
+        use_selected_item()
+
+
+func _notification(what: int) -> void:
+    if what == NOTIFICATION_PAUSED:
+        _use_held = false
+
+
+func _input(event: InputEvent) -> void:
+    # Soltar o botão sempre conta, mesmo que a interface tenha consumido o evento.
+    if event.is_action_released("use_item"):
+        _use_held = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
-    if input_enabled and event.is_action_pressed("interact"):
+    if not input_enabled:
+        return
+    if event.is_action_pressed("use_item"):
+        # No celular cada toque vira também um clique "emulado"; sem este filtro,
+        # tocar em qualquer botão usaria a ferramenta. No toque, usar = botão próprio.
+        if event is InputEventMouseButton and event.device == InputEvent.DEVICE_ID_EMULATION:
+            return
+        _use_held = true
+        get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("interact"):
         if try_interact():
             get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("hotbar_next"):
+        GameState.select_slot(GameState.selected_slot + 1)
+    elif event.is_action_pressed("hotbar_prev"):
+        GameState.select_slot(GameState.selected_slot - 1)
+    else:
+        for i in GameState.HOTBAR_SIZE:
+            if event.is_action_pressed("tool_%d" % (i + 1)):
+                GameState.select_slot(i)
+                get_viewport().set_input_as_handled()
+                return
 
 
 func get_move_input() -> Vector2:
@@ -71,13 +113,34 @@ static func direction_to_index(dir: Vector2) -> int:
     return posmod(int(round((90.0 - degrees) / 45.0)), 8)
 
 
-## Interage com o alvo mais próximo. Retorna true se houve interação.
+## Ponto (no mundo) logo à frente dos pés: a célula onde ferramentas agem.
+func get_target_position() -> Vector2:
+    return global_position + Vector2(0, -3) + DIRECTIONS[facing_index] * 13.0
+
+
+## Interage com o objeto mais próximo; sem objeto, tenta a célula à frente
+## (ex.: colher). Retorna true se houve interação.
 func try_interact() -> bool:
     _refresh_interaction_target()
-    if _current_target == null:
+    if _current_target != null:
+        _current_target.interact(self)
+        return true
+    for provider in get_tree().get_nodes_in_group("cell_interaction"):
+        if provider.interact_cell(get_target_position(), self):
+            return true
+    return false
+
+
+## Usa o item selecionado na célula à frente (enxada, regador, semente...).
+func use_selected_item() -> bool:
+    _use_cooldown = USE_COOLDOWN
+    var item := GameState.get_selected_item()
+    if item == null:
         return false
-    _current_target.interact(self)
-    return true
+    for target in get_tree().get_nodes_in_group("item_target"):
+        if target.use_item(item, get_target_position(), self):
+            return true
+    return false
 
 
 func get_interaction_target() -> Interactable:
@@ -147,9 +210,13 @@ func _refresh_interaction_target() -> void:
         if dist < best_dist:
             best_dist = dist
             best = candidate
-    if best != _current_target:
-        _current_target = best
-        EventBus.interaction_prompt_changed.emit(best.get_prompt() if best else "")
-    elif best != null and best.prompt_dirty:
-        best.prompt_dirty = false
-        EventBus.interaction_prompt_changed.emit(best.get_prompt())
+    _current_target = best
+    var prompt := best.get_prompt() if best else ""
+    if prompt == "":
+        for provider in get_tree().get_nodes_in_group("cell_interaction"):
+            prompt = provider.get_cell_prompt(get_target_position())
+            if prompt != "":
+                break
+    if prompt != _current_prompt:
+        _current_prompt = prompt
+        EventBus.interaction_prompt_changed.emit(prompt)

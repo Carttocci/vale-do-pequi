@@ -1,8 +1,10 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/farm_level.gd" id="level"]
 [ext_resource type="Script" path="res://scripts/world/farm_ground.gd" id="ground"]
 [ext_resource type="Script" path="res://scripts/world/fence_line.gd" id="fence"]
+[ext_resource type="Script" path="res://scripts/farming/farm_field.gd" id="field"]
+[ext_resource type="PackedScene" path="res://scenes/farm/objects/bau.tscn" id="bau"]
 [ext_resource type="PackedScene" path="res://scenes/farm/objects/casa_principal.tscn" id="casa"]
 [ext_resource type="PackedScene" path="res://scenes/farm/objects/poco.tscn" id="poco"]
 [ext_resource type="PackedScene" path="res://scenes/farm/objects/placa.tscn" id="placa"]
@@ -17,11 +19,21 @@ script = ExtResource("level")
 [node name="Ground" type="TileMapLayer" parent="."]
 script = ExtResource("ground")
 
+[node name="Soil" type="TileMapLayer" parent="."]
+
 [node name="PlayerSpawn" type="Marker2D" parent="."]
 position = Vector2(464, 140)
 
 [node name="Entities" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="Crops" type="Node2D" parent="Entities"]
+y_sort_enabled = true
+
+[node name="BauDoAvo" parent="Entities" instance=ExtResource("bau")]
+position = Vector2(520, 114)
+starting_items = PackedStringArray("semente_abobora:6", "semente_mandioca:6", "semente_milho:10")
+title = "Baú do avô"
 
 [node name="CasaPrincipal" parent="Entities" instance=ExtResource("casa")]
 position = Vector2(464, 112)
@@ -138,3 +150,9 @@ position = Vector2(296, 238)
 script = ExtResource("fence")
 length_tiles = 3
 vertical = true
+
+[node name="FarmField" type="Node" parent="."]
+script = ExtResource("field")
+ground_path = NodePath("../Ground")
+soil_path = NodePath("../Soil")
+crops_root_path = NodePath("../Entities/Crops")

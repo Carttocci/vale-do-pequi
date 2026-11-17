@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CropData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/farming/crop_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/crops/milho_0_placeholder.png" id="t0"]
+[ext_resource type="Texture2D" path="res://assets/crops/milho_1_placeholder.png" id="t1"]
+[ext_resource type="Texture2D" path="res://assets/crops/milho_2_placeholder.png" id="t2"]
+[ext_resource type="Texture2D" path="res://assets/crops/milho_3_placeholder.png" id="t3"]
+
+[resource]
+script = ExtResource("1")
+id = &"milho"
+display_name = "Milho"
+seed_item = &"semente_milho"
+harvest_item = &"milho"
+stage_days = PackedInt32Array(1, 1, 2)
+stage_textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3")])
+harvest_min = 1
+harvest_max = 2
+regrow_days = 0

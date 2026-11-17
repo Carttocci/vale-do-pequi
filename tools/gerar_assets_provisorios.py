@@ -361,6 +361,135 @@ def make_touch_ui():
     circle("assets/ui/touch_btn_fullscreen_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), full)
 
 
+def make_farming():
+    """Fase 2: solo, cursor, ferramentas, sementes, colheitas, estágios das plantas, baú."""
+    o = C["outline"]
+    rng = random.Random(21)
+
+    # solo capinado: seco e molhado (2 tiles 16x16)
+    img = Image.new("RGBA", (32, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    for i, (base, line) in enumerate([(C["soil"], C["soil_d"]), ((74, 40, 30, 255), (52, 28, 22, 255))]):
+        d.rectangle([i * 16 + 1, 1, i * 16 + 14, 14], fill=base)
+        d.rectangle([i * 16 + 1, 1, i * 16 + 14, 14], outline=line)
+        for y in (4, 8, 12):
+            d.line([(i * 16 + 3, y), (i * 16 + 12, y)], fill=line)
+    img.save(out("assets/tilesets/soil_placeholder.png"))
+
+    # cursor do tile-alvo
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    for (x0, y0, dx, dy) in [(0, 0, 1, 1), (15, 0, -1, 1), (0, 15, 1, -1), (15, 15, -1, -1)]:
+        d.line([(x0, y0), (x0 + dx * 4, y0)], fill=(255, 240, 200, 230))
+        d.line([(x0, y0), (x0, y0 + dy * 4)], fill=(255, 240, 200, 230))
+    img.save(out("assets/ui/tile_cursor_placeholder.png"))
+
+    def icon(name, draw):
+        im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        draw(ImageDraw.Draw(im))
+        im.save(out(f"assets/items/{name}_placeholder.png"))
+
+    def enxada(d):
+        d.line([(3, 14), (11, 4)], fill=C["wood"], width=2)
+        d.polygon([(9, 2), (14, 2), (14, 6), (11, 5)], fill=C["stone"], outline=o)
+    def regador(d):
+        d.rectangle([3, 6, 11, 13], fill=(70, 130, 150, 255), outline=o)
+        d.line([(11, 8), (15, 4)], fill=(70, 130, 150, 255), width=2)
+        d.arc([4, 2, 10, 9], 180, 360, fill=o)
+    icon("enxada", enxada)
+    icon("regador", regador)
+
+    def pouch(color):
+        def f(d):
+            d.polygon([(4, 5), (12, 5), (14, 14), (2, 14)], fill=C["bege"], outline=o)
+            d.rectangle([5, 3, 11, 5], fill=C["bege_d"], outline=o)
+            d.ellipse([6, 8, 10, 12], fill=color, outline=o)
+        return f
+    crops = {
+        "milho": (C["ipe"], (110, 150, 50, 255)),
+        "feijao": ((120, 60, 40, 255), (90, 140, 60, 255)),
+        "abobora": ((214, 120, 40, 255), (80, 130, 50, 255)),
+        "mandioca": ((200, 150, 100, 255), (70, 120, 50, 255)),
+    }
+    for name, (fruit, leaf) in crops.items():
+        icon(f"semente_{name}", pouch(fruit))
+
+    # ícones das colheitas
+    def milho(d):
+        d.polygon([(5, 14), (8, 1), (11, 14)], fill=(110, 150, 50, 255), outline=o)
+        d.ellipse([6, 3, 10, 12], fill=C["ipe"], outline=o)
+    def feijao(d):
+        for (x, y) in [(3, 8), (8, 5), (9, 10)]:
+            d.ellipse([x, y, x + 5, y + 4], fill=(120, 60, 40, 255), outline=o)
+    def abobora(d):
+        d.ellipse([1, 4, 15, 15], fill=(214, 120, 40, 255), outline=o)
+        d.line([(8, 5), (8, 14)], fill=(170, 90, 30, 255))
+        d.rectangle([7, 1, 9, 4], fill=C["wood"])
+    def mandioca(d):
+        d.polygon([(2, 12), (12, 3), (14, 5), (5, 14)], fill=(160, 100, 60, 255), outline=o)
+        d.line([(5, 11), (11, 5)], fill=C["bege"])
+    for name, fn in [("milho", milho), ("feijao", feijao), ("abobora", abobora), ("mandioca", mandioca)]:
+        icon(name, fn)
+
+    # estágios (16x32, base em y=31): broto, jovem, crescendo, maduro(+ fruto)
+    def stage_img(name, leaf, fruit, n_stages):
+        for s in range(n_stages):
+            im = Image.new("RGBA", (16, 32), (0, 0, 0, 0))
+            d = ImageDraw.Draw(im)
+            h = [4, 9, 15, 20][min(s, 3)]
+            if name == "milho":
+                h = [4, 10, 18, 26][min(s, 3)]
+            base = 30
+            d.line([(8, base), (8, base - h)], fill=leaf, width=2)
+            for k in range(1, s + 2):
+                y = base - k * max(2, h // (s + 2))
+                d.line([(8, y), (3, y - 3)], fill=leaf, width=1)
+                d.line([(8, y), (13, y - 3)], fill=leaf, width=1)
+            if s == n_stages - 1:  # maduro
+                if name == "milho":
+                    d.ellipse([9, base - 18, 13, base - 9], fill=C["ipe"], outline=o)
+                elif name == "feijao":
+                    for (x, y) in [(2, base - 10), (11, base - 13), (4, base - 16)]:
+                        d.rectangle([x, y, x + 3, y + 2], fill=fruit, outline=o)
+                elif name == "abobora":
+                    d.ellipse([2, base - 8, 14, base + 1], fill=fruit, outline=o)
+                elif name == "mandioca":
+                    d.ellipse([3, base - 22, 13, base - 12], fill=leaf, outline=o)
+                    d.line([(8, base), (5, base + 1)], fill=(160, 100, 60, 255), width=2)
+            im.save(out(f"assets/crops/{name}_{s}_placeholder.png"))
+    for name, (fruit, leaf) in crops.items():
+        stage_img(name, leaf, fruit, 4)
+
+    # baú
+    img = Image.new("RGBA", (20, 18), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.ellipse([2, 14, 18, 17], fill=(0, 0, 0, 70))
+    d.rectangle([1, 6, 18, 15], fill=C["wood"], outline=o)
+    d.rectangle([1, 2, 18, 7], fill=C["wood_l"], outline=o)
+    d.line([(1, 10), (18, 10)], fill=C["wood_d"])
+    d.rectangle([8, 6, 11, 10], fill=C["pequi"], outline=o)
+    img.save(out("assets/environments/bau_placeholder.png"))
+
+    # botões de toque: usar item e mochila
+    def touch_btn(path, size, fill, ring, glyph):
+        im = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        d.ellipse([0, 0, size - 1, size - 1], fill=fill, outline=ring, width=2)
+        glyph(d, size)
+        im.save(out(path))
+    def tool_glyph(d, s):
+        c = s // 2
+        d.line([(c - 7, c + 7), (c + 4, c - 4)], fill=C["wood_l"], width=3)
+        d.polygon([(c + 1, c - 9), (c + 9, c - 9), (c + 9, c - 3), (c + 4, c - 4)], fill=C["stone"], outline=o)
+    def bag_glyph(d, s):
+        c = s // 2
+        d.rectangle([c - 6, c - 3, c + 6, c + 7], fill=C["bege"], outline=o)
+        d.arc([c - 4, c - 8, c + 4, c - 1], 180, 360, fill=C["bege"], width=2)
+    touch_btn("assets/ui/touch_btn_use_placeholder.png", 36, (178, 84, 52, 190), (246, 196, 28, 230), tool_glyph)
+    touch_btn("assets/ui/touch_btn_use_pressed_placeholder.png", 36, (246, 196, 28, 230), (178, 84, 52, 230), tool_glyph)
+    touch_btn("assets/ui/touch_btn_bag_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), bag_glyph)
+
+
 def make_app_icons():
     """Ícones do app web/PWA (pequi sobre terra vermelha)."""
     for size in (144, 180, 512):
@@ -374,6 +503,7 @@ def make_app_icons():
 
 if __name__ == "__main__":
     make_touch_ui()
+    make_farming()
     make_app_icons()
     make_tileset()
     make_player()

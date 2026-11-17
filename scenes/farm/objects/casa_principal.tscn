@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/environments/casa_principal_placeholder.png" id="tex"]
-[ext_resource type="Script" path="res://scripts/world/inspectable.gd" id="scr"]
+[ext_resource type="Script" path="res://scripts/world/house_door.gd" id="scr"]
 [ext_resource type="Script" path="res://scripts/world/interactable.gd" id="int"]
 
 [sub_resource type="RectangleShape2D" id="body"]
@@ -13,8 +13,6 @@ radius = 12.0
 [node name="CasaPrincipal" type="StaticBody2D"]
 collision_mask = 0
 script = ExtResource("scr")
-prompt = "Entrar em casa"
-messages = PackedStringArray("A porta tá emperrada. A casa precisa de reforma (interiores na Fase 3).", "Dá pra ver poeira e móveis velhos pela fresta.")
 
 [node name="Sprite" type="Sprite2D" parent="."]
 texture = ExtResource("tex")

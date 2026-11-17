@@ -11,14 +11,9 @@ signal interacted(actor: Node)
 const LAYER_INTERACTABLE := 1 << 2  # camada 3
 
 ## Texto mostrado no HUD, sem a tecla (o HUD adiciona "[E]").
-@export var prompt: String = "Interagir":
-    set(value):
-        prompt = value
-        prompt_dirty = true
+## O jogador relê este texto a cada quadro, então pode mudar a qualquer hora.
+@export var prompt: String = "Interagir"
 @export var enabled: bool = true
-
-## Marcado quando o texto muda enquanto o jogador já está mirando o objeto.
-var prompt_dirty: bool = false
 
 
 func _ready() -> void:

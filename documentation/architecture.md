@@ -29,12 +29,37 @@ Main (main.gd)
 └── TouchControls (CanvasLayer 2)        analógico virtual + botões de toque
 ```
 
-## Autoloads
+## Autoloads (nesta ordem)
 
 | Nome | Arquivo | Papel |
 |---|---|---|
-| `EventBus` | scripts/core/event_bus.gd | Sinais globais: mensagens, dica de interação, item coletado, pausa |
-| `GameState` | scripts/core/game_state.gd | Estado da sessão. **Provisório**: só contagem de itens até o inventário da Fase 2 |
+| `EventBus` | scripts/core/event_bus.gd | Sinais globais: mensagens, dica de interação, item coletado, baú aberto, pausa, modo toque |
+| `ItemDB` | scripts/core/item_db.gd | Catálogo: lê `data/items/*.tres` (ItemData) e `data/crops/*.tres` (CropData) |
+| `GameState` | scripts/core/game_state.gd | Estado do jogador: mochila, atalho selecionado, água do regador, dia |
+| `SaveManager` | scripts/save/save_manager.gd | Salvar/carregar JSON com versão e migração |
+
+## Fazenda (Fase 2)
+
+- **Dados:** `ItemData` (id, nome, ícone, categoria, pilha, ferramenta, cultura da semente) e `CropData` (estágios por dias regados, texturas, colheita, rebrota). Itens novos = só um `.tres` novo, sem código.
+- **Inventory** (`scripts/inventory/inventory.gd`): slots `null` ou `{id, count}`; pilhas, transferência, serialização tolerante a itens que deixarem de existir.
+- **FarmField** (`scripts/farming/farm_field.gd`): estado por célula `{watered, crop, age}`, TileMapLayer `Soil` para a terra, um `Sprite2D` por planta dentro de `Entities/Crops` (y-sort com o jogador). Cresce no sinal `GameState.day_advanced` (só dormir; carregar save não faz crescer).
+- **Jogador sem acoplamento:** o Player chama `use_item(item, ponto, ator)` em todo nó do grupo `item_target` e `get_cell_prompt`/`interact_cell` nos do grupo `cell_interaction`. O FarmField é um deles; pesca, mineração etc. entram do mesmo jeito.
+- **Uso por eventos:** "usar" é ligado por evento (não por polling), para que clicar na interface não use a ferramenta; no celular, o clique emulado do toque é ignorado e o botão "usar" faz o papel.
+
+## Save
+
+Arquivo `user://vale_do_pequi_save.json` (no navegador: IndexedDB).
+
+```
+{ "version": 1, "saved_at": "...",
+  "game":   GameState.to_data()  → dia, água, atalho, mochila,
+  "player": {x, y, facing},
+  "nodes":  { "Farm/FarmField": {...}, "Farm/Entities/BauDoAvo": {...}, "Farm/Entities/Pequizeiro1": {...} } }
+```
+
+- Nós do grupo `persistent` implementam `get_save_data()` / `load_save_data(data)`; a chave é o caminho a partir do nó do grupo `save_root` (a cena principal).
+- `SaveManager.migrate()` leva saves antigos até `GameState.DATA_VERSION`; save de versão mais nova ou corrompido é recusado sem mexer no jogo; campos faltando usam o padrão de jogo novo.
+- Salva ao dormir e pelo menu de pausa. Carrega automaticamente ao abrir o jogo.
 
 ## Camadas de física
 
@@ -90,7 +115,7 @@ Limitação conhecida: sem autotile, as bordas entre tipos de chão são retas. 
 
 ## Testes
 
-`tests/test_runner.tscn` — testes de integração (85 verificações): controles, mapeamento de direções, estrutura da cena, movimento, velocidade na diagonal, as 8 direções do sprite, colisão com casa/água/árvore/cerca/bordas, interação com poço, coleta de pequi, pausa e controles de toque (analógico virtual, botão de interagir, botão de pausa, troca toque ↔ teclado). Rodam também no GitHub Actions antes de cada publicação.
+`tests/test_runner.tscn` — testes de integração (184 verificações; os da Fase 2 cobrem catálogo, mochila, atalhos, ciclo completo de plantio, regras do solo, regador, rebrota, baú, mochila, save/load e robustez do save, botões de toque). Usam um arquivo de save separado e nunca tocam no save do jogador. Antes: 85 verificações: controles, mapeamento de direções, estrutura da cena, movimento, velocidade na diagonal, as 8 direções do sprite, colisão com casa/água/árvore/cerca/bordas, interação com poço, coleta de pequi, pausa e controles de toque (analógico virtual, botão de interagir, botão de pausa, troca toque ↔ teclado). Rodam também no GitHub Actions antes de cada publicação.
 
 ```
 godot --headless --path . res://tests/test_runner.tscn     # código de saída 0 = ok

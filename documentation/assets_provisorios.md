@@ -18,3 +18,9 @@ Ao trocar pela arte final, **mantenha nome, tamanho e layout** (ou ajuste o `off
 | assets/items/pequi_chao_placeholder.png | 8×8 | fruto caído |
 | assets/ui/touch_*_placeholder.png | 64, 28, 44, 26 px | analógico e botões de toque |
 | assets/ui/app_icon_*.png | 144, 180, 512 | ícones do app web (PWA) |
+| assets/tilesets/soil_placeholder.png | 32×16 | terra capinada seca / molhada |
+| assets/crops/<cultura>_<0-3>_placeholder.png | 16×32 | estágios das plantas; base em y=31 |
+| assets/items/*_placeholder.png | 16×16 | ícones de ferramentas, sementes e colheitas |
+| assets/environments/bau_placeholder.png | 20×18 | baú |
+| assets/ui/tile_cursor_placeholder.png | 16×16 | cursor da célula-alvo |
+| assets/ui/touch_btn_use*/bag_placeholder.png | 36 / 26 | botões de toque usar e mochila |

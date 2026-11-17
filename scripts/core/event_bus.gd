@@ -16,6 +16,9 @@ signal item_collected(item_id: StringName, amount: int, total: int)
 ## Controles de toque ligados (celular) ou desligados (teclado/controle).
 signal touch_mode_changed(enabled: bool)
 
+## Um baú pediu para abrir a tela de transferência.
+signal chest_open_requested(chest: Node)
+
 ## Jogo pausado/retomado pelo menu.
 signal pause_changed(paused: bool)
 

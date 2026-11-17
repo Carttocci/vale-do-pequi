@@ -43,5 +43,3 @@ texture = ExtResource("fruit")
 [node name="Pequi3" type="Sprite2D" parent="Fallen"]
 position = Vector2(13, -1)
 texture = ExtResource("fruit")
-
-[node name="RegrowTimer" type="Timer" parent="."]

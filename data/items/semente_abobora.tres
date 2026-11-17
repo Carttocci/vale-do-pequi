@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/semente_abobora_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"semente_abobora"
+display_name = "Semente de abóbora"
+description = "Abóbora demora 6 dias regados, mas vale a pena."
+icon = ExtResource("2")
+category = 1
+max_stack = 99
+sell_price = 8
+tool_type = 0
+crop_id = &"abobora"

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/semente_mandioca_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"semente_mandioca"
+display_name = "Rama de mandioca"
+description = "Mandioca é paciente: 8 dias regados. Dá farinha e muito mais."
+icon = ExtResource("2")
+category = 1
+max_stack = 99
+sell_price = 10
+tool_type = 0
+crop_id = &"mandioca"

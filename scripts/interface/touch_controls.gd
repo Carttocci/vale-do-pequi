@@ -13,6 +13,8 @@ var touch_mode: bool = false
 @onready var interact_button: TouchScreenButton = $Interact
 @onready var fullscreen_button: TouchScreenButton = $Fullscreen
 @onready var pause_button: TouchScreenButton = $Pause
+@onready var use_button: TouchScreenButton = $Use
+@onready var bag_button: TouchScreenButton = $Bag
 
 var _last_size := Vector2.ZERO
 
@@ -61,3 +63,5 @@ func _layout() -> void:
     interact_button.position = Vector2(size.x - 70, size.y - 78)
     pause_button.position = Vector2(size.x - 32, 6)
     fullscreen_button.position = Vector2(size.x - 64, 6)
+    bag_button.position = Vector2(size.x - 96, 6)
+    use_button.position = Vector2(size.x - 116, size.y - 54)

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/regador_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"regador"
+display_name = "Regador"
+description = "Rega a terra capinada. Encha no poço ou na lagoa."
+icon = ExtResource("2")
+category = 0
+max_stack = 1
+sell_price = 0
+tool_type = 2
+crop_id = &""

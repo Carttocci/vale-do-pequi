@@ -18,7 +18,10 @@ func _ready() -> void:
     player.position = level.get_spawn_position()
     level.get_entities_root().add_child(player)
     player.set_camera_limits(level.get_world_rect())
-    EventBus.show_message("Fazenda do Pequi. O mato tomou conta... bora começar.", 3.5)
+    if SaveManager.has_save() and SaveManager.load_game():
+        EventBus.show_message("Bem-vindo de volta! Dia %d." % GameState.day, 3.0)
+    else:
+        EventBus.show_message("Fazenda do Pequi. Pegue a enxada e bora capinar a roça!", 3.5)
 
 
 ## Desktop: escala inteira (pixel perfeito, pode sobrar borda).

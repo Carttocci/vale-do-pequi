@@ -5,8 +5,10 @@ extends CanvasLayer
 @onready var prompt_label: Label = $Root/Prompt
 @onready var message_label: Label = $Root/Message
 @onready var message_timer: Timer = $MessageTimer
-@onready var item_box: Control = $Root/ItemBox
-@onready var item_count: Label = $Root/ItemBox/Row/Count
+@onready var day_label: Label = $Root/DayBox/Day
+@onready var hotbar: Hotbar = $Root/Hotbar
+@onready var save_button: Button = $Root/PauseMenu/Panel/Buttons/Save
+@onready var new_game_button: Button = $Root/PauseMenu/Panel/Buttons/NewGame
 @onready var pause_menu: Control = $Root/PauseMenu
 @onready var resume_button: Button = $Root/PauseMenu/Panel/Buttons/Resume
 @onready var quit_button: Button = $Root/PauseMenu/Panel/Buttons/Quit
@@ -21,11 +23,13 @@ func _ready() -> void:
     process_mode = Node.PROCESS_MODE_ALWAYS
     prompt_label.hide()
     message_label.hide()
-    item_box.hide()
     pause_menu.hide()
     EventBus.interaction_prompt_changed.connect(_on_prompt_changed)
     EventBus.message_requested.connect(_on_message_requested)
-    EventBus.item_collected.connect(_on_item_collected)
+    GameState.day_changed.connect(func(d: int) -> void: day_label.text = "Dia %d" % d)
+    day_label.text = "Dia %d" % GameState.day
+    save_button.pressed.connect(_on_save_pressed)
+    new_game_button.pressed.connect(_on_new_game_pressed)
     message_timer.timeout.connect(_fade_message)
     resume_button.pressed.connect(set_paused.bind(false))
     quit_button.pressed.connect(func() -> void: get_tree().quit())
@@ -50,6 +54,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func set_paused(paused: bool) -> void:
     get_tree().paused = paused
     pause_menu.visible = paused
+    new_game_button.text = "Novo jogo"
     if paused:
         resume_button.grab_focus()
     EventBus.pause_changed.emit(paused)
@@ -93,7 +98,19 @@ func _fade_message() -> void:
     _message_tween.tween_callback(message_label.hide)
 
 
-func _on_item_collected(item_id: StringName, _amount: int, total: int) -> void:
-    if item_id == &"pequi":
-        item_box.show()
-        item_count.text = "x%d" % total
+func _on_save_pressed() -> void:
+    var ok := SaveManager.save_game()
+    save_button.text = "Salvo!" if ok else "Erro ao salvar"
+    get_tree().create_timer(1.5, true, false, true).timeout.connect(func() -> void: save_button.text = "Salvar jogo")
+
+
+## Novo jogo apaga o save: pede um segundo toque para confirmar
+## (sem janela de confirmação do navegador).
+func _on_new_game_pressed() -> void:
+    if new_game_button.text == "Novo jogo":
+        new_game_button.text = "Apagar save? Toque de novo"
+        return
+    SaveManager.delete_save()
+    GameState.new_game()
+    get_tree().paused = false
+    get_tree().reload_current_scene()
