@@ -1238,6 +1238,34 @@ def make_content():
     simple("arquibancada", 40, 22, arquibancada)
 
 
+def make_title():
+    """Fase 9: fundo da tela de título (320x180, ampliado 2x)."""
+    import random
+    r = random.Random(4)
+    W, H = 320, 180
+    im = Image.new("RGBA", (W, H))
+    d = ImageDraw.Draw(im)
+    top, mid = (70, 110, 170), (246, 170, 90)
+    for y in range(110):  # céu de fim de tarde
+        k = y / 110
+        d.line([(0, y), (W, y)], fill=tuple(int(top[i] + (mid[i] - top[i]) * k) for i in range(3)) + (255,))
+    d.ellipse([228, 52, 262, 86], fill=(255, 214, 120, 255))
+    serra = [(0, 100), (30, 84), (60, 92), (95, 70), (130, 88), (170, 76), (210, 90), (250, 72), (290, 86), (320, 80), (320, 120), (0, 120)]
+    d.polygon(serra, fill=(110, 90, 120, 255))
+    d.rectangle([0, 104, W, H], fill=C["dry"])
+    for _ in range(500):
+        x, y = r.randrange(W), r.randrange(106, H)
+        d.point((x, y), fill=r.choice([C["dry_l"], C["dry_d"], C["grass"], C["grass_d"]]))
+    d.polygon([(130, H), (254, 128), (268, 128), (200, H)], fill=C["earth"])
+    pequi = Image.open(out("assets/environments/pequizeiro_placeholder.png"))
+    ipe = Image.open(out("assets/environments/ipe_amarelo_placeholder.png"))
+    casa = Image.open(out("assets/environments/casa_principal_placeholder.png"))
+    im.alpha_composite(casa, (214, 120 - casa.height + 14))
+    for (img, x, y) in [(pequi, 40, 128), (ipe, 186, 120), (pequi, 280, 140), (ipe, 90, 112), (pequi, 10, 150)]:
+        im.alpha_composite(img, (x, y - img.height + 20))
+    im.resize((W * 2, H * 2), Image.NEAREST).save(out("assets/ui/titulo_fundo_placeholder.png"))
+
+
 if __name__ == "__main__":
     make_touch_ui()
     make_farming()
@@ -1260,4 +1288,5 @@ if __name__ == "__main__":
     make_sign()
     make_items()
     make_bush()
+    make_title()
     print("Assets provisórios gerados.")

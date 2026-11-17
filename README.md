@@ -15,7 +15,7 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 | Trocar atalho | 1–9 / rodinha | tocar na barra de baixo | LB / RB |
 | Mochila | I | botão da mochila | Y |
 | Diário (missões, caderno, habilidades) | J | botão do caderno | — |
-| Pausa | Esc | botão ⏸ | Start |
+| Pausa (opções, salvar, voltar ao menu) | Esc | botão ⏸ | Start |
 | Tela cheia | F11 | botão ⛶ (Android) | — |
 
 **Tempo:** o dia vai das 06:00 às 02:00 (~14 min reais). Começa em 1º de outubro, no período chuvoso; chuva rega a roça sozinha. Milho e abóbora só no chuvoso; feijão e mandioca o ano todo. Pequi só cai de outubro a janeiro.
@@ -25,6 +25,8 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 **Mata e rio:** da vila, siga a estrada para o leste. Pesque com vara e minhoca (João Pedro, na lagoa da vila), observe os bichos (E) para o caderno de campo e arme armadilhas de javali. Galinhas e vacas: Mariana, na clínica.
 
 **Aventura:** a história começa conversando com o Seu Benedito na vila; a missão atual aparece no canto da tela e no diário (J). Pedidos do povo ficam no mural da praça. Com a picareta do Toninho, abra a trilha no norte da mata até a Serra do Cristal, desça a mina (elevador nos andares 5 e 10) e descubra as Ruínas do Cerrado.
+
+**Começo:** o jogo abre na tela de título (Continuar / Novo jogo / Opções). Música e efeitos têm volume próprio nas Opções.
 
 **Vida no vale:** cozinhe no fogão a lenha (ao lado da casa) e coma com a comida na mão (E). Dê presentes aos moradores (item na mão + E): com 2 corações eles ensinam receitas de família. Na bancada você faz decoração e obras da fazenda. Fique de olho nas festas da praça: Festa do Pequi (5/dez), Folia de Reis (6/jan), Cavalhadas (8/mai) e Festa Junina (9/jun).
 
@@ -44,4 +46,4 @@ A cada `push` na `main`, o workflow `.github/workflows/publicar-web.yml` roda os
   (Abrir o `index.html` direto do disco não funciona — o navegador bloqueia.)
 
 Documentação em `documentation/`: arquitetura, mecânicas, changelog e assets provisórios.
-Os PNGs provisórios são gerados por `tools/gerar_assets_provisorios.py` (Python + Pillow).
+Os PNGs provisórios são gerados por `tools/gerar_assets_provisorios.py` (Python + Pillow) e os sons e músicas por `tools/gerar_audio.py` (Python + numpy). Itens: `tools/gerar_itens.py`; peixes: `tools/gerar_peixes.py`.

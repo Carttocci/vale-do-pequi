@@ -59,6 +59,7 @@ func _process(delta: float) -> void:
             if _timer <= 0.0:
                 phase = Phase.BITE
                 _timer = BITE_WINDOW
+                Audio.play(&"agua")
                 _refresh()
         Phase.BITE:
             _timer -= delta

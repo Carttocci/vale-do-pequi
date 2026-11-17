@@ -12,6 +12,7 @@ func _ready() -> void:
 
 
 func _on_interacted(_actor: Node) -> void:
+    Audio.play(&"porta")
     GameState.sleep()
     var ok := SaveManager.save_game()
     EventBus.show_message("Bom dia! %s — %s.%s" % [Calendar.format_date(GameState.day), Clock.weather_name(),

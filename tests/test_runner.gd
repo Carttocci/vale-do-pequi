@@ -22,6 +22,7 @@ const TEST_SAVE := "user://teste_automatizado_save.json"
 func _ready() -> void:
     # Nunca toca no save real do jogador.
     SaveManager.save_path = TEST_SAVE
+    Settings.path = "user://teste_opcoes.cfg"
     SaveManager.delete_save()
     # Tempo parado e sol todo dia: testes determinísticos. Os da Fase 3
     # ligam o relógio e trocam o clima quando precisam.
@@ -103,6 +104,10 @@ func _run_all() -> void:
     await _test_festivals()
     await _test_decor_and_obras()
     await _test_save_v7()
+    _test_data_integrity()
+    await _test_audio()
+    await _test_settings_and_options()
+    await _test_title_screen()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -2245,3 +2250,148 @@ func _test_save_v7() -> void:
     check(GameState.knows_recipe(&"pamonha"), "save antigo ganha as receitas iniciais")
     SaveManager.delete_save()
     GameState.new_game()
+
+
+# --- Fase 9: finalização --------------------------------------------------------
+
+func _test_data_integrity() -> void:
+    print("[Fase 9: dados consistentes]")
+    var bad := PackedStringArray()
+    for r in Recipes.station("cozinha") + Recipes.station("bancada") + Recipes.station("obras"):
+        for it in r.ing:
+            if ItemDB.get_item(StringName(it)) == null:
+                bad.append("receita %s: %s" % [r.id, it])
+        if r.has("out") and ItemDB.get_item(StringName(r.out)) == null:
+            bad.append("receita %s sem item" % r.id)
+    var npc_ids := {}
+    for n in get_tree().get_nodes_in_group("npc"):
+        npc_ids[String(n.data.id)] = true
+        for list in [n.data.gifts_love, n.data.gifts_like, n.data.gifts_hate, n.data.shop_sells]:
+            for it in list:
+                if not it.begins_with("animal:") and ItemDB.get_item(StringName(it)) == null:
+                    bad.append("%s: item %s" % [n.data.id, it])
+        for it in n.data.shop_sells:
+            if not it.begins_with("animal:") and ItemDB.get_item(StringName(it)).buy_price <= 0:
+                bad.append("%s vende %s sem preço" % [n.data.id, it])
+    for q in Quests.defs.values():
+        for st in q.steps:
+            if st.has("npc") and not npc_ids.has(st.npc):
+                bad.append("missão %s: morador %s" % [q.id, st.npc])
+            if st.has("item") and ItemDB.get_item(StringName(st.item)) == null:
+                bad.append("missão %s: item %s" % [q.id, st.item])
+        for it in q.get("rewards", {}).get("items", {}):
+            if ItemDB.get_item(StringName(it)) == null:
+                bad.append("missão %s: prêmio %s" % [q.id, it])
+    for e in HeartEvents.all():
+        if not npc_ids.has(e.npc):
+            bad.append("evento: morador %s" % e.npc)
+        for it in e.get("items", {}):
+            if ItemDB.get_item(StringName(it)) == null:
+                bad.append("evento %s: item %s" % [e.npc, it])
+    for f: StringName in VilaLevel.BARRACA_ITEMS:
+        for it in VilaLevel.BARRACA_ITEMS[f]:
+            var item := ItemDB.get_item(StringName(it))
+            if item == null or item.buy_price <= 0:
+                bad.append("barraca %s: %s" % [f, it])
+    check(bad.is_empty(), "receitas, lojas, missões e eventos só citam itens e moradores que existem " + str(bad))
+    var arb := PackedStringArray()
+    for item in ItemDB.all_items():
+        if item.buy_price > 0 and item.sell_price >= item.buy_price:
+            arb.append(String(item.id))
+        if item.category == ItemData.Category.FOOD and item.energy <= 0:
+            arb.append(String(item.id) + " (comida sem energia)")
+    check(arb.is_empty(), "nenhum item dá lucro comprando e revendendo; toda comida dá energia " + str(arb))
+    for r in Recipes.station("cozinha"):
+        var cost := 0
+        for it in r.ing:
+            cost += ItemDB.get_item(StringName(it)).sell_price * int(r.ing[it])
+        var value := ItemDB.get_item(StringName(r.out)).sell_price * int(r.get("count", 1))
+        if value < cost:
+            arb.append(r.id)
+    check(arb.is_empty(), "cozinhar nunca dá prejuízo na venda " + str(arb))
+
+
+func _test_audio() -> void:
+    print("[Fase 9: som e música]")
+    check(AudioServer.get_bus_index(Audio.BUS_MUSIC) != -1 and AudioServer.get_bus_index(Audio.BUS_SFX) != -1,
+        "canais de música e efeitos")
+    check(Audio._sfx.size() == Audio.SFX.size() and Audio._music.size() == Audio.TRACKS.size(), "todos os sons carregados")
+    check(Audio._music.values().all(func(s: AudioStreamWAV) -> bool: return s.loop_mode == AudioStreamWAV.LOOP_FORWARD),
+        "músicas em loop")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    set_time(3, 10 * 60)
+    check(Audio.music_for_context() == &"dia", "de dia: viola")
+    set_time(3, 20 * 60)
+    check(Audio.music_for_context() == &"noite", "à noite: música da noite")
+    var mn := mine()
+    mn.pending_floor = 1
+    _main.change_region_now(&"mina")
+    check(Audio.current_track == &"mina", "na mina: música da mina")
+    _main.change_region_now(&"vila")
+    set_time(25, 10 * 60)
+    check(Audio.music_for_context() == &"festa", "dia de festa na vila: forró")
+    set_time(3, 10 * 60)
+    _main.change_region_now(&"farm")
+    Audio._last_played.clear()
+    GameState.add_money(10)
+    check(Audio.last_sfx == &"moeda", "ganhar dinheiro toca moeda")
+    Audio._last_played.clear()
+    GameState.damage(5)
+    check(Audio.last_sfx == &"dano", "levar dano toca som")
+    Audio._last_played.clear()
+    var field := _main.get_node("Farm/FarmField") as FarmField
+    field.till(Vector2i(10, 12))
+    check(Audio.last_sfx == &"capinar", "capinar faz barulho de enxada")
+
+
+func _test_settings_and_options() -> void:
+    print("[Fase 9: opções]")
+    Settings.set_music_volume(0.3)
+    var idx := AudioServer.get_bus_index(Audio.BUS_MUSIC)
+    check(is_equal_approx(AudioServer.get_bus_volume_db(idx), linear_to_db(0.3)), "volume da música aplicado")
+    Settings.set_sfx_volume(0.0)
+    check(AudioServer.is_bus_mute(AudioServer.get_bus_index(Audio.BUS_SFX)), "efeitos no zero = mudo")
+    Settings.music_volume = 1.0
+    Settings.load_settings()
+    check(is_equal_approx(Settings.music_volume, 0.3) and Settings.sfx_volume == 0.0, "opções salvas em arquivo")
+    var hud := _main.get_node("HUD")
+    Settings.set_show_quest_hint(false)
+    check(not hud.quest_label.visible, "dá para esconder a missão da tela")
+    Settings.set_show_quest_hint(true)
+    hud.set_paused(true)
+    check(hud.options_button.get_parent() == hud.save_button.get_parent(), "menu de pausa tem 'Opções'")
+    hud.options_button.pressed.emit()
+    check(hud.options_panel.visible and not hud.pause_menu.visible, "opções abrem por cima do jogo pausado")
+    hud.options_panel.music_slider.value = 0.5
+    check(is_equal_approx(Settings.music_volume, 0.5), "slider muda o volume")
+    hud.options_panel.close()
+    check(hud.pause_menu.visible, "voltar das opções retorna ao menu de pausa")
+    hud.set_paused(false)
+    check(not get_tree().paused, "jogo volta")
+    Settings.set_music_volume(0.7)
+    Settings.set_sfx_volume(0.8)
+    DirAccess.remove_absolute(Settings.path)
+
+
+func _test_title_screen() -> void:
+    print("[Fase 9: tela de título]")
+    check(ProjectSettings.get_setting("application/run/main_scene") == "res://scenes/title/title.tscn", "jogo abre na tela de título")
+    check(str(ProjectSettings.get_setting("application/config/version")).begins_with("1."), "versão 1.x")
+    SaveManager.delete_save()
+    var title := (load("res://scenes/title/title.tscn") as PackedScene).instantiate() as TitleScreen
+    add_child(title)
+    await frames(2)
+    check(not title.continue_button.visible, "sem save: sem 'Continuar'")
+    title.queue_free()
+    SaveManager.save_game()
+    title = (load("res://scenes/title/title.tscn") as PackedScene).instantiate() as TitleScreen
+    add_child(title)
+    await frames(2)
+    check(title.continue_button.visible and title.continue_button.text.begins_with("Continuar ("), "com save: 'Continuar (data)'")
+    title._on_new_pressed()
+    check(title.new_button.text != "Novo jogo" and SaveManager.has_save(), "novo jogo pede confirmação antes de apagar")
+    title.options.open()
+    check(title.options.visible, "opções na tela de título")
+    title.queue_free()
+    SaveManager.delete_save()

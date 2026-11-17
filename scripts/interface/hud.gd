@@ -33,6 +33,7 @@ func _ready() -> void:
     update_clock()
     _build_bars()
     _build_tracker()
+    _build_menu_extras()
     save_button.pressed.connect(_on_save_pressed)
     new_game_button.pressed.connect(_on_new_game_pressed)
     message_timer.timeout.connect(_fade_message)
@@ -54,11 +55,17 @@ func _process(_delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("menu"):
+        if options_panel and options_panel.visible:
+            options_panel.close()
+            get_viewport().set_input_as_handled()
+            return
         set_paused(not get_tree().paused)
         get_viewport().set_input_as_handled()
 
 
 func set_paused(paused: bool) -> void:
+    if options_panel:
+        options_panel.hide()
     get_tree().paused = paused
     pause_menu.visible = paused
     new_game_button.text = "Novo jogo"
@@ -201,3 +208,48 @@ func update_tracker() -> void:
                 break
     quest_label.text = text
     buff_label.text = ("◆ " + GameState.BUFF_NAMES[GameState.buff]) if GameState.buff != &"" else ""
+
+
+# --- opções e volta ao menu ----------------------------------------------------
+
+const TITLE_SCENE := "res://scenes/title/title.tscn"
+
+var options_panel: OptionsPanel
+var options_button: Button
+var menu_button: Button
+
+
+func _build_menu_extras() -> void:
+    var buttons: Control = $Root/PauseMenu/Panel/Buttons
+    options_button = Button.new()
+    options_button.name = "Options"
+    options_button.text = "Opções"
+    options_button.pressed.connect(func() -> void:
+        pause_menu.hide()
+        options_panel.open())
+    buttons.add_child(options_button)
+    buttons.move_child(options_button, quit_button.get_index())
+    menu_button = Button.new()
+    menu_button.name = "TitleMenu"
+    menu_button.text = "Salvar e ir ao menu"
+    menu_button.pressed.connect(go_to_title)
+    buttons.add_child(menu_button)
+    buttons.move_child(menu_button, quit_button.get_index())
+    for b in [options_button, menu_button]:
+        b.add_theme_font_size_override("font_size", save_button.get_theme_font_size("font_size"))
+    options_panel = OptionsPanel.new()
+    $Root.add_child(options_panel)
+    options_panel.closed.connect(func() -> void: pause_menu.show())
+    Settings.changed.connect(_apply_settings)
+    _apply_settings()
+
+
+func _apply_settings() -> void:
+    if quest_label:
+        quest_label.visible = Settings.show_quest_hint
+
+
+func go_to_title() -> void:
+    SaveManager.save_game()
+    get_tree().paused = false
+    get_tree().change_scene_to_file(TITLE_SCENE)

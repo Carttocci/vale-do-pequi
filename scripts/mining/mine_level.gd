@@ -233,6 +233,7 @@ func _build_arena() -> void:
             EventBus.show_message("O Guardião se desfaz em pó de cristal. Algo pulsa no chão...", 3.5))
         _dyn.add_child(boss)
         EventBus.show_message("O chão treme... o Guardião de Cristal desperta!", 3.0)
+        Audio.play(&"chefe")
     else:
         for i in 6:
             var r := Rock.new()

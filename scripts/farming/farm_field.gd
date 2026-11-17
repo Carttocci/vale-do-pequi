@@ -99,6 +99,7 @@ func till(cell: Vector2i) -> bool:
         return false
     cells[cell] = {"watered": false, "crop": &"", "age": 0}
     _refresh(cell)
+    Audio.play(&"capinar")
     return true
 
 
@@ -107,6 +108,7 @@ func water(cell: Vector2i) -> bool:
         return false
     cells[cell].watered = true
     _refresh(cell)
+    Audio.play(&"regar")
     return true
 
 

@@ -69,6 +69,7 @@ func take_hit(amount: int, dir: Vector2, knockback: float, stun: float = 0.0) ->
     if is_dead():
         return
     hp -= amount
+    Audio.play(&"acerto")
     _knock = dir.normalized() * knockback
     _stun = maxf(_stun, stun + 0.15)
     sprite.modulate = Color(2, 2, 2)

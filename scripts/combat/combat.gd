@@ -69,6 +69,7 @@ func attack() -> bool:
     _since_last = 0.0
     cooldown = w.attack_cooldown * (0.85 if combo == 3 else 1.0)
     var mult := GameState.melee_multiplier() * (1.6 if combo == 3 else 1.0)
+    Audio.play(&"golpe")
     _hit(w, int(round(w.damage * mult)), w.knockback * (1.5 if combo == 3 else 1.0), false)
     attacked.emit(w, combo, false)
     return true

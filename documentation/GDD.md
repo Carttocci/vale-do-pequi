@@ -371,7 +371,7 @@ Cada fase termina com uma versão jogável publicada no navegador.
 | 6 — Combate | Hack-and-slash, armas, inimigos, habilidades | ✅ v0.7 |
 | 7 — Aventura | Mineração, ruínas, masmorras, missões, **início da trama do Silêncio** | ✅ v0.8 |
 | 8 — Conteúdo | Culinária, eventos/festividades, relacionamentos, construção | ✅ v0.9 |
-| 9 — Finalização | Testes, otimização, áudio, balanceamento, lançamento | Próxima |
+| 9 — Finalização | Testes, otimização, áudio, balanceamento, lançamento | ✅ v1.0 |
 
 Prioridades permanentes: sensação de controle agradável · cara de Goiás (não fazenda genérica) · arquitetura bem estruturada desde o início.
 

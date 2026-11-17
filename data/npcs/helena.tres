@@ -27,4 +27,4 @@ lines_repeat = PackedStringArray("Mais alguma coisa?", "Volta sempre!")
 shop_marker = &"mercearia_balcao"
 shop_title = "Mercearia da Helena"
 shop_sells = PackedStringArray("semente_milho", "semente_feijao", "semente_abobora", "semente_mandioca", "arroz", "acucar")
-shop_buys = PackedInt32Array(2, 3, 6)
+shop_buys = PackedInt32Array(2, 3, 6, 8)

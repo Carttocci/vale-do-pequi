@@ -39,6 +39,8 @@ Main (main.gd)
 | `GameState` | scripts/core/game_state.gd | Estado do jogador: mochila, atalho selecionado, água do regador, dia |
 | `Quests` | scripts/quests/quests.gd | Missões (data/quests.json): ativas, concluídas, contadores; falas de missão dos moradores |
 | `SaveManager` | scripts/save/save_manager.gd | Salvar/carregar JSON com versão e migração |
+| `Audio` | scripts/core/audio.gd | Canais Música/Efeitos, efeitos por sinais do jogo, música por contexto com fade |
+| `Settings` | scripts/core/settings.gd | Opções em user://opcoes.cfg (volumes, dica de missão) |
 
 ## Fazenda (Fase 2)
 
@@ -65,6 +67,12 @@ Main (main.gd)
 - `Rock` (picareta) e `Mining` (provedor `item_target`). Pedras quebradas avisam o `Level.invalidate_nav()`.
 - `Boss` herda de `Enemy` e adiciona ataque especial, segunda fase e ajudantes; `Projectile` acerta o jogador.
 - `Quests` escuta `EventBus.region_entered`, `enemy_killed`, `GameState.flag_set`, mochila e relógio para concluir etapas sozinhas; `Npc.talk()` pergunta `Quests.dialogue_for(id)` antes da conversa normal. `QuestBoard` (mural) e `JournalUI` (diário) só leem o autoload.
+
+## Finalização (Fase 9)
+
+- Cena inicial: `scenes/title/title.tscn` (`TitleScreen`). "Novo jogo" apaga o save e chama `GameState.new_game()`; as duas opções abrem `scenes/main/main.tscn`, que carrega o save se existir.
+- Áudio sem arquivos de terceiros: `tools/gerar_audio.py` sintetiza os WAV (Karplus-Strong para a viola, ruído filtrado para os efeitos). As músicas são importadas com compressão QOA e entram em loop pelo código (`Audio._ready`).
+- `OptionsPanel` é o mesmo painel na tela de título e no menu de pausa.
 
 ## Conteúdo (Fase 8)
 

@@ -111,3 +111,4 @@ func enter_chamber() -> void:
         EventBus.show_message("O eco se desfaz em silêncio... e uma luz dourada surge no fundo da câmara.", 4.0))
     get_entities_root().add_child(boss)
     EventBus.show_message("O ar fica pesado e sem som. Algo sem rosto se forma na sua frente!", 3.0)
+    Audio.play(&"chefe")

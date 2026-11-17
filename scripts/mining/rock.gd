@@ -51,6 +51,7 @@ func hit(power: int = 1) -> bool:
     if hp <= 0:
         return false
     hp -= power
+    Audio.play(&"picareta")
     var t := create_tween()
     _sprite.position = Vector2(1, 0)
     t.tween_property(_sprite, "position", Vector2.ZERO, 0.1)
@@ -65,6 +66,7 @@ func hit(power: int = 1) -> bool:
             pk.position = position + Vector2(rng.randf_range(-4, 4), 2)
             get_parent().add_child(pk)
     GameState.add_xp(&"mineracao", int(info.xp))
+    Audio.play(&"pedra_quebra")
     broken.emit(self)
     var level := _level()
     collision_layer = 0

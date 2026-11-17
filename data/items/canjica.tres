@@ -12,6 +12,6 @@ icon = ExtResource("2")
 category = 8
 max_stack = 99
 sell_price = 70
-buy_price = 25
+buy_price = 80
 energy = 45
 health = 15

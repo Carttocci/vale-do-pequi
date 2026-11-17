@@ -402,6 +402,7 @@ func eat(item: ItemData) -> bool:
     if item == null or item.category != ItemData.Category.FOOD:
         return false
     restore(item.health, item.energy)
+    Audio.play(&"comer")
     if item.buff != &"":
         set_buff(item.buff)
     EventBus.show_message("Comeu %s. +%d energia%s" % [item.display_name.to_lower(), item.energy,

@@ -71,3 +71,12 @@
 | Festas | Festa do Pequi 5/dez, Folia de Reis 6/jan, Cavalhadas 8/mai, Festa Junina 9/jun; moradores na praça das 9h às 22h | `ALL` em scripts/events/festivals.gd; atrações em vila_level.gd |
 | Lembranças do vale | 1ª vez de cada receita, cada festa (por ano), cada conversa especial | `GameState.add_memory` |
 | Obras | caixa d'água (regador 40), galinheiro 10, curral 6 | data/recipes.json (`obras`), ranch.gd `capacity` |
+
+## Fase 9 — balanceamento
+| Regra | Valor | Onde ajustar |
+|---|---|---|
+| Revenda | Preço de compra sempre maior que o de venda (teste automático) | tools/gerar_itens.py |
+| Cozinha | Valor de venda do prato ≥ soma dos ingredientes (teste automático) | tools/gerar_itens.py, data/recipes.json |
+| Quem compra comida pronta | Helena (mercearia) | `shop_buys` em data/npcs/helena.tres |
+| Música | dia · noite (19h+) · mina (mina/ruínas) · festa (vila em dia de festa, até 22h); troca em 1,5 s | `music_for_context` em scripts/core/audio.gd |
+| Volume padrão | música 70%, efeitos 80% | scripts/core/settings.gd |

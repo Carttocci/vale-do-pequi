@@ -68,3 +68,7 @@ func _load_dir(path: String) -> Array:
             if res:
                 out.append(res)
     return out
+
+
+func all_items() -> Array:
+    return _items.values()

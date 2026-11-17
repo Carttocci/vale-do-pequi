@@ -1,5 +1,14 @@
 # Changelog — Vale do Pequi
 
+## 1.0.0 — Fase 9: Finalização (17/11/2026)
+- **Tela de título**: Continuar (com a data do save), Novo jogo (pede confirmação se já existe save), Opções e Créditos.
+- **Som e música** gerados por código (`tools/gerar_audio.py`): viola caipira de dia, música da noite, ambiente de gotas na mina e nas ruínas, e forró de festa junina em dia de festa na vila, com troca suave. 17 efeitos (enxada, regador, moeda, golpe, picareta, comer, peixe mordendo, nível, missão, chefe...).
+- **Opções** (na tela de título e no menu de pausa): volume da música e dos efeitos, missão atual na tela e tela cheia. Ficam salvas à parte do jogo.
+- Menu de pausa: **Opções** e **Salvar e ir ao menu**.
+- **Balanceamento**: nenhum item dá lucro comprando e revendendo; cozinhar sempre agrega valor; a Helena compra comida pronta; preços das barracas das festas acima da revenda; farinha de mandioca vale um pouco mais.
+- Teste de consistência dos dados (receitas, lojas, missões e eventos só citam itens e moradores que existem).
+- Música comprimida (QOA) para carregar rápido no navegador. 28 testes novos (590 no total).
+
 ## 0.9.0 — Fase 8: Conteúdo (17/11/2026)
 - **Fogão a lenha** na fazenda: 10 receitas goianas (pamonha, canjica, arroz com pequi, feijão tropeiro, doce de leite, lambari frito, caldo de mandioca, empadão goiano, pão de queijo) e farinha de mandioca. 4 receitas no começo; as outras 6 são **receitas de família** que os moradores ensinam.
 - **Comer** (comida na mão + E): recupera energia e vida, e algumas dão efeito até dormir: valentia (+25% de dano), fôlego (ferramentas gastam metade), pernas leves (+20% de velocidade) e paciência (peixe morde mais rápido).
