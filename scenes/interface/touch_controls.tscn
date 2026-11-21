@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_eat_placeholder.png" id="eat"]
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_zoom_in_placeholder.png" id="zin"]
 [ext_resource type="Texture2D" path="res://assets/ui/touch_btn_zoom_out_placeholder.png" id="zout"]
+[ext_resource type="Texture2D" path="res://assets/ui/touch_btn_map_placeholder.png" id="map"]
 
 [node name="TouchControls" type="CanvasLayer"]
 layer = 2
@@ -91,3 +92,8 @@ action = "zoom_in"
 [node name="ZoomOut" type="TouchScreenButton" parent="."]
 texture_normal = ExtResource("zout")
 action = "zoom_out"
+
+[node name="Map" type="TouchScreenButton" parent="."]
+position = Vector2(416, 6)
+texture_normal = ExtResource("map")
+action = "map"

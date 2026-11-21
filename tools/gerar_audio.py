@@ -18,6 +18,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 rng = np.random.default_rng(7)
 
 
+## SO=nome1,nome2 python3 tools/gerar_audio.py → só esses efeitos (o resto fica igual).
+SO = [n for n in os.environ.get("SO", "").split(",") if n]
+
+
 def out(path):
     p = os.path.join(ROOT, path)
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -174,10 +178,21 @@ def sfx():
             b = lowpass(tone + lowpass(noise(0.11), 0.4) * 0.4, 0.35) * env(len(tt), 0.004)
             x[s0:s0 + len(b)] += b * 0.7
         return x
-    for name, fn in [("latido", latido), ("capinar", capinar), ("regar", regar), ("pegar", pegar), ("moeda", moeda), ("golpe", golpe),
+    def passo(k, f0, dur, gain):
+        def g():
+            n = int(SR * dur)
+            x = lowpass(noise(dur), k) * env(n, 0.002) * gain
+            x[:len(t(0.03))] += np.sin(2 * np.pi * f0 * t(0.03)) * env(len(t(0.03)), 0.001) * gain * 0.5
+            return x
+        return g
+    for name, fn in [("passo_grama", passo(0.35, 120, 0.08, 0.35)), ("passo_terra", passo(0.18, 90, 0.07, 0.45)),
+                     ("passo_pedra", passo(0.7, 260, 0.05, 0.35)), ("passo_madeira", passo(0.3, 170, 0.07, 0.5)),
+                     ("latido", latido), ("capinar", capinar), ("regar", regar), ("pegar", pegar), ("moeda", moeda), ("golpe", golpe),
                      ("acerto", acerto), ("dano", dano), ("picareta", picareta), ("pedra_quebra", pedra_quebra),
                      ("comer", comer), ("agua", agua), ("nivel", nivel), ("missao", missao), ("porta", porta),
                      ("clique", clique), ("dialogo", dialogo), ("chefe", chefe)]:
+        if SO and name not in SO:
+            continue
         save(f"assets/audio/sfx/{name}.wav", fn())
 
 

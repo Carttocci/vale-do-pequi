@@ -43,6 +43,9 @@ var _interact_held: bool = false
 ## Ação que o E faria agora: {"kind", "prompt", "priority", "provider"}.
 var _action: Dictionary = {}
 
+## Passos dados (testes) e último quadro de passo que tocou som.
+var footsteps := 0
+var _last_step := -1
 enum ActionKind { NONE, CELL, ITEM, INTERACTABLE, ATTACK }
 
 ## Prioridade quando várias coisas são possíveis ao mesmo tempo:
@@ -293,7 +296,29 @@ func _update_sprite_frame() -> void:
     var step := 0
     if state == State.WALK:
         step = int(_anim_time * walk_fps) % FRAMES_PER_DIRECTION
+        if step % 2 == 0 and step != _last_step:
+            footstep()
+    _last_step = step if state == State.WALK else -1
     sprite.frame = facing_index * FRAMES_PER_DIRECTION + step
+
+
+## Som do passo conforme o chão: grama, terra, pedra ou madeira (ponte).
+func footstep() -> void:
+    footsteps += 1
+    Audio.play(footstep_sound(), 0.12)
+
+
+func footstep_sound() -> StringName:
+    var main := get_tree().get_first_node_in_group("save_root")
+    var level: Level = main.level if main and "level" in main else null
+    if level == null or level.ground == null:
+        return &"passo_grama"
+    var cell := level.ground.local_to_map(level.ground.to_local(global_position))
+    match level.ground.get_cell_atlas_coords(cell).x:
+        3, 4: return &"passo_terra"
+        8, 10, 11, 12: return &"passo_pedra"
+        9: return &"passo_madeira"
+    return &"passo_grama"
 
 
 func _update_interaction_area() -> void:

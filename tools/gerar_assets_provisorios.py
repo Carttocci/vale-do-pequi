@@ -687,6 +687,15 @@ def make_farming():
         return g
     touch_btn("assets/ui/touch_btn_zoom_in_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), zoom_glyph(True))
     touch_btn("assets/ui/touch_btn_zoom_out_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), zoom_glyph(False))
+    def map_glyph(d, s):
+        c = s // 2
+        pts = [(c - 8, c - 5), (c - 3, c - 7), (c + 3, c - 5), (c + 8, c - 7), (c + 8, c + 5), (c + 3, c + 7), (c - 3, c + 5), (c - 8, c + 7)]
+        d.polygon(pts, fill=(222, 204, 160), outline=o)
+        d.line([(c - 3, c - 7), (c - 3, c + 5)], fill=(170, 150, 110))
+        d.line([(c + 3, c - 5), (c + 3, c + 7)], fill=(170, 150, 110))
+        d.line([(c - 6, c + 2), (c - 1, c - 1), (c + 5, c + 1)], fill=(190, 70, 50))
+        d.point((c + 5, c + 1), fill=(220, 40, 30))
+    touch_btn("assets/ui/touch_btn_map_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), map_glyph)
 
 
 def make_weather():

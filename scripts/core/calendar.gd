@@ -45,6 +45,25 @@ static func period_name(day: int) -> String:
     return "Período chuvoso" if period(day) == PERIOD_RAINY else "Período seco"
 
 
+## Cor do chão/mato por mês: verde vivo nas chuvas, amarelando na seca
+## (o pior é agosto/setembro, antes das primeiras chuvas).
+const SEASON_TINTS := [
+    Color(1.0, 1.04, 0.98), Color(1.0, 1.04, 0.98), Color(1.0, 1.03, 0.98), Color(1.02, 1.02, 0.96),  # jan-abr
+    Color(1.08, 1.0, 0.86), Color(1.16, 0.98, 0.74), Color(1.24, 0.96, 0.62), Color(1.32, 0.94, 0.54),  # mai-ago
+    Color(1.32, 0.93, 0.54), Color(1.04, 1.02, 0.94), Color(1.0, 1.04, 0.98), Color(1.0, 1.04, 0.98),  # set-dez
+]
+## Ipê floresce no fim da seca (agosto e setembro).
+const IPE_MONTHS := [7, 8]
+
+
+static func season_tint(day: int) -> Color:
+    return SEASON_TINTS[month_index(day)]
+
+
+static func is_ipe_bloom(day: int) -> bool:
+    return month_index(day) in IPE_MONTHS
+
+
 static func is_pequi_season(day: int) -> bool:
     return month_index(day) in PEQUI_MONTHS
 

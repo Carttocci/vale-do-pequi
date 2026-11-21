@@ -44,6 +44,8 @@ var _raid_target: Node2D
 var _wander := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
 var sprite: Sprite2D
+## Barrinha de vida em cima da criatura (aparece depois do primeiro golpe).
+var hp_bar: Node2D
 
 
 func setup(k: StringName, at: Vector2, lvl: Level, hp_scale: float = 1.0) -> Enemy:
@@ -59,9 +61,25 @@ func setup(k: StringName, at: Vector2, lvl: Level, hp_scale: float = 1.0) -> Ene
     sprite.hframes = 4
     sprite.offset = Vector2(0, -sprite.texture.get_height() / 2.0 + 1)
     add_child(sprite)
+    if info.ai != "boss":  # chefe tem barra grande no HUD
+        hp_bar = Node2D.new()
+        hp_bar.name = "HpBar"
+        hp_bar.position = Vector2(0, -sprite.texture.get_height() - 3)
+        hp_bar.visible = false
+        hp_bar.draw.connect(_draw_hp_bar)
+        add_child(hp_bar)
     add_to_group("enemy")
     _rng.randomize()
     return self
+
+
+func _draw_hp_bar() -> void:
+    var w := maxf(12.0, float(info.w) * 0.8)
+    var r := Rect2(-w / 2.0, 0, w, 3)
+    hp_bar.draw_rect(r.grow(1), Color(0.08, 0.06, 0.06, 0.85))
+    var f := clampf(float(hp) / max_hp, 0.0, 1.0)
+    var col := Color(0.4, 0.85, 0.35) if f > 0.5 else (Color(0.95, 0.75, 0.2) if f > 0.25 else Color(0.9, 0.25, 0.2))
+    hp_bar.draw_rect(Rect2(r.position, Vector2(w * f, 3)), col)
 
 
 func is_dead() -> bool:
@@ -73,6 +91,9 @@ func take_hit(amount: int, dir: Vector2, knockback: float, stun: float = 0.0) ->
     if is_dead():
         return
     hp -= amount
+    if hp_bar:
+        hp_bar.visible = hp > 0
+        hp_bar.queue_redraw()
     Audio.play(&"acerto")
     _knock = dir.normalized() * knockback
     _stun = maxf(_stun, stun + 0.15)

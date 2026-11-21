@@ -31,6 +31,9 @@ var _path := PackedVector2Array()
 var _target_marker: StringName = &""
 var _facing: int = 0
 var _anim: float = 0.0
+## "!" em cima da cabeça quando tem conversa de missão esperando.
+var quest_mark: Label
+var _mark_check := 0.0
 
 @onready var sprite: Sprite2D = $Sprite
 @onready var interactable: Interactable = $Interactable
@@ -50,9 +53,32 @@ func _ready() -> void:
     Clock.time_changed.connect(func(_m: int) -> void: _follow_schedule())
     Clock.day_started.connect(func(_d: int, _w: int) -> void: snap_to_schedule())
     snap_to_schedule.call_deferred()
+    quest_mark = Label.new()
+    quest_mark.name = "QuestMark"
+    quest_mark.text = "!"
+    quest_mark.add_theme_color_override("font_color", Color(1, 0.88, 0.2))
+    quest_mark.add_theme_color_override("font_outline_color", Color(0.1, 0.07, 0.05))
+    quest_mark.add_theme_constant_override("outline_size", 4)
+    quest_mark.add_theme_font_size_override("font_size", 22)
+    quest_mark.position = Vector2(-4, -50)
+    quest_mark.visible = false
+    add_child(quest_mark)
+    for sig in [Quests.quest_updated, Quests.quest_started]:
+        sig.connect(func(_id: String) -> void: _mark_check = 0.0)
+    EventBus.region_entered.connect(func(_r: StringName) -> void: quest_mark.visible = has_quest_hint())
+
+
+func has_quest_hint() -> bool:
+    return data != null and not Quests.dialogue_for(String(data.id)).is_empty()
 
 
 func _process(delta: float) -> void:
+    _mark_check -= delta
+    if _mark_check <= 0.0:
+        _mark_check = 0.4
+        quest_mark.visible = has_quest_hint()
+    if quest_mark.visible:
+        quest_mark.position.y = -50 + sin(Time.get_ticks_msec() / 220.0) * 2.0
     if _path.is_empty():
         _anim = 0.0
         _update_frame()

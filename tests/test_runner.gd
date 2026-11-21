@@ -120,6 +120,7 @@ func _run_all() -> void:
     await _test_click_does_not_stick()
     await _test_tutorial()
     await _test_hit_juice()
+    await _test_world_polish()
     _test_font_symbols()
 
 
@@ -1540,8 +1541,10 @@ func _test_ranch_life(ranch: Ranch, shop: ShopUI) -> void:
     var runaway: Dictionary = ranch.lost[0]
     await frames(2)
     var lost_nodes := mata().get_entities_root().get_children().filter(func(n: Node) -> bool: return n is LostAnimal and not n.is_queued_for_deletion())
-    check(lost_nodes.size() == 1, "bicho fugido aparece na Mata dos Ipês")
-    check(ranch.rescue(runaway) and ranch.lost.is_empty() and ranch.animals.size() == 1, "resgatou o bicho")
+    var diag := "lost=%d an=%d nodes=%d mata=%s" % [ranch.lost.size(), ranch.animals.size(), lost_nodes.size(), str(ranch._mata())]
+    check(lost_nodes.size() == 1, "bicho fugido aparece na Mata dos Ipês " + diag)
+    var ok := ranch.rescue(runaway)
+    check(ok and ranch.lost.is_empty() and ranch.animals.size() == 1, "resgatou o bicho " + diag + " msg=" + str(_messages.back() if not _messages.is_empty() else ""))
     # fugido some depois de 3 dias
     ranch.lost = [{"kind": &"galinha", "name": "Perdida", "young": false, "age": 9, "happiness": 50, "pet_day": 0, "health": 30, "status": "ferido", "status_days": 0, "lost_day": GameState.day - 4, "x": 100.0, "y": 100.0}]
     ranch._expire_lost()
@@ -2920,3 +2923,73 @@ func _test_font_symbols() -> void:
     var sizes := hud.find_children("*", "Label", true, false).filter(func(l: Label) -> bool: return l.label_settings != null) \
         .map(func(l: Label) -> int: return l.label_settings.font_size)
     check(not sizes.is_empty() and sizes.all(func(z: int) -> bool: return z == 11 or z == 22), "caixa do relógio no tamanho da grade da fonte " + str(sizes))
+
+
+func _test_world_polish() -> void:
+    print("[estações, mapa, '!', barras de vida, passos, luzes]")
+    GameState.new_game()
+    Quests.reset()
+    _main.change_region_now(&"farm")
+    var fx := _main.get_node("WeatherFX") as WeatherFX
+    var farm: Level = _main.get_region(&"farm")
+    # estações: out (chuvas) verde; ago (seca) amarelado, com pétalas de ipê
+    set_time(1, 10 * 60)
+    check(farm.ground.modulate.g >= farm.ground.modulate.b and farm.ground.modulate.r <= 1.05, "outubro: mato verde")
+    var aug := 1 + 10 * 10  # 1º de agosto
+    check(Calendar.month_index(aug) == 7, "dia de agosto")
+    set_time(aug, 10 * 60)
+    check(farm.ground.modulate.r > 1.1 and farm.ground.modulate.b < 0.8, "agosto: capim amarelado na seca")
+    check(fx.leaves.emitting, "pétalas de ipê caindo no fim da seca")
+    set_time(1, 22 * 60)
+    check(fx.fireflies.emitting and not fx.leaves.emitting, "noite de chuvas: vaga-lumes")
+    check(get_tree().get_nodes_in_group("night_light").any(func(l: Node) -> bool: return (l as NightLight).enabled and l.energy > 0.5),
+        "de noite as janelas e a lanterna acendem")
+    set_time(1, 12 * 60)
+    check(get_tree().get_nodes_in_group("night_light").all(func(l: Node) -> bool: return not (l as NightLight).enabled), "de dia as luzes apagam")
+    # mapa
+    var map := _main.get_node("MapUI") as MapUI
+    var ev := InputEventAction.new()
+    ev.action = &"map"
+    ev.pressed = true
+    Input.parse_input_event(ev)
+    await frames(3)
+    check(map.is_open() and get_tree().paused, "M abre o mapa (e pausa)")
+    check(map._region_tex.texture != null and map._region_tex.texture.get_size() == Vector2(farm.ground.map_size), "mapa desenha o chão da região")
+    var a := map.world_to_map(Vector2(0, 0))
+    var b := map.world_to_map(Vector2(farm.ground.map_size) * 16.0)
+    check(b.x > a.x and b.y > a.y, "conversão mundo → mapa")
+    check(map._known(&"farm") and not map._known(&"ruinas"), "ruínas aparecem como ??? até visitar")
+    map.close()
+    check(not get_tree().paused, "fechou o mapa")
+    # "!" em quem tem missão
+    _main.change_region_now(&"vila")
+    var here := get_tree().get_nodes_in_group("npc").filter(func(n: Node) -> bool: return vila().is_ancestor_of(n))
+    var with_quest := here.filter(func(n: Node) -> bool: return n.has_quest_hint())
+    await get_tree().create_timer(0.5).timeout
+    check(not with_quest.is_empty() and with_quest.all(func(n: Node) -> bool: return n.quest_mark.visible), "'!' em cima de quem tem missão")
+    var without := here.filter(func(n: Node) -> bool: return not n.has_quest_hint())
+    check(without.all(func(n: Node) -> bool: return not n.quest_mark.visible), "sem missão, sem '!'")
+    # barra de vida
+    _main.change_region_now(&"farm")
+    var e := spawn_enemy(&"raiz_torta", Vector2(640, 300))
+    e.set_process(false)
+    check(e.hp_bar != null and not e.hp_bar.visible, "barra de vida escondida antes do golpe")
+    e.take_hit(10, Vector2.RIGHT, 0.0)
+    check(e.hp_bar.visible, "barra de vida aparece ao apanhar")
+    e.queue_free()
+    var boss := spawn_enemy(&"guardiao_cristal", _player.global_position + Vector2(80, 0))
+    boss.set_process(false)
+    await frames(2)
+    var hud := _main.get_node("HUD")
+    check(boss.hp_bar == null and hud.boss_box.visible and hud.boss_name.text == "Guardião de Cristal", "chefe: barra grande no topo com o nome")
+    boss.queue_free()
+    await frames(2)
+    check(not hud.boss_box.visible, "barra do chefe some sem chefe")
+    # passos
+    await place_player(Vector2(600, 300))
+    var steps := _player.footsteps
+    Input.action_press("move_right")
+    await get_tree().create_timer(0.6).timeout
+    Input.action_release("move_right")
+    check(_player.footsteps > steps, "andar faz som de passo (%d)" % (_player.footsteps - steps))
+    check(_player.footstep_sound() in [&"passo_grama", &"passo_terra", &"passo_pedra", &"passo_madeira"], "som do passo pelo chão")

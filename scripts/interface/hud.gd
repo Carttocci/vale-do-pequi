@@ -32,6 +32,7 @@ func _ready() -> void:
     GameState.money_changed.connect(func(_m: int) -> void: update_clock())
     update_clock()
     _build_bars()
+    _build_boss_bar()
     _build_tracker()
     _build_menu_extras()
     save_button.pressed.connect(_on_save_pressed)
@@ -48,6 +49,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
     # Dica de ação some enquanto há conversa/loja/menu na frente.
     prompt_label.visible = _prompt_text != "" and not get_tree().paused
+    _update_boss_bar()
     # Checagem barata a cada quadro: o sinal de redimensionamento não é
     # confiável em todos os navegadores quando o celular gira.
     _update_rotate_hint()
@@ -154,6 +156,55 @@ func _build_bars() -> void:
     box.add_child(energy_bar)
     GameState.health_changed.connect(func(_v: int, _m: int) -> void: health_bar.queue_redraw())
     GameState.energy_changed.connect(func(_v: int, _m: int) -> void: energy_bar.queue_redraw())
+
+
+# --- chefe: barra grande no topo ---------------------------------------------
+
+var boss_box: VBoxContainer
+var boss_name: Label
+var boss_bar: Control
+var boss: Enemy
+
+
+func _build_boss_bar() -> void:
+    boss_box = VBoxContainer.new()
+    boss_box.set_anchors_preset(Control.PRESET_CENTER_TOP)
+    boss_box.position = Vector2(-110, 40)
+    boss_box.custom_minimum_size = Vector2(220, 0)
+    boss_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    boss_box.add_theme_constant_override("separation", 1)
+    $Root.add_child(boss_box)
+    boss_name = Label.new()
+    boss_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    boss_name.add_theme_color_override("font_color", Color(0.85, 0.75, 1))
+    boss_name.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.1))
+    boss_name.add_theme_constant_override("outline_size", 3)
+    boss_box.add_child(boss_name)
+    boss_bar = _make_bar(Color(0.62, 0.38, 0.95), func() -> float:
+        return float(boss.hp) / boss.max_hp if is_instance_valid(boss) else 0.0)
+    boss_bar.custom_minimum_size = Vector2(220, 7)
+    boss_box.add_child(boss_bar)
+    boss_box.hide()
+
+
+## Chefe vivo por perto (na região ativa) → mostra a barra.
+func _update_boss_bar() -> void:
+    if boss_box == null:
+        return
+    var player := get_tree().get_first_node_in_group("player") as Node2D
+    var found: Enemy = null
+    if player:
+        for n in get_tree().get_nodes_in_group("enemy"):
+            var e := n as Enemy
+            if e and e.info.get("ai", "") == "boss" and not e.is_dead() and e.is_visible_in_tree() \
+                    and e.global_position.distance_to(player.global_position) < 300.0:
+                found = e
+                break
+    boss = found
+    boss_box.visible = found != null
+    if found:
+        boss_name.text = String(found.info.name)
+        boss_bar.queue_redraw()
 
 
 func _make_bar(color: Color, value: Callable) -> Control:

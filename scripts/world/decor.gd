@@ -57,6 +57,10 @@ func _update_light() -> void:
         return
     var night := Clock.hour() >= 18 or Clock.hour() < 6 or Clock.hour() >= 24
     sprite.modulate = Color(1.6, 1.4, 0.9) if night else Color.WHITE
+    if get_node_or_null("NightLight") == null:
+        NightLight.attach(self, Vector2(0, -12), 80.0, Color(1.0, 0.8, 0.45), 1.2)
+    else:
+        ($NightLight as NightLight).refresh()
 
 
 func pick_up() -> void:

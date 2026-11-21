@@ -20,6 +20,7 @@ var touch_mode: bool = false
 @onready var eat_button: TouchScreenButton = $Eat
 @onready var zoom_in_button: TouchScreenButton = $ZoomIn
 @onready var zoom_out_button: TouchScreenButton = $ZoomOut
+@onready var map_button: TouchScreenButton = $Map
 
 var _last_size := Vector2.ZERO
 
@@ -74,4 +75,5 @@ func _layout() -> void:
     eat_button.position = Vector2(size.x - 38, size.y - 116)
     zoom_in_button.position = Vector2(size.x - 160, 6)
     zoom_out_button.position = Vector2(size.x - 192, 6)
+    map_button.position = Vector2(size.x - 224, 6)
     dodge_button.position = Vector2(size.x - 110, size.y - 46)
