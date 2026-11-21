@@ -182,6 +182,7 @@ func hit(cell: Vector2i, power: int) -> void:
         return
     var c: Dictionary = cells[cell]
     c.hp -= power
+    FX.burst(self, ground.map_to_local(cell) + Vector2(0, -4), FX.STONE if c.kind == &"pedra_grande" else FX.WOOD, 6)
     Audio.play(&"picareta" if c.kind == &"pedra_grande" else &"acerto")
     var node: Node2D = c.node
     var t := node.create_tween()
@@ -196,6 +197,8 @@ func hit(cell: Vector2i, power: int) -> void:
         _remove(cell)
         _add(cell, &"toco")
         EventBus.show_message("Timbeeer! A árvore caiu.", 1.5)
+        if not GameState.has_flag(&"arvore_derrubada"):
+            GameState.set_flag(&"arvore_derrubada")
     elif c.kind == &"pedra_grande":
         _drop(cell, &"pedra", _rng.randi_range(3, 5))
         if _rng.randf() < 0.25:
@@ -216,6 +219,7 @@ func _clear(cell: Vector2i, give: bool) -> void:
     match k:
         &"mato":
             Audio.play(&"capinar")
+            FX.burst(self, ground.map_to_local(cell), FX.LEAVES, 8)
             GameState.add_xp(&"coleta", 1)
             if randf() < 0.05:
                 GameState.add_item(&"semente_milho", 1)

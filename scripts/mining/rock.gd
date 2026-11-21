@@ -52,6 +52,7 @@ func hit(power: int = 1) -> bool:
         return false
     hp -= power
     Audio.play(&"picareta")
+    FX.burst(get_parent(), position + Vector2(0, -4), FX.STONE, 5)
     var t := create_tween()
     _sprite.position = Vector2(1, 0)
     t.tween_property(_sprite, "position", Vector2.ZERO, 0.1)

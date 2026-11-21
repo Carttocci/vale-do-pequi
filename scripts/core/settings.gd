@@ -17,9 +17,13 @@ var camera_zoom: float = 1.75 if DisplayServer.is_touchscreen_available() else 1
 
 
 
+const FONT_SYMBOLS := preload("res://assets/fonts/Simbolos.ttf")
+
+
 func _ready() -> void:
     load_settings()
     lock_escape_key()
+    _add_symbol_fallback()
     get_tree().node_added.connect(func(n: Node) -> void:
         if n is Control:
             _pixel_font.call_deferred(n))
@@ -28,7 +32,13 @@ func _ready() -> void:
 ## Fonte de pixel só fica nítida no tamanho da grade dela. A Micro 5 é de 11 px:
 ## texto normal vira 11, texto grande (20+) vira 22. Fonte escolhida a dedo (título) fica.
 func _pixel_font(c: Control) -> void:
-    if not is_instance_valid(c) or not c.has_theme_font_size_override("font_size"):
+    if not is_instance_valid(c):
+        return
+    # caixas com LabelSettings (relógio do HUD) também entram na grade
+    if c is Label and (c as Label).label_settings and (c as Label).label_settings.font_size > 0:
+        var ls := (c as Label).label_settings
+        ls.font_size = 22 if ls.font_size >= 20 else 11
+    if not c.has_theme_font_size_override("font_size"):
         return
     if c.has_theme_font_override("font"):
         return
@@ -111,3 +121,30 @@ func apply() -> void:
     Audio.set_bus_volume(Audio.BUS_MUSIC, music_volume)
     Audio.set_bus_volume(Audio.BUS_SFX, sfx_volume)
     changed.emit()
+
+
+
+## Símbolos (★ ♥ → ✓ ♪ ...) que a fonte principal não tem vêm da fonte de
+## símbolos em pixel (tools/gerar_fonte_simbolos.py). Vale pra qualquer fonte do tema.
+func _add_symbol_fallback() -> void:
+    var fonts: Array[Font] = []
+    var theme := ThemeDB.get_project_theme()
+    if theme and theme.default_font:
+        fonts.append(theme.default_font)
+    fonts.append(ThemeDB.fallback_font)
+    for f in fonts:
+        if f and not FONT_SYMBOLS in f.fallbacks:
+            var list := f.fallbacks.duplicate()
+            list.append(FONT_SYMBOLS)
+            f.fallbacks = list
+
+
+func has_glyph(ch: String) -> bool:
+    var theme := ThemeDB.get_project_theme()
+    var f: Font = theme.default_font if theme and theme.default_font else ThemeDB.fallback_font
+    if f.has_char(ch.unicode_at(0)):
+        return true
+    for fb in f.fallbacks:
+        if fb.has_char(ch.unicode_at(0)):
+            return true
+    return false

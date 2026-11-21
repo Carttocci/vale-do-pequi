@@ -6,3 +6,5 @@
 Vieram do repositório oficial do Google Fonts (github.com/google/fonts, pasta ofl/).
 São fontes de grade de pixel exata: a Micro 5 fica perfeita no tamanho 11 (e 22),
 a Jersey 15 no 27 (e 54). Importadas sem suavização para ficarem nítidas ao ampliar.
+
+- **Simbolos.ttf**: símbolos em pixel (★ ♥ ♡ → ↑ ✓ ♪ ◆ ✦) feitos pra este jogo por `tools/gerar_fonte_simbolos.py`. Fica como fonte reserva da fonte principal do tema.

@@ -75,6 +75,9 @@ func take_hit(amount: int, dir: Vector2, knockback: float, stun: float = 0.0) ->
     sprite.modulate = Color(2, 2, 2)
     var t := create_tween()
     t.tween_property(sprite, "modulate", Color.WHITE, 0.15)
+    FX.damage_number(get_parent(), position, amount)
+    FX.burst(get_parent(), position + Vector2(0, -8), FX.BLOOD_SILENCE, 6)
+    FX.shake(get_tree(), 1.5 if hp > 0 else 3.0, 0.12)
     if hp <= 0:
         _die()
 

@@ -223,6 +223,8 @@ func take_damage(amount: int, from: Vector2) -> bool:
     var t := create_tween()
     t.tween_property(sprite, "modulate", Color.WHITE, 0.3)
     GameState.damage(dmg)
+    FX.damage_number(get_parent(), position, dmg, Color(1, 0.45, 0.4))
+    FX.shake(get_tree(), 3.0, 0.2)
     return true
 
 

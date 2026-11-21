@@ -1,5 +1,13 @@
 # Changelog — Vale do Pequi
 
+## 1.3.0 — Começo guiado, impacto no combate e símbolos (20/11/2026)
+- **Tutorial "Primeiros passos"** (missão que aparece primeiro no jogo novo): pegar 5 galhos → 3 pedrinhas → fazer o machado na bancada → derrubar uma árvore → capinar e plantar → regar. Cada passo ensina o botão e, no fim, dá R$ 100, 10 sementes de milho e 2 pamonhas. Depois a história segue com o Seu Benedito.
+- **Impacto no combate**: número de dano subindo em cima de quem apanha (vermelho quando é você), faíscas no golpe, tremidinha de tela (mais forte ao matar e ao apanhar).
+- **Partículas**: folhas voando ao arrancar ou cortar mato, lascas de madeira na árvore, faíscas na pedra.
+- **Símbolos sem quadradinho**: fonte de símbolos em pixel (★ ♥ ♡ → ↑ ✓ ♪ ◆ ✦) como reserva da fonte principal; continua valendo se a fonte for trocada. Ela é gerada por `tools/gerar_fonte_simbolos.py`.
+- **Caixa do relógio** no tamanho certo da fonte (antes ficava borrada).
+- 18 testes novos (667 no total).
+
 ## 1.2.4 — Clique não fica preso e fonte de grade exata (17/11/2026)
 - Corrigido: depois de um clique do mouse em algo (galho, mato, pedra...), a ação ficava "segurada" e o personagem saía catando tudo por onde passava. Agora soltar o mouse solta a ação.
 - Fontes trocadas por fontes de grade de pixel exata: **Micro 5** (texto, tamanho 11/22) e **Jersey 15** (título, 54). As anteriores não seguiam uma grade e as letras saíam com larguras tortas no HUD.

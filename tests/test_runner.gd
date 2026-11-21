@@ -22,6 +22,8 @@ const TEST_SAVE := "user://teste_automatizado_save.json"
 func _ready() -> void:
     # Nunca toca no save real do jogador.
     SaveManager.save_path = TEST_SAVE
+    Quests.skip_tutorial = true  # o tutorial tem teste próprio
+    Quests.reset()
     Settings.path = "user://teste_opcoes.cfg"
     SaveManager.delete_save()
     # Tempo parado e sol todo dia: testes determinísticos. Os da Fase 3
@@ -115,6 +117,9 @@ func _run_all() -> void:
     await _test_camera_zoom()
     await _test_escape_closes_windows()
     await _test_click_does_not_stick()
+    await _test_tutorial()
+    await _test_hit_juice()
+    _test_font_symbols()
 
 
 # --- utilidades ----------------------------------------------------------
@@ -2713,3 +2718,80 @@ func _test_click_does_not_stick() -> void:
         await get_tree().physics_frame
     check(GameState.get_item_count(&"galho") == 1, "andar depois do clique não cata os outros sozinho")
     df.clear_all()
+
+
+func _test_tutorial() -> void:
+    print("[tutorial: primeiros passos]")
+    Quests.skip_tutorial = false
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    var hud := _main.get_node("HUD")
+    check(Quests.is_active("t_primeiros_passos") and Quests.is_active("q_chegada"), "jogo novo: tutorial e história juntos")
+    check(hud.quest_label.text.contains("galhos"), "HUD mostra o passo do tutorial primeiro")
+    GameState.add_item(&"galho", 5)
+    check(Quests.active["t_primeiros_passos"] == 1, "5 galhos: próximo passo")
+    GameState.add_item(&"pedra", 3)
+    check(Quests.active["t_primeiros_passos"] == 2 and hud.quest_label.text.contains("bancada"), "3 pedras: agora o machado na bancada")
+    var ui := _main.get_node("RecipeUI") as RecipeUI
+    ui.open("bancada")
+    ui.make("machado")
+    ui.close()
+    check(Quests.active["t_primeiros_passos"] == 3, "fez o machado: derrubar árvore")
+    var df := _main.get_node("Farm/Entities/DebrisField") as DebrisField
+    var cell := Vector2i(36, 24)
+    df._add(cell, &"arvore")
+    for i in 5:
+        df.hit(cell, 1)
+    check(Quests.active["t_primeiros_passos"] == 4, "árvore no chão: capinar e plantar")
+    var field := _main.get_node("Farm/FarmField") as FarmField
+    var soil := Vector2i(36, 26)
+    df.clear_all()
+    field.till(soil)
+    field.plant(soil, &"milho")
+    check(Quests.active["t_primeiros_passos"] == 5, "plantou: regar")
+    var money := GameState.money
+    field.water(soil)
+    check(Quests.is_done("t_primeiros_passos") and GameState.money == money + 100, "regou: tutorial concluído, R$ 100")
+    check(GameState.get_item_count(&"semente_milho") >= 10, "prêmio: sementes de milho")
+    check(hud.quest_label.text.contains("Benedito"), "depois do tutorial, a história: falar com o Seu Benedito")
+    Quests.skip_tutorial = true
+    GameState.new_game()
+
+
+func _test_hit_juice() -> void:
+    print("[impacto: número de dano, partículas, tremida]")
+    _main.change_region_now(&"farm")
+    for f in get_tree().get_nodes_in_group("fx"):
+        f.queue_free()
+    await frames(1)
+    var e := spawn_enemy(&"raiz_torta", Vector2(612, 300))
+    e.set_process(false)
+    e.set_physics_process(false)
+    var shakes := FX.shakes
+    e.take_hit(7, Vector2.RIGHT, 0.0)
+    var nums := get_tree().get_nodes_in_group("fx").filter(func(n: Node) -> bool: return n is Label)
+    check(nums.size() == 1 and (nums[0] as Label).text == "7", "número de dano aparece em cima do inimigo")
+    check(get_tree().get_nodes_in_group("fx").any(func(n: Node) -> bool: return n is CPUParticles2D), "faíscas no golpe")
+    check(FX.shakes == shakes + 1, "câmera dá uma tremidinha")
+    await get_tree().create_timer(0.9).timeout
+    check(get_tree().get_nodes_in_group("fx").filter(func(n: Node) -> bool: return n is Label).is_empty(), "número some sozinho")
+    check(_player.camera.offset == Vector2.ZERO, "câmera volta ao lugar")
+    e.queue_free()
+    var df := _main.get_node("Farm/Entities/DebrisField") as DebrisField
+    df._add(Vector2i(36, 24), &"mato")
+    df.interact_cell(df.ground.map_to_local(Vector2i(36, 24)), _player)
+    check(df.get_children().any(func(n: Node) -> bool: return n is CPUParticles2D), "folhas voando ao arrancar mato")
+    df.clear_all()
+
+
+func _test_font_symbols() -> void:
+    print("[fonte: símbolos e caixa do relógio]")
+    var missing := ""
+    for ch in ["★", "♥", "♡", "→", "↑", "✓", "♪", "◆", "✦", "ã", "ç", "é"]:
+        if not Settings.has_glyph(ch):
+            missing += ch
+    check(missing == "", "todos os símbolos do jogo têm desenho (sem quadradinho) " + missing)
+    var hud := _main.get_node("HUD")
+    var sizes := hud.find_children("*", "Label", true, false).filter(func(l: Label) -> bool: return l.label_settings != null) \
+        .map(func(l: Label) -> int: return l.label_settings.font_size)
+    check(not sizes.is_empty() and sizes.all(func(z: int) -> bool: return z == 11 or z == 22), "caixa do relógio no tamanho da grade da fonte " + str(sizes))

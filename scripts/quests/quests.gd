@@ -17,6 +17,8 @@ var order: Array = []
 var active: Dictionary = {}     # id -> índice da etapa atual
 var done: Dictionary = {}       # id -> true
 var counters: Dictionary = {}   # id -> contador da etapa (kill)
+## Testes antigos pulam o tutorial (missões com "tutorial": true).
+var skip_tutorial := false
 
 
 func _ready() -> void:
@@ -180,6 +182,8 @@ func _start_auto() -> void:
     for id in order:
         var st: String = defs[id].get("start", "")
         if active.has(id) or done.has(id):
+            continue
+        if skip_tutorial and defs[id].get("tutorial", false):
             continue
         if st == "auto" or (st.begins_with("after:") and done.has(st.trim_prefix("after:"))):
             active[id] = 0

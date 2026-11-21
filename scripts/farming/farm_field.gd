@@ -112,6 +112,8 @@ func water(cell: Vector2i) -> bool:
     cells[cell].watered = true
     _refresh(cell)
     Audio.play(&"regar")
+    if cells[cell].crop != &"" and not GameState.has_flag(&"regou"):
+        GameState.set_flag(&"regou")
     return true
 
 
@@ -121,6 +123,8 @@ func plant(cell: Vector2i, crop_id: StringName) -> bool:
     cells[cell].crop = crop_id
     cells[cell].age = 0
     _refresh(cell)
+    if not GameState.has_flag(&"plantou"):
+        GameState.set_flag(&"plantou")
     return true
 
 

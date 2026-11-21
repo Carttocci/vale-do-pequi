@@ -1,87 +1,404 @@
 {
   "quests": [
-    {"id": "q_chegada", "main": true, "start": "auto",
-     "title": "Uma nova vida", "desc": "Apresente-se ao povo da Vila de Santa Pequiria. Seu Benedito conhecia seu avô.",
-     "steps": [{"type": "talk", "npc": "benedito", "text": "Converse com Seu Benedito na vila.",
-                "lines": ["Então você veio mesmo! Seu avô ia ficar feliz de ver a fazenda acordando de novo.",
-                          "Mas vou te contar uma coisa que não conto pra todo mundo: de uns tempos pra cá, tem luz esquisita na Mata dos Ipês de noite.",
-                          "Vai lá depois que escurecer e me conta o que viu. Mas leva o facão do seu avô, viu?"]}],
-     "rewards": {"money": 100}},
-    {"id": "q_luzes", "main": true, "start": "after:q_chegada",
-     "title": "Luzes na mata", "desc": "Seu Benedito falou de luzes estranhas na Mata dos Ipês à noite.",
-     "steps": [{"type": "reach", "region": "mata", "from_hour": 19, "to_hour": 26, "text": "Vá à Mata dos Ipês depois das 19h."},
-               {"type": "talk", "npc": "benedito", "text": "Conte ao Seu Benedito o que viu.",
-                "lines": ["Bicho de raiz andando? Javali de olho brilhando? Uai...",
-                          "Meu pai falava de um tal de Silêncio: uma coisa que vai apagando a memória das coisas. Eu achava que era causo.",
-                          "Se aqueles bichos deixarem uns cacos frios pra trás, junta e leva pra Mariana. Ela entende dessas coisas de bicho."]}],
-     "rewards": {"money": 150, "items": {"flecha": 10}}},
-    {"id": "q_fragmentos", "main": true, "start": "after:q_luzes",
-     "title": "Cacos frios", "desc": "As criaturas da mata deixam fragmentos sem som. A Mariana pode saber o que são.",
-     "steps": [{"type": "deliver", "npc": "mariana", "item": "fragmento_silencio", "count": 3,
-                "text": "Leve 3 Fragmentos do Silêncio para a Mariana.",
-                "lines": ["Nossa... estão gelados. E repara: quando você bate um no outro, não faz barulho nenhum.",
-                          "Isso não é mineral daqui do vale. Tem um brilho parecido com o cristal da Serra do Cristal, ao norte da mata.",
-                          "Mas a trilha da serra desabou faz anos. O Toninho tem picareta: fala com ele."]}],
-     "rewards": {"money": 200, "friendship": {"mariana": 20}}},
-    {"id": "q_trilha", "main": true, "start": "after:q_fragmentos",
-     "title": "A trilha da serra", "desc": "Abra a trilha desmoronada no norte da Mata dos Ipês.",
-     "steps": [{"type": "talk", "npc": "toninho", "text": "Peça ajuda ao Toninho na ferraria.", "give": {"picareta": 1},
-                "lines": ["A trilha da serra? Rapaz... ninguém sobe lá desde o desmoronamento.",
-                          "Toma essa picareta. Era do seu avô também: ele deixou aqui pra eu afiar e nunca voltou pra buscar.",
-                          "Pedregulho cede com paciência. E se achar minério de ferro, me traz!"]},
-               {"type": "flag", "flag": "trilha_serra_aberta", "text": "Quebre os pedregulhos da trilha no norte da mata."}],
-     "rewards": {"money": 100}},
-    {"id": "q_mina", "main": true, "start": "after:q_trilha",
-     "title": "Fundo da mina", "desc": "A mina abandonada da Serra do Cristal tem o mesmo brilho dos fragmentos.",
-     "steps": [{"type": "min_flag", "flag": "mina_fundo", "value": 5, "text": "Chegue ao andar 5 da mina."}],
-     "rewards": {"money": 300}},
-    {"id": "q_guardiao", "main": true, "start": "after:q_mina",
-     "title": "O Guardião de Cristal", "desc": "Algo grande protege o fundo da mina.",
-     "steps": [{"type": "flag", "flag": "guardiao_derrotado", "text": "Derrote o Guardião de Cristal no andar 10."}],
-     "rewards": {"money": 500}},
-    {"id": "q_ruinas", "main": true, "start": "after:q_guardiao",
-     "title": "Ruínas do Cerrado", "desc": "O coração de cristal abriu o portal das ruínas na Serra do Cristal.",
-     "steps": [{"type": "flag", "flag": "totens_resolvidos", "text": "Acenda os totens na ordem certa."},
-               {"type": "flag", "flag": "eco_derrotado", "text": "Enfrente o que guarda o fundo das ruínas."},
-               {"type": "talk", "npc": "mae_do_ouro", "text": "Fale com a luz dourada.",
-                "lines": ["Não tenha medo. O povo antigo me chamava de Mãe-do-Ouro. Eu cuido das serras e do que elas guardam.",
-                          "O que você enfrentou era só um eco. O Silêncio de verdade não tem corpo: ele se alimenta do que as pessoas esquecem.",
-                          "Uma receita que ninguém faz mais, uma moda de viola que ninguém canta, uma festa que deixou de acontecer... cada esquecimento abre uma brecha.",
-                          "Força de facão não fecha essas brechas. Lembrança fecha. Cozinhe, plante, festeje, escute os mais velhos.",
-                          "Seu avô sabia disso. Agora você também sabe. Volte para o vale: é lá que essa luta continua."]}],
-     "rewards": {"money": 1000, "items": {"cristal_vale": 1}, "flag": "ato1_completo"}},
-
-    {"id": "s_alzira_milho", "start": "board", "giver": "alzira", "min_day": 2,
-     "title": "Pamonhada da Dona Alzira", "desc": "Dona Alzira quer fazer pamonha e precisa de milho fresco.",
-     "steps": [{"type": "deliver", "npc": "alzira", "item": "milho", "count": 5, "text": "Entregue 5 milhos à Dona Alzira.",
-                "lines": ["Que milho bonito! Hoje sai pamonha de sal e de doce. Toma aqui um agrado."]}],
-     "rewards": {"money": 150, "friendship": {"alzira": 30}}},
-    {"id": "s_helena_pequi", "start": "board", "giver": "helena", "min_day": 3,
-     "title": "Estoque de pequi", "desc": "A mercearia está sem pequi para vender.",
-     "steps": [{"type": "deliver", "npc": "helena", "item": "pequi", "count": 10, "text": "Entregue 10 pequis à Helena.",
-                "lines": ["Salvou meu estoque! Com pequi na prateleira o povo compra até arroz a mais."]}],
-     "rewards": {"money": 160, "friendship": {"helena": 30}}},
-    {"id": "s_joao_tucunare", "start": "board", "giver": "joao_pedro", "min_day": 4,
-     "title": "O tucunaré da aposta", "desc": "João Pedro apostou que você não pega um tucunaré.",
-     "steps": [{"type": "deliver", "npc": "joao_pedro", "item": "tucunare", "count": 1, "text": "Mostre um tucunaré ao João Pedro.",
-                "lines": ["Não acredito! Perdi a aposta... toma as minhocas, apostado é apostado."]}],
-     "rewards": {"money": 120, "items": {"isca": 20}, "friendship": {"joao_pedro": 30}}},
-    {"id": "s_toninho_ferro", "start": "board", "giver": "toninho", "min_day": 6,
-     "title": "Ferro para a forja", "desc": "Toninho precisa de minério para os pedidos da vila.",
-     "steps": [{"type": "deliver", "npc": "toninho", "item": "minerio_ferro", "count": 5, "text": "Entregue 5 minérios de ferro ao Toninho.",
-                "lines": ["Ferro bom! Com isso faço umas dez enxadas. Toma, pelo trabalho."]}],
-     "rewards": {"money": 250, "friendship": {"toninho": 30}}},
-    {"id": "s_mariana_fauna", "start": "board", "giver": "mariana", "min_day": 2,
-     "title": "Censo da fauna", "desc": "Mariana precisa de ajuda para registrar os bichos da Mata dos Ipês.",
-     "steps": [{"type": "observe", "count": 4, "text": "Observe 4 espécies diferentes (caderno de campo)."},
-               {"type": "talk", "npc": "mariana", "text": "Mostre suas anotações à Mariana.",
-                "lines": ["Quatro espécies! Suas anotações estão ótimas. Isso vai pro meu relatório."]}],
-     "rewards": {"money": 200, "friendship": {"mariana": 30}}},
-    {"id": "s_benedito_javali", "start": "board", "giver": "benedito", "min_day": 5,
-     "title": "Javalis corrompidos", "desc": "Javalis de olho brilhante estão rondando as roças à noite.",
-     "steps": [{"type": "kill", "enemy": "javali_corrompido", "count": 3, "text": "Derrote 3 javalis corrompidos na mata à noite."},
-               {"type": "talk", "npc": "benedito", "text": "Avise o Seu Benedito.",
-                "lines": ["Três! Agora a roça do povo descansa uns dias. Deus te pague."]}],
-     "rewards": {"money": 250, "friendship": {"benedito": 30}}}
+    {
+      "id": "t_primeiros_passos",
+      "main": true,
+      "tutorial": true,
+      "start": "auto",
+      "title": "Primeiros passos",
+      "desc": "A fazenda do vovô está tomada pelo mato. Hora de arregaçar as mangas!",
+      "steps": [
+        {
+          "type": "collect",
+          "item": "galho",
+          "count": 5,
+          "text": "Pegue 5 galhos do chão (E ou clique)."
+        },
+        {
+          "type": "collect",
+          "item": "pedra",
+          "count": 3,
+          "text": "Pegue 3 pedrinhas (E ou clique)."
+        },
+        {
+          "type": "collect",
+          "item": "machado",
+          "count": 1,
+          "text": "Faça um machado na bancada, do lado do celeiro."
+        },
+        {
+          "type": "flag",
+          "flag": "arvore_derrubada",
+          "text": "Derrube uma árvore com o machado na mão (E, clique ou F)."
+        },
+        {
+          "type": "flag",
+          "flag": "plantou",
+          "text": "Capine a terra com a enxada e plante uma semente."
+        },
+        {
+          "type": "flag",
+          "flag": "regou",
+          "text": "Regue a plantinha (o poço enche o regador)."
+        }
+      ],
+      "rewards": {
+        "money": 100,
+        "items": {
+          "semente_milho": 10,
+          "pamonha": 2
+        }
+      }
+    },
+    {
+      "id": "q_chegada",
+      "main": true,
+      "start": "auto",
+      "title": "Uma nova vida",
+      "desc": "Apresente-se ao povo da Vila de Santa Pequiria. Seu Benedito conhecia seu avô.",
+      "steps": [
+        {
+          "type": "talk",
+          "npc": "benedito",
+          "text": "Converse com Seu Benedito na vila.",
+          "lines": [
+            "Então você veio mesmo! Seu avô ia ficar feliz de ver a fazenda acordando de novo.",
+            "Mas vou te contar uma coisa que não conto pra todo mundo: de uns tempos pra cá, tem luz esquisita na Mata dos Ipês de noite.",
+            "Vai lá depois que escurecer e me conta o que viu. Mas leva o facão do seu avô, viu?"
+          ]
+        }
+      ],
+      "rewards": {
+        "money": 100
+      }
+    },
+    {
+      "id": "q_luzes",
+      "main": true,
+      "start": "after:q_chegada",
+      "title": "Luzes na mata",
+      "desc": "Seu Benedito falou de luzes estranhas na Mata dos Ipês à noite.",
+      "steps": [
+        {
+          "type": "reach",
+          "region": "mata",
+          "from_hour": 19,
+          "to_hour": 26,
+          "text": "Vá à Mata dos Ipês depois das 19h."
+        },
+        {
+          "type": "talk",
+          "npc": "benedito",
+          "text": "Conte ao Seu Benedito o que viu.",
+          "lines": [
+            "Bicho de raiz andando? Javali de olho brilhando? Uai...",
+            "Meu pai falava de um tal de Silêncio: uma coisa que vai apagando a memória das coisas. Eu achava que era causo.",
+            "Se aqueles bichos deixarem uns cacos frios pra trás, junta e leva pra Mariana. Ela entende dessas coisas de bicho."
+          ]
+        }
+      ],
+      "rewards": {
+        "money": 150,
+        "items": {
+          "flecha": 10
+        }
+      }
+    },
+    {
+      "id": "q_fragmentos",
+      "main": true,
+      "start": "after:q_luzes",
+      "title": "Cacos frios",
+      "desc": "As criaturas da mata deixam fragmentos sem som. A Mariana pode saber o que são.",
+      "steps": [
+        {
+          "type": "deliver",
+          "npc": "mariana",
+          "item": "fragmento_silencio",
+          "count": 3,
+          "text": "Leve 3 Fragmentos do Silêncio para a Mariana.",
+          "lines": [
+            "Nossa... estão gelados. E repara: quando você bate um no outro, não faz barulho nenhum.",
+            "Isso não é mineral daqui do vale. Tem um brilho parecido com o cristal da Serra do Cristal, ao norte da mata.",
+            "Mas a trilha da serra desabou faz anos. O Toninho tem picareta: fala com ele."
+          ]
+        }
+      ],
+      "rewards": {
+        "money": 200,
+        "friendship": {
+          "mariana": 20
+        }
+      }
+    },
+    {
+      "id": "q_trilha",
+      "main": true,
+      "start": "after:q_fragmentos",
+      "title": "A trilha da serra",
+      "desc": "Abra a trilha desmoronada no norte da Mata dos Ipês.",
+      "steps": [
+        {
+          "type": "talk",
+          "npc": "toninho",
+          "text": "Peça ajuda ao Toninho na ferraria.",
+          "give": {
+            "picareta": 1
+          },
+          "lines": [
+            "A trilha da serra? Rapaz... ninguém sobe lá desde o desmoronamento.",
+            "Toma essa picareta. Era do seu avô também: ele deixou aqui pra eu afiar e nunca voltou pra buscar.",
+            "Pedregulho cede com paciência. E se achar minério de ferro, me traz!"
+          ]
+        },
+        {
+          "type": "flag",
+          "flag": "trilha_serra_aberta",
+          "text": "Quebre os pedregulhos da trilha no norte da mata."
+        }
+      ],
+      "rewards": {
+        "money": 100
+      }
+    },
+    {
+      "id": "q_mina",
+      "main": true,
+      "start": "after:q_trilha",
+      "title": "Fundo da mina",
+      "desc": "A mina abandonada da Serra do Cristal tem o mesmo brilho dos fragmentos.",
+      "steps": [
+        {
+          "type": "min_flag",
+          "flag": "mina_fundo",
+          "value": 5,
+          "text": "Chegue ao andar 5 da mina."
+        }
+      ],
+      "rewards": {
+        "money": 300
+      }
+    },
+    {
+      "id": "q_guardiao",
+      "main": true,
+      "start": "after:q_mina",
+      "title": "O Guardião de Cristal",
+      "desc": "Algo grande protege o fundo da mina.",
+      "steps": [
+        {
+          "type": "flag",
+          "flag": "guardiao_derrotado",
+          "text": "Derrote o Guardião de Cristal no andar 10."
+        }
+      ],
+      "rewards": {
+        "money": 500
+      }
+    },
+    {
+      "id": "q_ruinas",
+      "main": true,
+      "start": "after:q_guardiao",
+      "title": "Ruínas do Cerrado",
+      "desc": "O coração de cristal abriu o portal das ruínas na Serra do Cristal.",
+      "steps": [
+        {
+          "type": "flag",
+          "flag": "totens_resolvidos",
+          "text": "Acenda os totens na ordem certa."
+        },
+        {
+          "type": "flag",
+          "flag": "eco_derrotado",
+          "text": "Enfrente o que guarda o fundo das ruínas."
+        },
+        {
+          "type": "talk",
+          "npc": "mae_do_ouro",
+          "text": "Fale com a luz dourada.",
+          "lines": [
+            "Não tenha medo. O povo antigo me chamava de Mãe-do-Ouro. Eu cuido das serras e do que elas guardam.",
+            "O que você enfrentou era só um eco. O Silêncio de verdade não tem corpo: ele se alimenta do que as pessoas esquecem.",
+            "Uma receita que ninguém faz mais, uma moda de viola que ninguém canta, uma festa que deixou de acontecer... cada esquecimento abre uma brecha.",
+            "Força de facão não fecha essas brechas. Lembrança fecha. Cozinhe, plante, festeje, escute os mais velhos.",
+            "Seu avô sabia disso. Agora você também sabe. Volte para o vale: é lá que essa luta continua."
+          ]
+        }
+      ],
+      "rewards": {
+        "money": 1000,
+        "items": {
+          "cristal_vale": 1
+        },
+        "flag": "ato1_completo"
+      }
+    },
+    {
+      "id": "s_alzira_milho",
+      "start": "board",
+      "giver": "alzira",
+      "min_day": 2,
+      "title": "Pamonhada da Dona Alzira",
+      "desc": "Dona Alzira quer fazer pamonha e precisa de milho fresco.",
+      "steps": [
+        {
+          "type": "deliver",
+          "npc": "alzira",
+          "item": "milho",
+          "count": 5,
+          "text": "Entregue 5 milhos à Dona Alzira.",
+          "lines": [
+            "Que milho bonito! Hoje sai pamonha de sal e de doce. Toma aqui um agrado."
+          ]
+        }
+      ],
+      "rewards": {
+        "money": 150,
+        "friendship": {
+          "alzira": 30
+        }
+      }
+    },
+    {
+      "id": "s_helena_pequi",
+      "start": "board",
+      "giver": "helena",
+      "min_day": 3,
+      "title": "Estoque de pequi",
+      "desc": "A mercearia está sem pequi para vender.",
+      "steps": [
+        {
+          "type": "deliver",
+          "npc": "helena",
+          "item": "pequi",
+          "count": 10,
+          "text": "Entregue 10 pequis à Helena.",
+          "lines": [
+            "Salvou meu estoque! Com pequi na prateleira o povo compra até arroz a mais."
+          ]
+        }
+      ],
+      "rewards": {
+        "money": 160,
+        "friendship": {
+          "helena": 30
+        }
+      }
+    },
+    {
+      "id": "s_joao_tucunare",
+      "start": "board",
+      "giver": "joao_pedro",
+      "min_day": 4,
+      "title": "O tucunaré da aposta",
+      "desc": "João Pedro apostou que você não pega um tucunaré.",
+      "steps": [
+        {
+          "type": "deliver",
+          "npc": "joao_pedro",
+          "item": "tucunare",
+          "count": 1,
+          "text": "Mostre um tucunaré ao João Pedro.",
+          "lines": [
+            "Não acredito! Perdi a aposta... toma as minhocas, apostado é apostado."
+          ]
+        }
+      ],
+      "rewards": {
+        "money": 120,
+        "items": {
+          "isca": 20
+        },
+        "friendship": {
+          "joao_pedro": 30
+        }
+      }
+    },
+    {
+      "id": "s_toninho_ferro",
+      "start": "board",
+      "giver": "toninho",
+      "min_day": 6,
+      "title": "Ferro para a forja",
+      "desc": "Toninho precisa de minério para os pedidos da vila.",
+      "steps": [
+        {
+          "type": "deliver",
+          "npc": "toninho",
+          "item": "minerio_ferro",
+          "count": 5,
+          "text": "Entregue 5 minérios de ferro ao Toninho.",
+          "lines": [
+            "Ferro bom! Com isso faço umas dez enxadas. Toma, pelo trabalho."
+          ]
+        }
+      ],
+      "rewards": {
+        "money": 250,
+        "friendship": {
+          "toninho": 30
+        }
+      }
+    },
+    {
+      "id": "s_mariana_fauna",
+      "start": "board",
+      "giver": "mariana",
+      "min_day": 2,
+      "title": "Censo da fauna",
+      "desc": "Mariana precisa de ajuda para registrar os bichos da Mata dos Ipês.",
+      "steps": [
+        {
+          "type": "observe",
+          "count": 4,
+          "text": "Observe 4 espécies diferentes (caderno de campo)."
+        },
+        {
+          "type": "talk",
+          "npc": "mariana",
+          "text": "Mostre suas anotações à Mariana.",
+          "lines": [
+            "Quatro espécies! Suas anotações estão ótimas. Isso vai pro meu relatório."
+          ]
+        }
+      ],
+      "rewards": {
+        "money": 200,
+        "friendship": {
+          "mariana": 30
+        }
+      }
+    },
+    {
+      "id": "s_benedito_javali",
+      "start": "board",
+      "giver": "benedito",
+      "min_day": 5,
+      "title": "Javalis corrompidos",
+      "desc": "Javalis de olho brilhante estão rondando as roças à noite.",
+      "steps": [
+        {
+          "type": "kill",
+          "enemy": "javali_corrompido",
+          "count": 3,
+          "text": "Derrote 3 javalis corrompidos na mata à noite."
+        },
+        {
+          "type": "talk",
+          "npc": "benedito",
+          "text": "Avise o Seu Benedito.",
+          "lines": [
+            "Três! Agora a roça do povo descansa uns dias. Deus te pague."
+          ]
+        }
+      ],
+      "rewards": {
+        "money": 250,
+        "friendship": {
+          "benedito": 30
+        }
+      }
+    }
   ]
 }
