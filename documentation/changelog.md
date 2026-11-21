@@ -1,5 +1,12 @@
 # Changelog — Vale do Pequi
 
+## 1.4.5 — Upheaval no jogo inteiro (21/11/2026)
+- Todo texto do jogo agora é **Upheaval** (Brian Kent), no tamanho 20, que é a grade dela, pra ficar nítida.
+- HUD reorganizado pra caber a letra maior: relógio, clima e dinheiro numa caixa só, vida/energia e missão uma embaixo da outra na esquerda; dica de ação e avisos embaixo, centralizados em cima da barra de itens (antes o aviso ficava em cima, por cima do relógio).
+- Aviso some enquanto tem janela aberta. No celular a dica não repete mais "(botão verde)": o botão já acende.
+- Abas do diário e mapa ajustados (nomes das regiões e saídas no tamanho certo).
+- Símbolos (★ ♥ → ✓...) redesenhados na grade da Upheaval, grossos como as letras.
+
 ## 1.4.4 — Fazenda diferente a cada jogo e terra que volta a ser grama (21/11/2026)
 - **Semente por jogo**: cada jogo novo espalha mato, galhos, pedrinhas, pedras grandes e árvores em lugares diferentes. O mato que nasce todo dia também segue a semente do jogo. Save antigo continua igual.
 - **Terra largada volta a ser grama**: terra capinada sem planta começa a voltar com 3 dias (metade de chance por dia) e volta com certeza com 5. Com planta, fica.

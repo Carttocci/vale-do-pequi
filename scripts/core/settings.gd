@@ -50,13 +50,19 @@ func _pixel_font(c: Control) -> void:
     # caixas com LabelSettings (relógio do HUD) também entram na grade
     if c is Label and (c as Label).label_settings and (c as Label).label_settings.font_size > 0:
         var ls := (c as Label).label_settings
-        ls.font_size = 22 if ls.font_size >= 20 else 11
+        ls.font_size = _grid_size(ls.font_size)
     if not c.has_theme_font_size_override("font_size"):
         return
     if c.has_theme_font_override("font"):
         return
     var size := c.get_theme_font_size("font_size")
-    c.add_theme_font_size_override("font_size", 22 if size >= 20 else 11)
+    c.add_theme_font_size_override("font_size", _grid_size(size))
+
+
+## A fonte do jogo (Upheaval) é de grade de 20 px: todo texto fica em 20;
+## só o que já era enorme (título) vai pra 40/60.
+func _grid_size(size: int) -> int:
+    return 60 if size >= 50 else (40 if size >= 36 else DISPLAY_GRID)
 
 
 ## No navegador, em tela cheia o Esc é do navegador (sai da tela cheia antes de

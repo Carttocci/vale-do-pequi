@@ -203,7 +203,7 @@ func _build() -> void:
     v.add_child(top)
     for i in TABS.size():
         var b := Button.new()
-        b.text = "  %s  " % TABS[i]
+        b.text = TABS[i]
         b.focus_mode = Control.FOCUS_NONE
         b.add_theme_font_size_override("font_size", 10)
         b.pressed.connect(set_tab.bind(i))

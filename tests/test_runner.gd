@@ -2928,7 +2928,7 @@ func _test_font_symbols() -> void:
     var hud := _main.get_node("HUD")
     var sizes := hud.find_children("*", "Label", true, false).filter(func(l: Label) -> bool: return l.label_settings != null) \
         .map(func(l: Label) -> int: return l.label_settings.font_size)
-    check(not sizes.is_empty() and sizes.all(func(z: int) -> bool: return z == 11 or z == 22), "caixa do relógio no tamanho da grade da fonte " + str(sizes))
+    check(not sizes.is_empty() and sizes.all(func(z: int) -> bool: return z % Settings.DISPLAY_GRID == 0), "caixa do relógio no tamanho da grade da fonte " + str(sizes))
 
 
 func _test_world_polish() -> void:

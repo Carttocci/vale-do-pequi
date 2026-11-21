@@ -34,6 +34,7 @@ func _ready() -> void:
     _build_bars()
     _build_boss_bar()
     _build_tracker()
+    _build_left_column()
     _build_menu_extras()
     save_button.pressed.connect(_on_save_pressed)
     new_game_button.pressed.connect(_on_new_game_pressed)
@@ -49,6 +50,9 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
     # Dica de ação some enquanto há conversa/loja/menu na frente.
     prompt_label.visible = _prompt_text != "" and not get_tree().paused
+    # aviso some atrás de janela aberta (mochila, loja, conversa...)
+    message_label.self_modulate.a = 0.0 if get_tree().paused and not pause_menu.visible else 1.0
+    _place_bottom_labels()
     _update_boss_bar()
     # Checagem barata a cada quadro: o sinal de redimensionamento não é
     # confiável em todos os navegadores quando o celular gira.
@@ -79,8 +83,49 @@ func set_paused(paused: bool) -> void:
 func _on_prompt_changed(text: String) -> void:
     _prompt_text = text
     prompt_label.visible = text != ""
-    # No celular a dica aponta para o botão verde, não para a tecla E.
-    prompt_label.text = (text + "  (botão verde)") if _touch_mode else ("[E] " + text)
+    # No celular o botão verde acende; no PC a dica mostra a tecla E.
+    prompt_label.text = text if _touch_mode else ("[E] " + text)
+    prompt_label.custom_minimum_size = Vector2.ZERO
+    prompt_label.reset_size()
+    _place_bottom_labels()
+
+
+## Coluna da esquerda (relógio, vida/energia, missão, efeito de comida), uma
+## embaixo da outra, e dica/mensagem centradas em cima da barra de itens.
+const LEFT_WIDTH := 214.0
+var left_column: VBoxContainer
+
+
+func _build_left_column() -> void:
+    left_column = VBoxContainer.new()
+    left_column.name = "LeftColumn"
+    left_column.position = Vector2(6, 6)
+    left_column.custom_minimum_size = Vector2(LEFT_WIDTH, 0)
+    left_column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    left_column.add_theme_constant_override("separation", 3)
+    $Root.add_child(left_column)
+    $Root.move_child(left_column, 0)
+    var day_box: Control = $Root/DayBox
+    for n: Control in [day_box, health_bar.get_parent(), quest_label, buff_label]:
+        n.get_parent().remove_child(n)
+        left_column.add_child(n)
+    health_bar.custom_minimum_size.x = LEFT_WIDTH
+    energy_bar.custom_minimum_size.x = LEFT_WIDTH
+    quest_label.custom_minimum_size = Vector2(LEFT_WIDTH, 0)
+    message_label.custom_minimum_size = Vector2(0, 0)
+    message_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
+    prompt_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
+
+
+func _place_bottom_labels() -> void:
+    var view := get_viewport().get_visible_rect().size
+    prompt_label.position = Vector2(roundf((view.x - prompt_label.size.x) / 2.0), view.y - 40.0 - prompt_label.size.y)
+    var w := minf(460.0, view.x - 40.0)
+    message_label.size = Vector2(w, 0)
+    message_label.custom_minimum_size = Vector2(w, 0)
+    message_label.reset_size()
+    var above := prompt_label.position.y - 4.0 if prompt_label.visible else view.y - 40.0
+    message_label.position = Vector2(roundf((view.x - w) / 2.0), above - message_label.size.y)
 
 
 func _on_touch_mode_changed(enabled: bool) -> void:
@@ -105,6 +150,7 @@ func _on_message_requested(text: String, duration: float) -> void:
     message_label.text = text
     message_label.modulate.a = 1.0
     message_label.show()
+    _place_bottom_labels()
     message_timer.start(duration)
 
 
@@ -134,8 +180,8 @@ func _on_new_game_pressed() -> void:
 
 ## "Seg, 1 Out  06:00" / "Chuva · Período chuvoso"
 func update_clock() -> void:
-    day_label.text = "%s  %s\n%s · %s\nR$ %d" % [Calendar.format_date(GameState.day), Calendar.format_time(Clock.minutes),
-        Clock.weather_name(), Calendar.period_name(GameState.day).trim_prefix("Período "), GameState.money]
+    day_label.text = "%s  %s\n%s\n%s · R$ %d" % [Calendar.format_date(GameState.day), Calendar.format_time(Clock.minutes),
+        Clock.weather_name(), Calendar.period_name(GameState.day).trim_prefix("Período ").capitalize(), GameState.money]
 
 
 # --- vida e energia -------------------------------------------------------------
@@ -227,8 +273,6 @@ var buff_label: Label
 
 func _build_tracker() -> void:
     quest_label = Label.new()
-    quest_label.position = Vector2(8, 78)
-    quest_label.size = Vector2(190, 40)
     quest_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     quest_label.add_theme_font_size_override("font_size", 8)
     quest_label.add_theme_color_override("font_color", Color(1, 0.9, 0.6))

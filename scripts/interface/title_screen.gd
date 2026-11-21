@@ -136,7 +136,7 @@ func _build_credits() -> void:
     credits.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
     credits.position = Vector2(10, -110)
     var l := Label.new()
-    l.text = "Vale do Pequi — um jogo de Carttocci\nFeito com Godot 4. Arte baseada no Ninja Adventure de pixel-boy e AAA (CC0),\nrepintada para o Cerrado. Fontes Micro 5 (OFL) e Upheaval (Brian Kent, freeware).\nO resto da arte e os sons são gerados por código.\nInspirado no Cerrado goiano: o pequi, o ipê, as festas,\nas receitas e a memória do povo do interior."
+    l.text = "Vale do Pequi — um jogo de Carttocci\nFeito com Godot 4. Arte baseada no Ninja Adventure de pixel-boy e AAA (CC0),\nrepintada para o Cerrado. Fonte Upheaval (Brian Kent, Ænigma Fonts, freeware).\nO resto da arte e os sons são gerados por código.\nInspirado no Cerrado goiano: o pequi, o ipê, as festas,\nas receitas e a memória do povo do interior."
     l.add_theme_font_size_override("font_size", 9)
     credits.add_child(l)
     credits.hide()

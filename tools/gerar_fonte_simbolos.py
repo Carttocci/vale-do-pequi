@@ -1,7 +1,8 @@
 """
 Gera assets/fonts/Simbolos.ttf: fonte "reserva" com os símbolos que o jogo usa
-(★ ♥ ♡ → ↑ ✓ ♪ ◆ ✦), desenhados em pixel na mesma grade da Micro 5
-(1 pixel = 150 unidades, 1650 por em → nítida no tamanho 11 e 22).
+(★ ♥ ♡ → ↑ ✓ ♪ ◆ ✦), desenhados em pixel na grade da Upheaval
+(1000 por em, 50 unidades = 1 px no tamanho 20; cada ponto do desenho vale 2×2 px,
+grosso como as letras dela).
 Quando a fonte principal não tem um caractere, o Godot busca nesta.
 Uso: python3 tools/gerar_fonte_simbolos.py   (precisa de fonttools)
 """
@@ -11,8 +12,8 @@ from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PX = 150
-UPEM = 1650
+PX = 100
+UPEM = 1000
 
 # 5x5, de cima pra baixo; a última linha fica na linha de base
 GLYPHS = {
@@ -54,9 +55,9 @@ def main():
         glyphs["u%04X" % ord(c)] = glyph(rows)
     fb.setupGlyf(glyphs)
     fb.setupHorizontalMetrics({n: (6 * PX if n != ".notdef" else 4 * PX, 0) for n in names})
-    fb.setupHorizontalHeader(ascent=1190, descent=-460)
+    fb.setupHorizontalHeader(ascent=750, descent=-150)
     fb.setupNameTable({"familyName": "ValeSimbolos", "styleName": "Regular"})
-    fb.setupOS2(sTypoAscender=1190, sTypoDescender=-460, usWinAscent=1350, usWinDescent=460)
+    fb.setupOS2(sTypoAscender=750, sTypoDescender=-150, usWinAscent=750, usWinDescent=150)
     fb.setupPost()
     path = os.path.join(ROOT, "assets", "fonts", "Simbolos.ttf")
     fb.save(path)
