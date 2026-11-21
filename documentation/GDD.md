@@ -258,7 +258,7 @@ O calendário é central para a rotina e segue a identidade climática do Cerrad
 
 - **Período chuvoso** (outubro a abril): plantio, rios cheios, tempestades.
 - **Período seco** (maio a setembro): vegetação dourada, ipês florindo, queimadas a evitar, colheitas e festas.
-- **Implementado (v0.4):** ano de 12 meses com nomes reais, 10 dias por mês; começa em 1º de outubro; dia das 06:00 às 02:00.
+- **Implementado (v0.4, dias oficiais desde a 1.4.8):** ano de 12 meses com nomes e dias reais (365 dias); começa em 1º de outubro; dia das 06:00 às 02:00.
 - Variações: tempestades, neblina, ventos, dias ensolarados.
 - Lugares e criaturas que **só aparecem em certas épocas** (gancho da história, §4.1).
 
