@@ -9,7 +9,7 @@ var music_slider: HSlider
 var sfx_slider: HSlider
 var hint_check: CheckButton
 var zoom_slider: HSlider
-## Tamanho da letra: 10 a 20 (20 = nítida; menor perde pixel).
+## Tamanho da letra: 8 (normal) ou 16 (grande). Os dois nítidos.
 var text_slider: HSlider
 
 

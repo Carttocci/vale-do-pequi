@@ -18,11 +18,11 @@ func _ready() -> void:
     player.camera.reset_smoothing()
     EventBus.show_message("Vila de Santa Pequiria", 30.0)
     EventBus.dialogue_requested.emit("Helena", PackedStringArray(["Opa! Você que é da família lá da Fazenda do Pequi? A vila inteira tá comentando."]), PackedStringArray(), Callable())
-    for s in [10, 12, 14, 16, 20]:
+    for s in [8, 16]:
         Settings.set_text_size(s)
         await _frames(10)
         get_viewport().get_texture().get_image().save_png("user://capturas/letra_%d.png" % s)
-    Settings.set_text_size(20)
+    Settings.set_text_size(8)
     get_tree().quit()
 
 

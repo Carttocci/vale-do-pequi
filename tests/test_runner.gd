@@ -2923,7 +2923,7 @@ func _test_hit_juice() -> void:
 func _test_font_symbols() -> void:
     print("[fonte: símbolos e caixa do relógio]")
     var missing := ""
-    for ch in ["★", "♥", "♡", "→", "↑", "✓", "♪", "◆", "✦", "ã", "ç", "é"]:
+    for ch in ["★", "♥", "♡", "→", "↑", "✓", "♪", "◆", "✦", "●", "■", "□", "ã", "ç", "é"]:
         if not Settings.has_glyph(ch):
             missing += ch
     check(missing == "", "todos os símbolos do jogo têm desenho (sem quadradinho) " + missing)
@@ -3207,9 +3207,9 @@ func _test_seed_and_fallow() -> void:
 func _test_text_size() -> void:
     print("[tamanho da letra nas Opções]")
     var hud := _main.get_node("HUD")
-    Settings.set_text_size(12)
-    await frames(2)
-    check(hud.day_label.label_settings.font_size == 12 and ThemeDB.get_project_theme().default_font_size == 12, "letra 12 no jogo todo")
-    Settings.set_text_size(99)
-    check(Settings.text_size == 20, "no máximo 20 (nítida)")
     Settings.set_text_size(16)
+    await frames(2)
+    check(hud.day_label.label_settings.font_size == 16 and ThemeDB.get_project_theme().default_font_size == 16, "letra grande (16) no jogo todo")
+    Settings.set_text_size(10)
+    check(Settings.text_size == 8, "tamanho fora da grade cai no 8 (nítido)")
+    Settings.set_text_size(8)

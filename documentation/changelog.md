@@ -1,5 +1,10 @@
 # Changelog — Vale do Pequi
 
+## 1.4.7 — Press Start 2P no texto do jogo (21/11/2026)
+- Todo texto agora é **Press Start 2P** (CodeMan38, OFL): letra miúda e nítida no tamanho 8, com minúsculas e acentos. A Upheaval fica só no título.
+- Opções → Letra: **8** (normal) ou **16** (grande), os dois nítidos. Botões do menu, nome do chefe e cabeçalho do mapa usam o 16.
+- Números da barra de itens ficam sempre no 8. Símbolos ● ■ □ desenhados na grade nova.
+
 ## 1.4.6 — Tamanho da letra nas Opções (21/11/2026)
 - **Opções → Letra**: escolhe o tamanho de todo texto do jogo (10, 12, 14, 16, 18 ou 20) e muda na hora. Fica salvo.
 - Padrão agora é 16 (menor que antes). Aviso: a Upheaval é desenhada pra 20; abaixo disso algumas letras perdem pixel.

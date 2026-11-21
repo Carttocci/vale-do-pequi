@@ -222,7 +222,7 @@ func _build_boss_bar() -> void:
     $Root.add_child(boss_box)
     boss_name = Label.new()
     boss_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    Settings.display_font(boss_name)
+    Settings.big_font(boss_name)
     boss_name.add_theme_color_override("font_color", Color(0.85, 0.75, 1))
     boss_name.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.1))
     boss_name.add_theme_constant_override("outline_size", 3)

@@ -117,7 +117,7 @@ func _draw_marks() -> void:
         var q := world_to_map(ex.global_position - _level.global_position)
         _marks.draw_rect(Rect2(q - Vector2(3, 3), Vector2(6, 6)), Color(1, 0.85, 0.3))
         var label: String = WORLD.get(ex.target_region, {}).get("name", String(ex.target_region))
-        _marks.draw_string(font, q + Vector2(5, 7), "→ " + label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(1, 0.92, 0.6))
+        _marks.draw_string(font, q + Vector2(5, 4), "→ " + label, HORIZONTAL_ALIGNMENT_LEFT, -1, Settings.text_size, Color(1, 0.92, 0.6))
     # moradores (com missão: "!")
     for n in get_tree().get_nodes_in_group("npc"):
         var npc := n as Node2D
@@ -126,7 +126,7 @@ func _draw_marks() -> void:
         var q := world_to_map(npc.global_position - _level.global_position)
         _marks.draw_circle(q, 2.5, Color(0.55, 0.8, 1))
         if npc.has_method("has_quest_hint") and npc.has_quest_hint():
-            _marks.draw_string(font, q + Vector2(-3, -3), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(1, 0.9, 0.2))
+            _marks.draw_string(font, q + Vector2(-3, -3), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, Settings.text_size, Color(1, 0.9, 0.2))
     # criação
     var ranch := get_tree().get_first_node_in_group("ranch") as Ranch
     if ranch and _level.is_ancestor_of(ranch):
@@ -157,8 +157,8 @@ func _draw_world() -> void:
         var known := _known(id)
         var col := Color(0.95, 0.4, 0.3) if id == here else (Color(0.85, 0.78, 0.6) if known else Color(0.4, 0.36, 0.32))
         _world.draw_rect(Rect2(p - Vector2(5, 5), Vector2(10, 10)), col)
-        _world.draw_string(font, p + Vector2(-45, 24), WORLD[id].name if known else "???",
-            HORIZONTAL_ALIGNMENT_CENTER, 90, 20, col)
+        _world.draw_string(font, p + Vector2(-45, 18), WORLD[id].name if known else "???",
+            HORIZONTAL_ALIGNMENT_CENTER, 90, Settings.text_size, col)
 
 
 func _known(id: StringName) -> bool:
@@ -213,7 +213,7 @@ func _build() -> void:
     h.add_child(right)
     var wt := Label.new()
     wt.text = "Vale do Pequi"
-    Settings.display_font(wt)
+    Settings.big_font(wt)
     right.add_child(wt)
     _world = Control.new()
     _world.custom_minimum_size = Vector2(270, 180)

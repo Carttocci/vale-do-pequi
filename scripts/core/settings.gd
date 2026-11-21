@@ -27,6 +27,13 @@ const FONT_DISPLAY := preload("res://assets/fonts/Upheaval.ttf")
 const DISPLAY_GRID := 20
 
 
+## Texto de destaque menor (botões do menu, nome do chefe, cabeçalho): a fonte
+## do jogo no dobro do tamanho (16), sempre nítida.
+func big_font(c: Control) -> void:
+    c.add_theme_font_override("font", preload("res://assets/fonts/PressStart2P.ttf"))
+    c.add_theme_font_size_override("font_size", 16)
+
+
 ## Põe a fonte de destaque num controle, no múltiplo de 20 mais perto de `size`.
 func display_font(c: Control, size: int = DISPLAY_GRID) -> void:
     c.add_theme_font_override("font", FONT_DISPLAY)
@@ -59,11 +66,11 @@ func _pixel_font(c: Control) -> void:
     c.add_theme_font_size_override("font_size", _grid_size(size))
 
 
-## A fonte do jogo (Upheaval) é de grade de 20 px: nítida em 20. O jogador pode
-## escolher menor nas Opções (TEXT_SIZES); abaixo de 20 as letras perdem pixel.
-## O que já era enorme (título) vai pra 40/60.
-const TEXT_SIZES := [10, 12, 14, 16, 18, 20]
-var text_size: int = 16
+## A fonte do texto (Press Start 2P) é de grade de 8 px: nítida em 8 e 16.
+## O jogador escolhe nas Opções (TEXT_SIZES). O que já era enorme vai pra 40/60.
+const TEXT_GRID := 8
+const TEXT_SIZES := [8, 16]
+var text_size: int = TEXT_GRID
 
 
 func _grid_size(size: int) -> int:
@@ -72,7 +79,7 @@ func _grid_size(size: int) -> int:
 
 ## Muda o tamanho de todo texto do jogo na hora (Opções → Letra).
 func set_text_size(v: int) -> void:
-    text_size = clampi(v, TEXT_SIZES[0], DISPLAY_GRID)
+    text_size = 16 if v >= 12 else TEXT_GRID
     _apply_text_size()
     save_settings()
 
@@ -132,7 +139,7 @@ func load_settings() -> void:
         show_quest_hint = bool(cfg.get_value("jogo", "dica_missao", show_quest_hint))
         camera_zoom = clampf(float(cfg.get_value("jogo", "zoom", camera_zoom)), ZOOM_MIN, ZOOM_MAX)
         zoom_touched = bool(cfg.get_value("jogo", "zoom_mexido", false))
-        text_size = clampi(int(cfg.get_value("jogo", "letra", text_size)), TEXT_SIZES[0], DISPLAY_GRID)
+        text_size = 16 if int(cfg.get_value("jogo", "letra", text_size)) >= 12 and int(cfg.get_value("jogo", "letra_fonte", 0)) == 2 else TEXT_GRID
     var theme := ThemeDB.get_project_theme()
     if theme:
         theme.default_font_size = text_size
@@ -146,6 +153,7 @@ func save_settings() -> void:
     cfg.set_value("jogo", "dica_missao", show_quest_hint)
     cfg.set_value("jogo", "zoom", camera_zoom)
     cfg.set_value("jogo", "letra", text_size)
+    cfg.set_value("jogo", "letra_fonte", 2)  # 2 = Press Start 2P (tamanhos antigos da Upheaval não valem)
     cfg.set_value("jogo", "zoom_mexido", zoom_touched)
     cfg.save(path)
 
@@ -191,6 +199,7 @@ func _add_symbol_fallback() -> void:
         fonts.append(theme.default_font)
     fonts.append(ThemeDB.fallback_font)
     fonts.append(FONT_DISPLAY)
+    fonts.append(preload("res://assets/fonts/PressStart2P.ttf"))
     for f in fonts:
         if f and not FONT_SYMBOLS in f.fallbacks:
             var list := f.fallbacks.duplicate()

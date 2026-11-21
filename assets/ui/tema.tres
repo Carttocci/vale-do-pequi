@@ -1,6 +1,6 @@
 [gd_resource type="Theme" load_steps=8 format=3]
 
-[ext_resource type="FontFile" path="res://assets/fonts/Upheaval.ttf" id="1"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P.ttf" id="1"]
 
 [sub_resource type="StyleBoxFlat" id="btn_normal"]
 content_margin_left = 10.0
@@ -90,7 +90,7 @@ corner_radius_bottom_left = 2
 
 [resource]
 default_font = ExtResource("1")
-default_font_size = 20
+default_font_size = 8
 Button/colors/font_color = Color(0.98, 0.93, 0.8, 1)
 Button/colors/font_hover_color = Color(1, 0.86, 0.42, 1)
 Button/colors/font_pressed_color = Color(1, 0.86, 0.42, 1)

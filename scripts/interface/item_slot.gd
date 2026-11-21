@@ -37,6 +37,8 @@ func _init() -> void:
     _count.offset_right = -2
     _count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
     _count.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+    # número do slot fica sempre no 8 (mesmo com letra grande), senão não cabe
+    _count.add_theme_font_override("font", preload("res://assets/fonts/PressStart2P.ttf"))
     _count.add_theme_font_size_override("font_size", 8)
     _count.add_theme_color_override("font_outline_color", Color.BLACK)
     _count.add_theme_constant_override("outline_size", 2)
