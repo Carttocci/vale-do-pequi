@@ -165,7 +165,16 @@ def sfx():
         tt = t(0.9)
         saw = 2 * ((55 * tt + 0.5 * np.sin(2 * np.pi * 3 * tt)) % 1.0) - 1
         return (lowpass(saw, 0.08) * 0.9 + lowpass(noise(0.9), 0.05) * 1.5) * np.sin(np.linspace(0, np.pi, len(tt))) * 0.8
-    for name, fn in [("capinar", capinar), ("regar", regar), ("pegar", pegar), ("moeda", moeda), ("golpe", golpe),
+    def latido():
+        x = np.zeros(int(SR * 0.32))
+        for s0 in (0, int(SR * 0.16)):
+            tt = t(0.11)
+            f = np.linspace(620, 330, len(tt))
+            tone = np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)) * 0.5 + np.sin(2 * np.pi * np.cumsum(f * 2) / SR) * 0.3
+            b = lowpass(tone + lowpass(noise(0.11), 0.4) * 0.4, 0.35) * env(len(tt), 0.004)
+            x[s0:s0 + len(b)] += b * 0.7
+        return x
+    for name, fn in [("latido", latido), ("capinar", capinar), ("regar", regar), ("pegar", pegar), ("moeda", moeda), ("golpe", golpe),
                      ("acerto", acerto), ("dano", dano), ("picareta", picareta), ("pedra_quebra", pedra_quebra),
                      ("comer", comer), ("agua", agua), ("nivel", nivel), ("missao", missao), ("porta", porta),
                      ("clique", clique), ("dialogo", dialogo), ("chefe", chefe)]:

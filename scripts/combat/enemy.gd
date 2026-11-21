@@ -37,6 +37,10 @@ var _knock := Vector2.ZERO
 var _anim := 0.0
 var _charge_dir := Vector2.ZERO
 var _charge_time := 0.0
+## Ataque à criação (Ranch): cercado-alvo.
+var raid_ranch: Ranch
+var raid_pen: StringName = &""
+var _raid_target: Node2D
 var _wander := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
 var sprite: Sprite2D
@@ -110,6 +114,10 @@ func _process(delta: float) -> void:
     var to_player := player.global_position - global_position if player else Vector2.INF
     var dist := to_player.length() if player else INF
     _anim += delta
+    # ataque à criação: vai atrás da porteira/dos bichos, a não ser que você chegue perto
+    if raid_ranch and (player == null or dist > 70.0) and _process_raid(delta):
+        sprite.frame = int(_anim * 8.0) % 4
+        return
     match info.ai:
         "chaser", "boss":
             if _charge_time > 0.0:
@@ -159,6 +167,23 @@ func _process(delta: float) -> void:
     if to_player != Vector2.INF:
         sprite.flip_h = to_player.x < 0
     sprite.frame = int(_anim * 8.0) % 4
+
+
+## Anda até o alvo do ataque à criação e bate nele. Retorna false se não tem alvo.
+func _process_raid(delta: float) -> bool:
+    if _raid_target == null or not is_instance_valid(_raid_target) or not _raid_target.is_inside_tree():
+        _raid_target = raid_ranch.raid_target(raid_pen)
+        if _raid_target == null:
+            return false
+    var to := _raid_target.global_position - global_position
+    if to.length() > info.range + 4.0:
+        _move(to.normalized() * info.speed * delta, true)
+    elif _cooldown <= 0.0:
+        _cooldown = info.cooldown
+        raid_ranch.raid_hit(_raid_target, int(info.damage))
+        _raid_target = null  # escolhe de novo (porteira pode ter quebrado, bicho fugido)
+    sprite.flip_h = to.x < 0
+    return true
 
 
 func _try_hit(player: Player, to_player: Vector2) -> void:

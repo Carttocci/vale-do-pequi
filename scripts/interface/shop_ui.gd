@@ -89,9 +89,9 @@ func sell(item_id: StringName, amount: int = 1) -> int:
 ## Compra de animal: vai direto para o cercado da fazenda.
 func buy_animal(kind: StringName) -> bool:
     var ranch := get_tree().get_first_node_in_group("ranch") as Ranch
-    if ranch == null or not Ranch.ANIMALS.has(kind):
+    if ranch == null or not (Ranch.ANIMALS.has(kind) or Ranch.BUYABLE.has(kind)):
         return false
-    var info: Dictionary = Ranch.ANIMALS[kind]
+    var info: Dictionary = Ranch.BUYABLE[kind] if Ranch.BUYABLE.has(kind) else Ranch.ANIMALS[kind]
     if not ranch.can_buy(kind):
         _info.text = "Não cabe mais nenhum(a) %s no cercado." % info.name.to_lower()
         return false
@@ -105,15 +105,18 @@ func buy_animal(kind: StringName) -> bool:
 
 
 func _add_animal_row(kind: StringName) -> void:
-    if not Ranch.ANIMALS.has(kind):
+    if not (Ranch.ANIMALS.has(kind) or Ranch.BUYABLE.has(kind)):
         return
-    var info: Dictionary = Ranch.ANIMALS[kind]
+    var info: Dictionary = Ranch.BUYABLE[kind] if Ranch.BUYABLE.has(kind) else Ranch.ANIMALS[kind]
+    var real: StringName = info.get("kind", kind)
     var ranch := get_tree().get_first_node_in_group("ranch") as Ranch
     var tex := AtlasTexture.new()
-    tex.atlas = load(info.sprite)
+    var base: Dictionary = Ranch.ANIMALS[real]
+    tex.atlas = load(base.young_sprite if info.get("young", false) else base.sprite)
     tex.region = Rect2(0, 0, tex.atlas.get_width() / 4.0, tex.atlas.get_height())
     var proxy := ItemData.new()
-    proxy.display_name = "%s (%d/%d)" % [info.name, ranch.count(kind) if ranch else 0, ranch.capacity(kind) if ranch else int(info.capacity)]
+    proxy.display_name = "%s (%d/%d no %s)" % [info.name, ranch.pen_count(ranch.pen_of(real)) if ranch else 0,
+        ranch.capacity(real) if ranch else int(base.capacity), String(base.pen)]
     proxy.icon = tex
     _add_row(proxy, "R$ %d" % info.price, "", buy_animal.bind(kind), "", Callable())
 

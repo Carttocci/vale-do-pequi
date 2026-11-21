@@ -23,6 +23,7 @@ func _ready() -> void:
     # Nunca toca no save real do jogador.
     SaveManager.save_path = TEST_SAVE
     Quests.skip_tutorial = true  # o tutorial tem teste próprio
+    Dog.active = false
     Quests.reset()
     Settings.path = "user://teste_opcoes.cfg"
     SaveManager.delete_save()
@@ -1403,7 +1404,10 @@ func _test_ranch() -> void:
     GameState.new_game()
     _main.change_region_now(&"farm")
     var ranch := get_tree().get_first_node_in_group("ranch") as Ranch
+    ranch.raids_enabled = false
+    ranch.breeding_enabled = false
     ranch.load_save_data({})
+    ranch.water = {&"galinheiro": Ranch.WATER_MAX, &"curral": Ranch.WATER_MAX}
     var shop := _main.get_node("ShopUI") as ShopUI
     shop.open_shop({"title": "Clínica", "sells": PackedStringArray(["animal:galinha", "racao"]), "buys": PackedInt32Array(), "tab": 0})
     GameState.money = 1000
@@ -1446,6 +1450,127 @@ func _test_ranch() -> void:
     hen.pet()
     hen.pet()
     check(hen.record.happiness == 58, "carinho: +8 felicidade, uma vez por dia")
+    await _test_ranch_life(ranch, shop)
+
+
+func _test_ranch_life(ranch: Ranch, shop: ShopUI) -> void:
+    print("[Criação: filhotes, água, porteira, ataques, Pipoca]")
+    ranch.load_save_data({})
+    ranch.pickups.clear()
+    GameState.money = 2000
+    shop.open_shop({"title": "Clínica", "sells": PackedStringArray(["animal:pintinho", "animal:bezerro", "animal:touro"]), "buys": PackedInt32Array(), "tab": 0})
+    check(shop.buy_animal(&"pintinho") and GameState.money == 1940, "comprou pintinho (R$ 60)")
+    check(shop.buy_animal(&"bezerro") and shop.buy_animal(&"touro") and GameState.money == 740, "comprou bezerro e touro")
+    shop.close()
+    var chick: Dictionary = ranch.animals[0]
+    check(chick.kind == &"galinha" and chick.young and chick.name != "", "pintinho é galinha filhote com nome (%s)" % chick.name)
+    check(ranch.display_name_of(chick).contains("pintinho"), "nome mostra 'pintinho'")
+    # água: sem água não produz e fica triste
+    ranch.water = {&"galinheiro": 0, &"curral": 0}
+    ranch.feed = {&"galinheiro": 20, &"curral": 20}
+    chick.happiness = 50
+    ranch.advance_day()
+    check(chick.happiness == 45, "sem água: comeu (+5) mas passou sede (-10)")
+    # regador enche o bebedouro
+    GameState.refill_water()
+    var trough: Prop = ranch.trough_props[&"galinheiro"]
+    var can := ItemDB.get_item(&"regador")
+    var act := ranch.get_item_action(can, trough.global_position, null)
+    check(act.get("prompt", "") == "Encher bebedouro (0/10)", "dica 'Encher bebedouro'")
+    check(ranch.use_item(can, trough.global_position, null) and ranch.water[&"galinheiro"] == Ranch.WATER_MAX, "regador encheu o bebedouro")
+    # cresce em 5 dias e só adulto bota ovo
+    ranch.water[&"curral"] = Ranch.WATER_MAX
+    for i in 4:
+        ranch.advance_day()
+    check(not chick.young and ranch.pickups.filter(func(p: Dictionary) -> bool: return p.item == "ovo").is_empty(), "pintinho virou galinha no 5º dia (sem ovos antes)")
+    var calf: Dictionary = ranch.animals.filter(func(a: Dictionary) -> bool: return a.kind == &"vaca")[0]
+    check(calf.young, "bezerro ainda crescendo")
+    # reprodução: vaca adulta feliz + touro → bezerro (sorteio repetido)
+    calf.young = false
+    ranch.breeding_enabled = true
+    var births := 0
+    for i in 80:
+        calf.happiness = 100
+        ranch.water[&"curral"] = Ranch.WATER_MAX
+        ranch.feed[&"curral"] = 20
+        var n := ranch.count(&"vaca")
+        ranch._try_breed(calf)
+        if ranch.count(&"vaca") > n:
+            births += 1
+            break
+    check(births == 1 and ranch.animals.filter(func(a: Dictionary) -> bool: return a.kind == &"vaca" and a.young).size() == 1, "vaca com touro teve bezerro")
+    var cows_before := ranch.count(&"vaca")
+    ranch.animals = ranch.animals.filter(func(a: Dictionary) -> bool: return a.kind != &"touro")
+    var hits := 0
+    for i in 200:
+        calf.happiness = 100
+        if ranch._try_breed(calf):
+            hits += 1
+    check(hits == 0, "sem touro não nasce bezerro")
+    ranch.breeding_enabled = false
+    # porteira
+    ranch.toggle_gate(&"galinheiro")
+    check(ranch.gates[&"galinheiro"].closed and ranch.gate_props[&"galinheiro"].interactable.prompt == "Abrir porteira", "fechou a porteira")
+    # defesa forte segura o ataque simulado
+    ranch.load_save_data({"animals": [{"kind": "galinha", "name": "A"}, {"kind": "galinha", "name": "B"}, {"kind": "galinha", "name": "C"}]})
+    ranch.gates[&"galinheiro"].closed = true
+    ranch.plan_raid_now(&"pequeno", &"galinheiro", 21 * 60)
+    ranch.simulate_raid()
+    check(ranch.animals.size() == 3 and ranch.animals.all(func(a: Dictionary) -> bool: return a.status == "ok"), "porteira + Pipoca seguram ataque pequeno")
+    # ataque grande sem porteira: resultados variados (morre, foge, ferido, assustado)
+    var outcomes := {}
+    for trial in 30:
+        var recs := []
+        for i in 6:
+            recs.append({"kind": "galinha", "name": "G%d" % i})
+        ranch.load_save_data({"animals": recs})
+        ranch.plan_raid_now(&"grande", &"galinheiro", 21 * 60)
+        ranch.simulate_raid()
+        outcomes["morreu"] = outcomes.get("morreu", 0) + 6 - ranch.animals.size() - ranch.lost.size()
+        outcomes["fugiu"] = outcomes.get("fugiu", 0) + ranch.lost.size()
+        for a in ranch.animals:
+            outcomes[a.status] = outcomes.get(a.status, 0) + 1
+    check(outcomes.get("morreu", 0) > 0 and outcomes.get("fugiu", 0) > 0 and outcomes.get("ferido", 0) > 0 and outcomes.get("assustado", 0) > 0,
+        "ataque varia: morre, foge, fere, assusta %s" % str(outcomes))
+    check(ranch.report.contains("Atacaram"), "relatório da manhã conta o ataque")
+    # bicho fugido aparece na mata e dá pra resgatar
+    while ranch.lost.is_empty():
+        ranch.load_save_data({"animals": [{"kind": "galinha", "name": "Fujona"}]})
+        ranch._harm(ranch.animals[0], true)
+    var runaway: Dictionary = ranch.lost[0]
+    await frames(2)
+    var lost_nodes := mata().get_entities_root().get_children().filter(func(n: Node) -> bool: return n is LostAnimal and not n.is_queued_for_deletion())
+    check(lost_nodes.size() == 1, "bicho fugido aparece na Mata dos Ipês")
+    check(ranch.rescue(runaway) and ranch.lost.is_empty() and ranch.animals.size() == 1, "resgatou o bicho")
+    # fugido some depois de 3 dias
+    ranch.lost = [{"kind": &"galinha", "name": "Perdida", "young": false, "age": 9, "happiness": 50, "pet_day": 0, "health": 30, "status": "ferido", "status_days": 0, "lost_day": GameState.day - 4, "x": 100.0, "y": 100.0}]
+    ranch._expire_lost()
+    check(ranch.lost.is_empty() and ranch.report.contains("Perdida"), "fugido não resgatado em 3 dias se perde")
+    # ataque ao vivo: inimigos vão atrás do cercado
+    ranch.load_save_data({"animals": [{"kind": "galinha", "name": "Viva"}]})
+    ranch.report = ""
+    await place_player(Vector2(300, 300))
+    ranch.plan_raid_now(&"pequeno", &"galinheiro", 21 * 60)
+    ranch.start_live_raid()
+    var raiders := get_tree().get_nodes_in_group("enemy").filter(func(e: Node) -> bool: return e.raid_ranch == ranch)
+    check(raiders.size() >= 2, "ataque ao vivo: %d criaturas saem da mata" % raiders.size())
+    for e in raiders:
+        e.take_hit(999, Vector2.RIGHT, 0.0, 0.0)
+    await frames(3)
+    check(ranch.raid.resolved and _messages[-1].contains("defendeu"), "derrotou o ataque: criação defendida")
+    # Pipoca
+    check(ranch.dog != null and is_instance_valid(ranch.dog), "Pipoca está na fazenda")
+    ranch.dog_pet_day = 0
+    var xp: int = GameState.skill_xp.get(&"criacao", 0)
+    ranch.pet_dog()
+    ranch.pet_dog()
+    check(GameState.skill_xp[&"criacao"] == xp + 2, "carinho no Pipoca uma vez por dia")
+    # save
+    var data := ranch.get_save_data()
+    ranch.load_save_data(JSON.parse_string(JSON.stringify(data)))
+    check(ranch.animals[0].name == "Viva" and ranch.gates.has(&"galinheiro") and ranch.water.has(&"curral"), "save guarda nomes, água e porteiras")
+    ranch.load_save_data({})
+    ranch.raids_enabled = false
 
 
 func _test_wildlife_and_traps() -> void:

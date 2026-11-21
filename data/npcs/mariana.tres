@@ -26,5 +26,5 @@ lines_generic = PackedStringArray("Capivara não é bicho de estimação, viu? P
 lines_repeat = PackedStringArray("Tô no meio de umas anotações, depois a gente conversa!", "Até mais!")
 shop_marker = &"clinica_frente"
 shop_title = "Clínica da Mariana"
-shop_sells = PackedStringArray("animal:galinha", "animal:vaca", "racao")
+shop_sells = PackedStringArray("animal:pintinho", "animal:bezerro", "animal:touro", "racao")
 shop_buys = PackedInt32Array()

@@ -10,7 +10,7 @@ const BUS_SFX := &"Efeitos"
 const SFX_DIR := "res://assets/audio/sfx/"
 const MUSIC_DIR := "res://assets/audio/musica/"
 const SFX := [&"capinar", &"regar", &"pegar", &"moeda", &"golpe", &"acerto", &"dano", &"picareta", &"pedra_quebra",
-    &"comer", &"agua", &"nivel", &"missao", &"porta", &"clique", &"dialogo", &"chefe"]
+    &"comer", &"agua", &"nivel", &"missao", &"porta", &"clique", &"dialogo", &"chefe", &"latido"]
 const TRACKS := [&"dia", &"noite", &"mina", &"festa"]
 const FADE := 1.5
 const VOICES := 8

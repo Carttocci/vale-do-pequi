@@ -21,7 +21,7 @@ func setup(animal_kind: StringName, rec: Dictionary, pen_rect: Rect2, info: Dict
     record = rec
     pen = pen_rect
     sprite = Sprite2D.new()
-    sprite.texture = load(info.sprite)
+    sprite.texture = load(info.young_sprite if rec.get("young", false) and info.has("young_sprite") else info.sprite)
     sprite.hframes = 4
     sprite.offset = Vector2(0, -sprite.texture.get_height() / 2.0 + 1)
     add_child(sprite)
@@ -34,21 +34,32 @@ func setup(animal_kind: StringName, rec: Dictionary, pen_rect: Rect2, info: Dict
     shape.position = Vector2(0, -6)
     interactable.add_child(shape)
     add_child(interactable)
-    interactable.prompt = "Fazer carinho (%s)" % info.name.to_lower()
+    interactable.prompt = "Fazer carinho na %s" % rec.get("name", info.name.to_lower()) if kind != &"touro" \
+        else "Fazer carinho no %s" % rec.get("name", "touro")
+    if rec.get("status", "ok") == "ferido":
+        sprite.modulate = Color(1, 0.75, 0.75)
     interactable.interacted.connect(func(_a: Node) -> void: pet())
     position = Vector2(_rng.randf_range(pen.position.x, pen.end.x), _rng.randf_range(pen.position.y, pen.end.y))
     _target = position
     return self
 
 
+## Levou um golpe num ataque: pisca e dá um pulinho de susto.
+func flash() -> void:
+    sprite.modulate = Color(2, 1.4, 1.4)
+    var t := create_tween()
+    t.tween_property(sprite, "modulate", Color(1, 0.75, 0.75), 0.2)
+    _target = position + Vector2(randf_range(-12, 12), randf_range(-6, 6))
+
+
 func pet() -> void:
     if int(record.get("pet_day", 0)) == GameState.day:
-        EventBus.show_message("Já ganhou carinho hoje. (felicidade %d)" % record.happiness, 1.5)
+        EventBus.show_message("%s já ganhou carinho hoje. (felicidade %d)" % [record.get("name", ""), record.happiness], 1.5)
         return
     record.pet_day = GameState.day
     record.happiness = mini(100, int(record.happiness) + 8)
     GameState.add_xp(&"criacao", 3)
-    EventBus.show_message("♥ Ficou feliz! (felicidade %d)" % record.happiness, 1.5)
+    EventBus.show_message("♥ %s ficou feliz! (felicidade %d)" % [record.get("name", ""), record.happiness], 1.5)
 
 
 func _process(delta: float) -> void:
