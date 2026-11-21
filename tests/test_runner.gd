@@ -1680,6 +1680,8 @@ func _test_combat_basics() -> void:
     _main.change_region_now(&"farm")
     GameState.add_item(&"facao", 1)
     select_item(&"facao")
+    for f in get_tree().get_nodes_in_group("debris_field"):
+        f.clear_all()  # mato/galho sorteados podiam cair bem na frente
     await place_player(Vector2(600, 300))
     _player.face(2)
     await frames(2)
