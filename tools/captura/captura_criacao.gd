@@ -32,7 +32,7 @@ func _ready() -> void:
     wfx.refresh()
     await _frames(30)
     _shot("criacao_noite")
-    GameState.day = 1 + 10 * 10
+    GameState.day = Calendar.day_of(7, 1, 2)
     Clock.minutes = 10 * 60
     Clock.time_changed.emit(Clock.minutes)
     wfx.refresh()

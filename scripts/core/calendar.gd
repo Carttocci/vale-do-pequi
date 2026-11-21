@@ -2,12 +2,13 @@ class_name Calendar
 extends RefCounted
 ## Calendário do Vale do Pequi (só funções; o estado é o dia em GameState).
 ##
-## Ano de 12 meses com os nomes reais, cada mês com DAYS_PER_MONTH dias.
+## Ano de verdade: 12 meses com os dias oficiais (fevereiro com 28), 365 dias.
 ## O jogo começa em 1º de outubro: começo das chuvas e da safra do pequi.
 ## Clima do Cerrado (GDD §11):
 ##   período chuvoso = outubro a abril · período seco = maio a setembro.
 
-const DAYS_PER_MONTH := 10
+const MONTH_DAYS := [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+const DAYS_PER_YEAR := 365
 const START_MONTH := 9  # 0 = janeiro → 9 = outubro
 const MONTHS := ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 const MONTHS_FULL := ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
@@ -21,16 +22,42 @@ const PERIOD_RAINY := &"chuvoso"
 const PERIOD_DRY := &"seco"
 
 
+## [ano (1...), mês (0 = jan), dia do mês (1...)] do dia do jogo `day` (1 = 1º de outubro do ano 1).
+## O ano do jogo vira em outubro (começo das chuvas).
+static func _split(day: int) -> Array:
+    var d := maxi(day, 1) - 1
+    var y := d / DAYS_PER_YEAR
+    d = d % DAYS_PER_YEAR
+    var m := START_MONTH
+    while d >= int(MONTH_DAYS[m]):
+        d -= int(MONTH_DAYS[m])
+        m = (m + 1) % 12
+    # ano conta a partir de janeiro, como antes: out-dez são do ano 1, jan em diante é ano 2
+    var yr := 1 + y + (1 if m < START_MONTH else 0)
+    return [yr, m, d + 1]
+
+
 static func month_index(day: int) -> int:
-    return (START_MONTH + (day - 1) / DAYS_PER_MONTH) % 12
+    return int(_split(day)[1])
 
 
 static func day_of_month(day: int) -> int:
-    return (day - 1) % DAYS_PER_MONTH + 1
+    return int(_split(day)[2])
 
 
 static func year(day: int) -> int:
-    return 1 + (START_MONTH + (day - 1) / DAYS_PER_MONTH) / 12
+    return int(_split(day)[0])
+
+
+## Dia do jogo para `dom` de `month` (0 = jan) no ano do jogo `yr` (como year()).
+static func day_of(month: int, dom: int, yr: int = 1) -> int:
+    var cycle := yr - 1 - (1 if month < START_MONTH else 0)
+    var d := cycle * DAYS_PER_YEAR
+    var m := START_MONTH
+    while m != month:
+        d += int(MONTH_DAYS[m])
+        m = (m + 1) % 12
+    return d + dom
 
 
 static func weekday(day: int) -> String:

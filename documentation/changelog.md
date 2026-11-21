@@ -1,5 +1,11 @@
 # Changelog — Vale do Pequi
 
+## 1.4.8 — Letras respirando e calendário de verdade (21/11/2026)
+- **Espaço entre letras e linhas**: +1 px entre as letras, +2 px nos espaços e +4 px entre as linhas (a Press Start 2P vem colada).
+- **Meses com os dias oficiais**: outubro 31, novembro 30, fevereiro 28... o ano tem 365 dias (antes cada mês tinha 10). Os períodos ficam mais longos: chuvas de outubro a abril, seca de maio a setembro.
+- Festas nas datas de verdade: Festa do Pequi 5/dez, Folia de Reis 6/jan, Cavalhadas 24/mai, Festa Junina 24/jun.
+- Save antigo: o número do dia continua o mesmo, então a data mostrada muda (ex.: dia 50 agora é 19 de novembro).
+
 ## 1.4.7 — Press Start 2P no texto do jogo (21/11/2026)
 - Todo texto agora é **Press Start 2P** (CodeMan38, OFL): letra miúda e nítida no tamanho 8, com minúsculas e acentos. A Upheaval fica só no título.
 - Opções → Letra: **8** (normal) ou **16** (grande), os dois nítidos. Botões do menu, nome do chefe e cabeçalho do mapa usam o 16.

@@ -856,12 +856,19 @@ func _test_calendar() -> void:
     print("[Fase 3: calendário]")
     check(Calendar.format_date(1) == "Seg, 1 Out", "dia 1 = Seg, 1 Out")
     check(Calendar.period(1) == Calendar.PERIOD_RAINY, "outubro é período chuvoso")
-    check(Calendar.format_date(11) == "Qui, 1 Nov", "dia 11 = 1 Nov")
-    check(Calendar.month_index(31) == 0 and Calendar.year(31) == 2, "dia 31 = janeiro do ano 2")
-    check(Calendar.month_index(70) == 3 and Calendar.period(70) == Calendar.PERIOD_RAINY, "abril ainda é chuvoso")
-    check(Calendar.month_index(71) == 4 and Calendar.period(71) == Calendar.PERIOD_DRY, "maio começa o período seco")
-    check(Calendar.period(120) == Calendar.PERIOD_DRY and Calendar.period(121) == Calendar.PERIOD_RAINY, "outubro do ano 2 volta a chover")
-    check(Calendar.is_pequi_season(1) and Calendar.is_pequi_season(40) and not Calendar.is_pequi_season(41), "safra do pequi: outubro a janeiro")
+    check(Calendar.format_date(31).ends_with("31 Out") and Calendar.format_date(32).ends_with(" 1 Nov"), "outubro tem 31 dias")
+    check(Calendar.month_index(93) == 0 and Calendar.day_of_month(93) == 1 and Calendar.year(93) == 2, "dia 93 = 1º de janeiro do ano 2")
+    var feb := Calendar.day_of(1, 28, 2)
+    check(Calendar.format_date(feb).ends_with("28 Fev") and Calendar.month_index(feb + 1) == 2, "fevereiro tem 28 dias")
+    var abr30 := Calendar.day_of(3, 30, 2)
+    check(Calendar.day_of_month(abr30) == 30 and Calendar.period(abr30) == Calendar.PERIOD_RAINY, "30 de abril ainda é chuvoso")
+    check(Calendar.month_index(abr30 + 1) == 4 and Calendar.period(abr30 + 1) == Calendar.PERIOD_DRY, "maio começa o período seco")
+    check(Calendar.period(365) == Calendar.PERIOD_DRY and Calendar.period(366) == Calendar.PERIOD_RAINY, "ano tem 365 dias; outubro volta a chover")
+    var jan31 := Calendar.day_of(0, 31, 2)
+    check(Calendar.is_pequi_season(1) and Calendar.is_pequi_season(jan31) and not Calendar.is_pequi_season(jan31 + 1), "safra do pequi: outubro a janeiro")
+    for d in [1, 50, 93, 200, 365, 366, 800]:
+        if Calendar.day_of(Calendar.month_index(d), Calendar.day_of_month(d), Calendar.year(d)) != d:
+            check(false, "day_of desfaz a data do dia %d" % d)
     check(Calendar.format_time(390) == "06:30" and Calendar.format_time(25 * 60) == "01:00", "formato da hora")
     check(Calendar.format_date_long(1) == "1º de outubro, ano 1", "data por extenso")
 
@@ -911,19 +918,19 @@ func _test_weather_rolls() -> void:
     Clock.forced_weather = -1
     var rain_wet := 0
     var rain_dry := 0
-    for d in range(2, 72):          # out a abr (chuvoso)
+    var maio := Calendar.day_of(4, 1, 2)
+    for d in range(2, maio):        # out a abr (chuvoso)
         if Clock.roll_weather(d) in [Clock.Weather.CHUVA, Clock.Weather.TEMPESTADE]:
             rain_wet += 1
-    for year in 3:                  # mai a set (seco) de 3 anos
-        for d in range(71 + year * 120, 121 + year * 120):
-            if Clock.roll_weather(d) in [Clock.Weather.CHUVA, Clock.Weather.TEMPESTADE]:
-                rain_dry += 1
-    check(rain_wet >= 20, "chuvoso chove bastante (%d de 70 dias)" % rain_wet)
-    check(rain_dry <= 12, "seco quase não chove (%d de 150 dias)" % rain_dry)
+    for d in range(maio, 366):      # mai a set (seco)
+        if Clock.roll_weather(d) in [Clock.Weather.CHUVA, Clock.Weather.TEMPESTADE]:
+            rain_dry += 1
+    check(rain_wet >= 60, "chuvoso chove bastante (%d de %d dias)" % [rain_wet, maio - 2])
+    check(rain_dry <= 15, "seco quase não chove (%d de %d dias)" % [rain_dry, 366 - maio])
     check(Clock.roll_weather(1) == Clock.Weather.ENSOLARADO, "primeiro dia sempre ensolarado")
     check(Clock.roll_weather(17) == Clock.roll_weather(17), "mesmo save, mesmo clima no mesmo dia")
     var seco_tipos := {}
-    for d in range(71, 121):
+    for d in range(Calendar.day_of(4, 1, 2), 366):
         seco_tipos[Clock.roll_weather(d)] = true
     check(seco_tipos.has(Clock.Weather.NEBLINA) or seco_tipos.has(Clock.Weather.VENTANIA), "seco tem neblina/ventania")
     Clock.forced_weather = saved_force
@@ -952,7 +959,7 @@ func _test_rain_and_periods() -> void:
     f.till(cell2)
     f.plant(cell2, &"feijao")
     _messages.clear()
-    jump_to_day(71)
+    jump_to_day(Calendar.day_of(4, 1, 2))
     check(Calendar.period(GameState.day) == Calendar.PERIOD_DRY, "chegou maio (seco)")
     check(f.get_crop_id(cell) == &"", "milho morre no período seco")
     check(f.get_crop_id(cell2) == &"feijao", "feijão aguenta o seco")
@@ -975,14 +982,14 @@ func _test_rain_and_periods() -> void:
 func _test_pequi_season() -> void:
     print("[Fase 3: safra do pequi]")
     var tree := node("Farm/Entities/Pequizeiro4") as Pequizeiro
-    jump_to_day(80)  # maio/junho
+    jump_to_day(Calendar.day_of(5, 10, 2))  # junho
     check(tree.get_available() == 0, "fora da safra não cai pequi")
     await place_player(tree.global_position + Vector2(0, 18))
     _player.face(4)
     GameState.select_slot(8)
     await frames(3)
     check(_prompts[-1] == "Pé de pequi (fora da safra)", "dica 'fora da safra'")
-    jump_to_day(121)  # outubro do ano 2
+    jump_to_day(366)  # outubro do ano 2
     check(tree.get_available() == tree.fruits_on_ground, "em outubro volta a cair pequi")
 
 
@@ -2275,18 +2282,19 @@ func _test_gifts_and_hearts() -> void:
 
 func _test_festivals() -> void:
     print("[Fase 8: festas]")
-    check(Festivals.today(25) == &"festa_pequi" and Festivals.today(36) == &"folia_reis"
-        and Festivals.today(78) == &"cavalhadas" and Festivals.today(89) == &"festa_junina", "4 festas no calendário")
-    check(Festivals.today(145) == &"festa_pequi", "repetem todo ano")
-    check(Festivals.next(1).day == 25, "próxima festa a partir do dia 1: Festa do Pequi (5 de dezembro)")
+    check(Festivals.today(Calendar.day_of(11, 5)) == &"festa_pequi" and Festivals.today(Calendar.day_of(0, 6, 2)) == &"folia_reis"
+        and Festivals.today(Calendar.day_of(4, 24, 2)) == &"cavalhadas" and Festivals.today(Calendar.day_of(5, 24, 2)) == &"festa_junina",
+        "4 festas no calendário (5/dez, 6/jan, 24/mai, 24/jun)")
+    check(Festivals.today(Calendar.day_of(11, 5) + 365) == &"festa_pequi", "repetem todo ano")
+    check(Festivals.next(1).day == Calendar.day_of(11, 5), "próxima festa a partir do dia 1: Festa do Pequi (5 de dezembro)")
     var v := vila() as VilaLevel
     _main.change_region_now(&"vila")
-    jump_to_day(24)
+    jump_to_day(Calendar.day_of(11, 5) - 1)
     check(v.festa_root == null, "dia comum: praça sem festa")
-    jump_to_day(25)
+    jump_to_day(Calendar.day_of(11, 5))
     check(_messages.any(func(m: String) -> bool: return m.contains("Festa do Pequi na praça")), "aviso de festa de manhã")
-    check(v.festa_root != null and v.festival == &"festa_pequi", "dia 25: praça enfeitada")
-    set_time(25, 10 * 60)
+    check(v.festa_root != null and v.festival == &"festa_pequi", "5 de dezembro: praça enfeitada")
+    set_time(Calendar.day_of(11, 5), 10 * 60)
     var helena := npc("helena")
     helena.snap_to_schedule()
     check(helena.is_at_marker(&"festa_1") and not helena.is_shop_open(), "moradores vão para a festa (loja fechada)")
@@ -2303,20 +2311,20 @@ func _test_festivals() -> void:
     GameState.add_item(&"pequi", 10)
     v.concurso_pequi()
     check(GameState.get_item_count(&"trofeu_pequi") == 1, "concurso uma vez por ano")
-    jump_to_day(36)
+    jump_to_day(Calendar.day_of(0, 6, 2))
     check(v.festival == &"folia_reis", "6 de janeiro: Folia de Reis")
     GameState.inventory.clear()
     v.receber_folia()
-    check(not GameState.has_flag(StringName("festa_folia_reis_ano%d" % Calendar.year(36))), "folia pede comida")
+    check(not GameState.has_flag(StringName("festa_folia_reis_ano%d" % Calendar.year(Calendar.day_of(0, 6, 2)))), "folia pede comida")
     GameState.add_item(&"pamonha", 1)
     v.receber_folia()
     dlg.close()
     check(GameState.get_item_count(&"pamonha") == 0 and GameState.buff == &"folego", "prato para a folia: bênção (fôlego)")
-    jump_to_day(78)
+    jump_to_day(Calendar.day_of(4, 24, 2))
     v.assistir_cavalhadas()
     dlg.close()
-    check(v.festival == &"cavalhadas" and GameState.has_flag(StringName("festa_cavalhadas_ano%d" % Calendar.year(78))), "Cavalhadas assistidas")
-    jump_to_day(89)
+    check(v.festival == &"cavalhadas" and GameState.has_flag(StringName("festa_cavalhadas_ano%d" % Calendar.year(Calendar.day_of(4, 24, 2)))), "Cavalhadas assistidas")
+    jump_to_day(Calendar.day_of(5, 24, 2))
     check(v.festival == &"festa_junina" and v.festa_root.get_child_count() >= 4, "Festa Junina: fogueira e pescaria")
     GameState.money = 5
     check(v.pescaria() == null and GameState.money == 5, "pescaria custa R$ 10")
@@ -2325,8 +2333,8 @@ func _test_festivals() -> void:
     check(GameState.money == 90, "pagou a pescaria")
     v.dancar_quadrilha()
     dlg.close()
-    check(GameState.has_flag(StringName("festa_festa_junina_ano%d" % Calendar.year(89))), "dançou a quadrilha")
-    jump_to_day(90)
+    check(GameState.has_flag(StringName("festa_festa_junina_ano%d" % Calendar.year(Calendar.day_of(5, 24, 2)))), "dançou a quadrilha")
+    jump_to_day(Calendar.day_of(5, 25, 2))
     check(v.festa_root == null, "no dia seguinte a praça volta ao normal")
 
 
@@ -2481,7 +2489,7 @@ func _test_audio() -> void:
     _main.change_region_now(&"mina")
     check(Audio.current_track == &"mina", "na mina: música da mina")
     _main.change_region_now(&"vila")
-    set_time(25, 10 * 60)
+    set_time(Calendar.day_of(11, 5), 10 * 60)
     check(Audio.music_for_context() == &"festa", "dia de festa na vila: forró")
     set_time(3, 10 * 60)
     _main.change_region_now(&"farm")
@@ -2943,7 +2951,7 @@ func _test_world_polish() -> void:
     # estações: out (chuvas) verde; ago (seca) amarelado, com pétalas de ipê
     set_time(1, 10 * 60)
     check(farm.ground.modulate.g >= farm.ground.modulate.b and farm.ground.modulate.r <= 1.05, "outubro: mato verde")
-    var aug := 1 + 10 * 10  # 1º de agosto
+    var aug := Calendar.day_of(7, 1, 2)  # 1º de agosto
     check(Calendar.month_index(aug) == 7, "dia de agosto")
     set_time(aug, 10 * 60)
     check(farm.ground.modulate.r > 1.1 and farm.ground.modulate.b < 0.8, "agosto: capim amarelado na seca")

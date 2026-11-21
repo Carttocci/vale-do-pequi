@@ -26,7 +26,7 @@ func _ready() -> void:
     await _frames(5)
     _shot("receitas")
     ui.close()
-    GameState.day = 25
+    GameState.day = Calendar.day_of(11, 5)
     Clock.minutes = 11 * 60
     main.change_region_now(&"vila")
     for n in get_tree().get_nodes_in_group("npc"):
@@ -37,7 +37,7 @@ func _ready() -> void:
     player.camera.reset_smoothing()
     await _frames(10)
     _shot("festa_pequi")
-    GameState.day = 89
+    GameState.day = Calendar.day_of(5, 24, 2)
     main.get_region(&"vila").refresh_festival()
     Clock.minutes = 19 * 60
     Clock.time_changed.emit(Clock.minutes)

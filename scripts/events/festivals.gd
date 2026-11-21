@@ -9,9 +9,9 @@ const ALL := {
         "desc": "Concurso do pequi e barraca de arroz com pequi na praça."},
     &"folia_reis": {"name": "Folia de Reis", "month": 0, "day": 6,
         "desc": "Os foliões passam com a bandeira cantando e abençoando as casas."},
-    &"cavalhadas": {"name": "Cavalhadas", "month": 4, "day": 8,
+    &"cavalhadas": {"name": "Cavalhadas", "month": 4, "day": 24,
         "desc": "Mouros e cristãos se enfrentam a cavalo; os mascarados fazem a festa."},
-    &"festa_junina": {"name": "Festa Junina", "month": 5, "day": 9,
+    &"festa_junina": {"name": "Festa Junina", "month": 5, "day": 24,
         "desc": "Fogueira, quadrilha, pescaria e comida de milho."},
 }
 
@@ -28,7 +28,7 @@ static func today(day: int) -> StringName:
 
 ## Dia do jogo da próxima festa a partir de `day` (inclusive) e qual é.
 static func next(day: int) -> Dictionary:
-    for d in range(day, day + Calendar.DAYS_PER_MONTH * 12 + 1):
+    for d in range(day, day + Calendar.DAYS_PER_YEAR + 1):
         var f := today(d)
         if f != &"":
             return {"id": f, "day": d}

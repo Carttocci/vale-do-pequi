@@ -30,7 +30,7 @@ const DISPLAY_GRID := 20
 ## Texto de destaque menor (botões do menu, nome do chefe, cabeçalho): a fonte
 ## do jogo no dobro do tamanho (16), sempre nítida.
 func big_font(c: Control) -> void:
-    c.add_theme_font_override("font", preload("res://assets/fonts/PressStart2P.ttf"))
+    c.add_theme_font_override("font", preload("res://assets/ui/fonte_texto.tres"))
     c.add_theme_font_size_override("font_size", 16)
 
 
