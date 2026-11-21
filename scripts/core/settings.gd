@@ -59,10 +59,41 @@ func _pixel_font(c: Control) -> void:
     c.add_theme_font_size_override("font_size", _grid_size(size))
 
 
-## A fonte do jogo (Upheaval) é de grade de 20 px: todo texto fica em 20;
-## só o que já era enorme (título) vai pra 40/60.
+## A fonte do jogo (Upheaval) é de grade de 20 px: nítida em 20. O jogador pode
+## escolher menor nas Opções (TEXT_SIZES); abaixo de 20 as letras perdem pixel.
+## O que já era enorme (título) vai pra 40/60.
+const TEXT_SIZES := [10, 12, 14, 16, 18, 20]
+var text_size: int = 16
+
+
 func _grid_size(size: int) -> int:
-    return 60 if size >= 50 else (40 if size >= 36 else DISPLAY_GRID)
+    return 60 if size >= 50 else (40 if size >= 36 else text_size)
+
+
+## Muda o tamanho de todo texto do jogo na hora (Opções → Letra).
+func set_text_size(v: int) -> void:
+    text_size = clampi(v, TEXT_SIZES[0], DISPLAY_GRID)
+    _apply_text_size()
+    save_settings()
+
+
+func _apply_text_size() -> void:
+    var theme := ThemeDB.get_project_theme()
+    if theme:
+        theme.default_font_size = text_size
+    _resize_texts(get_tree().root)
+
+
+func _resize_texts(n: Node) -> void:
+    if n is Label and (n as Label).label_settings and (n as Label).label_settings.font_size < 36:
+        (n as Label).label_settings.font_size = text_size
+    if n is Control and (n as Control).has_theme_font_size_override("font_size") \
+            and not (n as Control).has_theme_font_override("font"):
+        var c := n as Control
+        if c.get_theme_font_size("font_size") < 36:
+            c.add_theme_font_size_override("font_size", text_size)
+    for ch in n.get_children():
+        _resize_texts(ch)
 
 
 ## No navegador, em tela cheia o Esc é do navegador (sai da tela cheia antes de
@@ -101,6 +132,10 @@ func load_settings() -> void:
         show_quest_hint = bool(cfg.get_value("jogo", "dica_missao", show_quest_hint))
         camera_zoom = clampf(float(cfg.get_value("jogo", "zoom", camera_zoom)), ZOOM_MIN, ZOOM_MAX)
         zoom_touched = bool(cfg.get_value("jogo", "zoom_mexido", false))
+        text_size = clampi(int(cfg.get_value("jogo", "letra", text_size)), TEXT_SIZES[0], DISPLAY_GRID)
+    var theme := ThemeDB.get_project_theme()
+    if theme:
+        theme.default_font_size = text_size
     apply()
 
 
@@ -110,6 +145,7 @@ func save_settings() -> void:
     cfg.set_value("audio", "efeitos", sfx_volume)
     cfg.set_value("jogo", "dica_missao", show_quest_hint)
     cfg.set_value("jogo", "zoom", camera_zoom)
+    cfg.set_value("jogo", "letra", text_size)
     cfg.set_value("jogo", "zoom_mexido", zoom_touched)
     cfg.save(path)
 

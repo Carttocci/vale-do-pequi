@@ -2928,7 +2928,7 @@ func _test_font_symbols() -> void:
     var hud := _main.get_node("HUD")
     var sizes := hud.find_children("*", "Label", true, false).filter(func(l: Label) -> bool: return l.label_settings != null) \
         .map(func(l: Label) -> int: return l.label_settings.font_size)
-    check(not sizes.is_empty() and sizes.all(func(z: int) -> bool: return z % Settings.DISPLAY_GRID == 0), "caixa do relógio no tamanho da grade da fonte " + str(sizes))
+    check(not sizes.is_empty() and sizes.all(func(z: int) -> bool: return z == Settings.text_size or z % Settings.DISPLAY_GRID == 0), "caixa do relógio no tamanho escolhido da letra " + str(sizes))
 
 
 func _test_world_polish() -> void:
@@ -3199,3 +3199,15 @@ func _test_seed_and_fallow() -> void:
     check(f.cells.has(planted), "com planta, a terra fica")
     var saved := f.get_save_data()
     check(saved.cells.values().all(func(c: Dictionary) -> bool: return c.has("idle")), "save guarda os dias largada")
+    await _test_text_size()
+
+
+func _test_text_size() -> void:
+    print("[tamanho da letra nas Opções]")
+    var hud := _main.get_node("HUD")
+    Settings.set_text_size(12)
+    await frames(2)
+    check(hud.day_label.label_settings.font_size == 12 and ThemeDB.get_project_theme().default_font_size == 12, "letra 12 no jogo todo")
+    Settings.set_text_size(99)
+    check(Settings.text_size == 20, "no máximo 20 (nítida)")
+    Settings.set_text_size(16)

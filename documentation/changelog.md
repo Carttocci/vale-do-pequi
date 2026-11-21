@@ -1,5 +1,9 @@
 # Changelog — Vale do Pequi
 
+## 1.4.6 — Tamanho da letra nas Opções (21/11/2026)
+- **Opções → Letra**: escolhe o tamanho de todo texto do jogo (10, 12, 14, 16, 18 ou 20) e muda na hora. Fica salvo.
+- Padrão agora é 16 (menor que antes). Aviso: a Upheaval é desenhada pra 20; abaixo disso algumas letras perdem pixel.
+
 ## 1.4.5 — Upheaval no jogo inteiro (21/11/2026)
 - Todo texto do jogo agora é **Upheaval** (Brian Kent), no tamanho 20, que é a grade dela, pra ficar nítida.
 - HUD reorganizado pra caber a letra maior: relógio, clima e dinheiro numa caixa só, vida/energia e missão uma embaixo da outra na esquerda; dica de ação e avisos embaixo, centralizados em cima da barra de itens (antes o aviso ficava em cima, por cima do relógio).

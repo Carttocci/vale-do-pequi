@@ -9,6 +9,8 @@ var music_slider: HSlider
 var sfx_slider: HSlider
 var hint_check: CheckButton
 var zoom_slider: HSlider
+## Tamanho da letra: 10 a 20 (20 = nítida; menor perde pixel).
+var text_slider: HSlider
 
 
 func _ready() -> void:
@@ -37,6 +39,10 @@ func _ready() -> void:
         Audio.play(&"clique", 0.0))
     zoom_slider = _slider(v, "Zoom", 0.0, func(x: float) -> void:
         Settings.set_camera_zoom(lerpf(Settings.ZOOM_MIN, Settings.ZOOM_MAX, x)))
+    text_slider = _slider(v, "Letra", 1.0, func(x: float) -> void:
+        var sizes: Array = Settings.TEXT_SIZES
+        Settings.set_text_size(sizes[roundi(x * (sizes.size() - 1))]))
+    text_slider.step = 1.0 / (Settings.TEXT_SIZES.size() - 1)
     hint_check = CheckButton.new()
     hint_check.text = "Missão atual na tela"
     hint_check.button_pressed = Settings.show_quest_hint
@@ -68,6 +74,7 @@ func open() -> void:
     music_slider.set_value_no_signal(Settings.music_volume)
     sfx_slider.set_value_no_signal(Settings.sfx_volume)
     zoom_slider.set_value_no_signal(inverse_lerp(Settings.ZOOM_MIN, Settings.ZOOM_MAX, Settings.camera_zoom))
+    text_slider.set_value_no_signal(float(Settings.TEXT_SIZES.find(Settings.text_size)) / (Settings.TEXT_SIZES.size() - 1))
     hint_check.set_pressed_no_signal(Settings.show_quest_hint)
     show()
     # centraliza (o tamanho só é conhecido depois de mostrar)
