@@ -1,5 +1,10 @@
 # Changelog — Vale do Pequi
 
+## 1.4.4 — Fazenda diferente a cada jogo e terra que volta a ser grama (21/11/2026)
+- **Semente por jogo**: cada jogo novo espalha mato, galhos, pedrinhas, pedras grandes e árvores em lugares diferentes. O mato que nasce todo dia também segue a semente do jogo. Save antigo continua igual.
+- **Terra largada volta a ser grama**: terra capinada sem planta começa a voltar com 3 dias (metade de chance por dia) e volta com certeza com 5. Com planta, fica.
+- 8 testes novos (745 no total).
+
 ## 1.4.3 — Atualizar sem Ctrl+F5 (21/11/2026)
 - O navegador guarda o jogo (é um app instalável) e às vezes segura a versão velha. Agora, ao abrir, o jogo confere a versão no site e, se tiver nova, aparece o botão **Atualizar** na tela inicial: limpa o cache e recarrega.
 - Opções → **Recarregar versão mais nova** faz o mesmo a qualquer hora.

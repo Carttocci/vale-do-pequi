@@ -3158,3 +3158,44 @@ func _test_pinch_zoom() -> void:
     await frames(2)
     check(is_equal_approx(Settings.camera_zoom, 1.75), "Ctrl + rodinha aproxima")
     Settings.set_camera_zoom(1.0)
+    await _test_seed_and_fallow()
+
+
+func _test_seed_and_fallow() -> void:
+    print("[semente do mundo e terra que volta a ser grama]")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    var df := _main.get_node("Farm/Entities/DebrisField") as DebrisField
+    Clock.world_seed = 111
+    df.generate()
+    var a := df.cells.keys().map(func(c: Vector2i) -> String: return "%s%s" % [c, df.cells[c].kind])
+    a.sort()
+    df.generate()
+    var a2 := df.cells.keys().map(func(c: Vector2i) -> String: return "%s%s" % [c, df.cells[c].kind])
+    a2.sort()
+    Clock.world_seed = 222
+    df.generate()
+    var b := df.cells.keys().map(func(c: Vector2i) -> String: return "%s%s" % [c, df.cells[c].kind])
+    b.sort()
+    check(a == a2, "mesma semente, mesma fazenda (o save continua igual)")
+    check(a != b, "jogo novo, semente nova: mato, pedra e árvore em outros lugares")
+    check(df.count(&"arvore") > 10 and df.count(&"galho") > 10 and df.count(&"pedrinha") > 10, "semente nova ainda tem de tudo")
+    df.clear_all()
+    # terra largada volta a ser grama
+    var f := field()
+    var cell := Vector2i(9, 12)
+    f.cells.erase(cell)
+    var planted := Vector2i(10, 12)
+    f.cells.erase(planted)
+    check(f.till(cell) and f.till(planted) and f.plant(planted, &"feijao"), "capinou duas, plantou numa")
+    for i in 2:
+        GameState.day += 1
+        f.advance_day()
+    check(f.cells.has(cell), "2 dias largada: ainda é terra")
+    for i in 3:
+        GameState.day += 1
+        f.advance_day()
+    check(not f.cells.has(cell), "até 5 dias sem planta: volta a ser grama")
+    check(f.cells.has(planted), "com planta, a terra fica")
+    var saved := f.get_save_data()
+    check(saved.cells.values().all(func(c: Dictionary) -> bool: return c.has("idle")), "save guarda os dias largada")

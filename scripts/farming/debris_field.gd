@@ -267,6 +267,8 @@ func _remove(cell: Vector2i) -> void:
         return
     var node: Node = cells[cell].node
     cells.erase(cell)
+    if node.get_parent():
+        node.get_parent().remove_child(node)  # sai da física na hora
     node.queue_free()
 
 
@@ -296,11 +298,15 @@ func is_free(cell: Vector2i, field: FarmField = null) -> bool:
     return spawn.distance_to(world) >= SAFE_RADIUS * 16
 
 
-## Jogo novo: espalha a bagunça (semente fixa = toda fazenda começa igual).
-func generate(seed: int = 42) -> void:
+## Jogo novo: espalha a bagunça. Cada jogo novo tem a sua semente
+## (Clock.world_seed), então mato, pedras e árvores nascem em lugares diferentes.
+func generate(seed: int = -1) -> void:
     clear_all()
+    var lv := _level()
+    if lv:
+        lv.invalidate_nav()
     _collect_safe_points()
-    _rng.seed = seed
+    _rng.seed = seed if seed >= 0 else hash(["fazenda", Clock.world_seed])
     var field := _field()
     var size := ground.get_used_rect()
     for y in range(size.position.y, size.end.y):
@@ -334,7 +340,7 @@ func _has_tree_near(cell: Vector2i) -> bool:
 func grow_daily() -> void:
     if not growth_enabled:
         return
-    _rng.seed = hash(["mato", GameState.day])
+    _rng.seed = hash(["mato", Clock.world_seed, GameState.day])
     _collect_safe_points()
     var field := _field()
     var size := ground.get_used_rect()

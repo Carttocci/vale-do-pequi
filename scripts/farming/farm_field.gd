@@ -100,7 +100,7 @@ func can_till(cell: Vector2i) -> bool:
 func till(cell: Vector2i) -> bool:
     if not can_till(cell):
         return false
-    cells[cell] = {"watered": false, "crop": &"", "age": 0}
+    cells[cell] = {"watered": false, "crop": &"", "age": 0, "idle": 0}
     _refresh(cell)
     Audio.play(&"capinar")
     return true
@@ -122,6 +122,7 @@ func plant(cell: Vector2i, crop_id: StringName) -> bool:
         return false
     cells[cell].crop = crop_id
     cells[cell].age = 0
+    cells[cell].idle = 0
     _refresh(cell)
     if not GameState.has_flag(&"plantou"):
         GameState.set_flag(&"plantou")
@@ -149,13 +150,28 @@ func harvest(cell: Vector2i) -> Dictionary:
     return {"item": crop.harvest_item, "amount": amount}
 
 
-## Passa um dia: o que foi regado cresce; a terra seca de novo.
+## Terra capinada e largada sem planta volta a ser grama: a partir de
+## IDLE_DAYS dias pode voltar (metade de chance por dia) e com IDLE_MAX volta com certeza.
+const IDLE_DAYS := 3
+const IDLE_MAX := 5
+
+
+## Passa um dia: o que foi regado cresce; a terra seca de novo; terra vazia
+## esquecida vira grama.
 func advance_day() -> void:
-    for cell: Vector2i in cells:
+    for cell: Vector2i in cells.keys():
         var c: Dictionary = cells[cell]
         if c.watered and c.crop != &"":
             c.age += 1
         c.watered = false
+        if c.crop == &"":
+            c.idle = int(c.get("idle", 0)) + 1
+            var r := RandomNumberGenerator.new()
+            r.seed = hash([Clock.world_seed, GameState.day, cell])
+            if c.idle >= IDLE_MAX or (c.idle >= IDLE_DAYS and r.randf() < 0.5):
+                cells.erase(cell)
+        else:
+            c.idle = 0
         _refresh(cell)
 
 
@@ -291,7 +307,7 @@ func get_save_data() -> Dictionary:
     var out := {}
     for cell: Vector2i in cells:
         var c: Dictionary = cells[cell]
-        out["%d,%d" % [cell.x, cell.y]] = {"watered": c.watered, "crop": String(c.crop), "age": c.age}
+        out["%d,%d" % [cell.x, cell.y]] = {"watered": c.watered, "crop": String(c.crop), "age": c.age, "idle": int(c.get("idle", 0))}
     return {"cells": out}
 
 
@@ -309,7 +325,8 @@ func load_save_data(data: Dictionary) -> void:
         var crop := StringName(c.get("crop", ""))
         if crop != &"" and ItemDB.get_crop(crop) == null:
             crop = &""  # cultura removida do jogo: sobra só a terra
-        cells[cell] = {"watered": bool(c.get("watered", false)), "crop": crop, "age": maxi(0, int(c.get("age", 0)))}
+        cells[cell] = {"watered": bool(c.get("watered", false)), "crop": crop, "age": maxi(0, int(c.get("age", 0))),
+            "idle": maxi(0, int(c.get("idle", 0)))}
         _refresh(cell)
 
 
