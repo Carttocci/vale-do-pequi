@@ -1491,7 +1491,7 @@ func _test_ranch_life(ranch: Ranch, shop: ShopUI) -> void:
     calf.young = false
     ranch.breeding_enabled = true
     var births := 0
-    for i in 80:
+    for i in 500:
         calf.happiness = 100
         ranch.water[&"curral"] = Ranch.WATER_MAX
         ranch.feed[&"curral"] = 20
