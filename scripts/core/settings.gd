@@ -20,6 +20,17 @@ var zoom_touched := false
 
 
 const FONT_SYMBOLS := preload("res://assets/fonts/Simbolos.ttf")
+## Fonte de destaque (título, botões do menu, nomes de chefe, cabeçalhos):
+## Upheaval, de Brian Kent. Grade de 20 px, só maiúsculas e larga, por isso
+## não serve pro texto corrido (que continua na Micro 5).
+const FONT_DISPLAY := preload("res://assets/fonts/Upheaval.ttf")
+const DISPLAY_GRID := 20
+
+
+## Põe a fonte de destaque num controle, no múltiplo de 20 mais perto de `size`.
+func display_font(c: Control, size: int = DISPLAY_GRID) -> void:
+    c.add_theme_font_override("font", FONT_DISPLAY)
+    c.add_theme_font_size_override("font_size", maxi(1, roundi(size / float(DISPLAY_GRID))) * DISPLAY_GRID)
 
 
 func _ready() -> void:
@@ -137,6 +148,7 @@ func _add_symbol_fallback() -> void:
     if theme and theme.default_font:
         fonts.append(theme.default_font)
     fonts.append(ThemeDB.fallback_font)
+    fonts.append(FONT_DISPLAY)
     for f in fonts:
         if f and not FONT_SYMBOLS in f.fallbacks:
             var list := f.fallbacks.duplicate()

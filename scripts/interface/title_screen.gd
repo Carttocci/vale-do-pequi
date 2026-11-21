@@ -23,8 +23,7 @@ func _ready() -> void:
     add_child(bg)
     var title := Label.new()
     title.text = "Vale do Pequi"
-    title.add_theme_font_override("font", load("res://assets/fonts/Jersey15.ttf"))
-    title.add_theme_font_size_override("font_size", 54)
+    Settings.display_font(title, 60)
     title.add_theme_color_override("font_color", Color(0.98, 0.8, 0.2))
     title.add_theme_color_override("font_outline_color", Color(0.25, 0.14, 0.08))
     title.add_theme_constant_override("outline_size", 8)
@@ -33,8 +32,8 @@ func _ready() -> void:
     title.add_theme_constant_override("shadow_offset_y", 4)
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.set_anchors_preset(Control.PRESET_CENTER_TOP)
-    title.position = Vector2(-200, 26)
-    title.size = Vector2(400, 64)
+    title.position = Vector2(-300, 18)
+    title.size = Vector2(600, 64)
     add_child(title)
     sub = Label.new()
     sub.text = "Uma fazenda no Cerrado goiano"
@@ -87,7 +86,7 @@ func _ready() -> void:
 func _button(text: String, cb: Callable) -> Button:
     var b := Button.new()
     b.text = text
-    b.add_theme_font_size_override("font_size", 22)
+    Settings.display_font(b)
     b.custom_minimum_size = Vector2(180, 30)
     b.pressed.connect(func() -> void:
         Audio.play(&"clique", 0.0)
@@ -123,7 +122,7 @@ func _build_credits() -> void:
     credits.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
     credits.position = Vector2(10, -110)
     var l := Label.new()
-    l.text = "Vale do Pequi — um jogo de Carttocci\nFeito com Godot 4. Arte baseada no Ninja Adventure de pixel-boy e AAA (CC0),\nrepintada para o Cerrado. Fontes Micro 5 e Jersey 15 (OFL).\nO resto da arte e os sons são gerados por código.\nInspirado no Cerrado goiano: o pequi, o ipê, as festas,\nas receitas e a memória do povo do interior."
+    l.text = "Vale do Pequi — um jogo de Carttocci\nFeito com Godot 4. Arte baseada no Ninja Adventure de pixel-boy e AAA (CC0),\nrepintada para o Cerrado. Fontes Micro 5 (OFL) e Upheaval (Brian Kent, freeware).\nO resto da arte e os sons são gerados por código.\nInspirado no Cerrado goiano: o pequi, o ipê, as festas,\nas receitas e a memória do povo do interior."
     l.add_theme_font_size_override("font_size", 9)
     credits.add_child(l)
     credits.hide()

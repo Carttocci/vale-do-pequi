@@ -1,5 +1,9 @@
 # Changelog — Vale do Pequi
 
+## 1.4.2 — Fonte Upheaval nos destaques (21/11/2026)
+- Título, botões da tela inicial, nome do chefe e cabeçalho do mapa agora usam a **Upheaval** (Brian Kent), sempre no tamanho da grade dela (20/40/60) pra ficar nítida.
+- O texto corrido continua na Micro 5: a Upheaval só tem maiúsculas e é cerca de 3 vezes mais larga, então as falas e o HUD não caberiam na tela.
+
 ## 1.4.1 — Zoom com os dedos (21/11/2026)
 - **Pinça no celular**: dois dedos no meio da tela aproximam ou afastam a câmera, sem degraus. Toques no analógico e nos botões não contam.
 - **Ctrl + rodinha do mouse** no PC (a rodinha sozinha continua trocando o item da barra).

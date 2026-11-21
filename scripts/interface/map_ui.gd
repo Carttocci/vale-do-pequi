@@ -213,6 +213,7 @@ func _build() -> void:
     h.add_child(right)
     var wt := Label.new()
     wt.text = "Vale do Pequi"
+    Settings.display_font(wt)
     right.add_child(wt)
     _world = Control.new()
     _world.custom_minimum_size = Vector2(240, 150)
