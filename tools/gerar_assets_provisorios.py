@@ -696,6 +696,11 @@ def make_farming():
         d.line([(c - 6, c + 2), (c - 1, c - 1), (c + 5, c + 1)], fill=(190, 70, 50))
         d.point((c + 5, c + 1), fill=(220, 40, 30))
     touch_btn("assets/ui/touch_btn_map_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), map_glyph)
+    def build_glyph(d, s):
+        c = s // 2
+        d.line([(c - 6, c + 7), (c + 2, c - 1)], fill=(150, 96, 56), width=3)
+        d.polygon([(c - 1, c - 7), (c + 6, c - 1), (c + 8, c - 3), (c + 1, c - 9)], fill=(196, 202, 214), outline=o)
+    touch_btn("assets/ui/touch_btn_build_placeholder.png", 26, (38, 30, 28, 150), (226, 206, 168, 180), build_glyph)
 
 
 def make_weather():

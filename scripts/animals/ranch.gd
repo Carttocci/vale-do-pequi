@@ -641,6 +641,9 @@ func defense_of(pen: StringName) -> int:
         if n is Decor and n.item_id == &"lampiao" and (n as Node2D).global_position.distance_to(center) < 110.0:
             lamps += 1
     d += mini(lamps, 2)
+    for t in get_tree().get_nodes_in_group("protetor"):
+        if (t as Node2D).global_position.distance_to(center) < 130.0:
+            d += 2
     if dog:
         d += 2
     return d

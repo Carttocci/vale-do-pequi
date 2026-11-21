@@ -280,9 +280,18 @@ func face(direction_index: int) -> void:
 
 func _apply_movement(input_dir: Vector2, delta: float) -> void:
     if input_dir != Vector2.ZERO:
-        velocity = velocity.move_toward(input_dir * max_speed * GameState.speed_multiplier(), acceleration * delta)
+        velocity = velocity.move_toward(input_dir * max_speed * GameState.speed_multiplier() * (1.2 if on_path() else 1.0),
+            acceleration * delta)
     else:
         velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
+
+
+## Em cima de caminho construído anda 20% mais rápido.
+func on_path() -> bool:
+    for p in get_tree().get_nodes_in_group("piso"):
+        if (p as Node2D).global_position.distance_to(global_position + Vector2(0, 4)) < 9.0:
+            return true
+    return false
 
 
 func _update_state(input_dir: Vector2, delta: float) -> void:

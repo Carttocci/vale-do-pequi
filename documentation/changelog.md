@@ -1,5 +1,18 @@
 # Changelog — Vale do Pequi
 
+## 1.5.0 — Modo construção (21/11/2026)
+- **B (ou botão do martelo no celular)** abre o menu de construção da fazenda: cada peça mostra custo, o que falta e o requisito.
+- Escolheu, aparece a **prévia** no quadrado (verde pode, vermelho não pode). No PC segue o mouse; no celular, o quadrado à frente. E/clique constrói e dá pra ir colocando vários seguidos; B volta ao menu; Esc sai.
+- **Recolher**: tira o que foi construído e devolve metade do material.
+- **Requisitos** por habilidade e história:
+  - Caminho de terra (R$ 5), de pedra (Mineração 1) e assoalho de madeira (Coleta 1): andar em cima é 20% mais rápido e o mato não nasce.
+  - Cerca de madeira: bloqueia a passagem.
+  - Vaso de flores; banco e baú (Artesanato 1); lampião (Artesanato 2); espantalho (Agricultura 2).
+  - Poço (Mineração 3, até 3): enche o regador perto da roça.
+  - Cerca de espinhos (Combate 2): machuca as criaturas do Silêncio que encostam.
+  - Totem de proteção (Combate 4 + terminar o Ato 1, até 2): +2 de defesa pros cercados perto nos ataques à criação.
+- Construir dá XP de Artesanato.
+
 ## 1.4.9 — Menu centralizado e letras menores (21/11/2026)
 - Corrigido: botões da tela inicial saíam pra direita quando o texto era comprido ("Continuar (Sáb, 10 Nov)"). Agora ficam centralizados.
 - Letras menores: botões do menu, nome do chefe e cabeçalho do mapa no tamanho do texto (8); título "Vale do Pequi" menor (40).

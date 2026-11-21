@@ -19,6 +19,7 @@
 [ext_resource type="Script" path="res://scripts/interface/shop_ui.gd" id="shop"]
 [ext_resource type="Script" path="res://scripts/interface/journal_ui.gd" id="journal"]
 [ext_resource type="Script" path="res://scripts/interface/map_ui.gd" id="mapui"]
+[ext_resource type="Script" path="res://scripts/interface/build_ui.gd" id="buildui"]
 [ext_resource type="Script" path="res://scripts/interface/recipe_ui.gd" id="recipe"]
 [ext_resource type="Script" path="res://scripts/player/eating.gd" id="eating"]
 [ext_resource type="Script" path="res://scripts/npc/gifting.gd" id="gifting"]
@@ -80,3 +81,6 @@ script = ExtResource("mapui")
 
 [node name="RecipeUI" type="CanvasLayer" parent="."]
 script = ExtResource("recipe")
+
+[node name="BuildUI" type="CanvasLayer" parent="."]
+script = ExtResource("buildui")

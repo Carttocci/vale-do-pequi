@@ -3222,3 +3222,80 @@ func _test_text_size() -> void:
     Settings.set_text_size(10)
     check(Settings.text_size == 8, "tamanho fora da grade cai no 8 (nítido)")
     Settings.set_text_size(8)
+    await _test_build_mode()
+
+
+func _test_build_mode() -> void:
+    print("[modo construção]")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    for f in get_tree().get_nodes_in_group("debris_field"):
+        f.clear_all()
+    var b := _main.get_node("BuildUI") as BuildUI
+    var keys := InputMap.action_get_events(&"build").map(func(e: InputEvent) -> int: return e.physical_keycode if e is InputEventKey else 0)
+    check(KEY_B in keys, "tecla B é o modo construção")
+    b.open()
+    check(b.mode == BuildUI.Mode.MENU and get_tree().paused, "abre o menu de construção (pausa)")
+    check(Construcoes.can_build(get_tree(), &"cerca").begins_with("Falta"), "cerca sem madeira: falta material")
+    check(Construcoes.can_build(get_tree(), &"poco").begins_with("Precisa") and Construcoes.missing_req(&"poco").contains("Mineração"),
+        "poço pede Mineração nível 3")
+    check(Construcoes.missing_req(&"totem_protecao").contains("Ato 1"), "totem pede terminar o Ato 1")
+    GameState.add_item(&"madeira", 10)
+    b.choose(&"cerca")
+    check(b.mode == BuildUI.Mode.PLACING and not get_tree().paused, "escolheu: jogo volta a andar com a prévia")
+    await place_player(Vector2(600, 300))
+    _player.face(2)
+    await frames(2)
+    var spot := b.snap(_main.level, _player.global_position + Vector2(32, 0))
+    check(b.can_place_at(spot), "prévia verde no quadrado livre")
+    check(b.place_at(spot) and GameState.get_item_count(&"madeira") == 8, "construiu a cerca (2 madeiras)")
+    check(not b.can_place_at(spot) and b.why_not_at(spot) == "Já tem coisa aqui.", "não constrói em cima")
+    await get_tree().physics_frame
+    await get_tree().physics_frame
+    _main.level.invalidate_nav()
+    check(get_tree().get_nodes_in_group("construcao_cerca").size() == 1 and not _main.level.is_walkable(spot), "cerca bloqueia a passagem")
+    var mine := b.snap(_main.level, _player.global_position)
+    check(not b.can_place_at(mine), "não constrói em cima de você")
+    # recolher devolve metade
+    b.choose(BuildUI.REMOVE)
+    check(b.remove_at(spot) and GameState.get_item_count(&"madeira") == 9, "recolher devolve metade (1 madeira)")
+    # caminho deixa mais rápido
+    GameState.money = 100
+    b.selected = &"caminho_terra"
+    b.mode = BuildUI.Mode.PLACING
+    var here := b.snap(_main.level, _player.global_position)
+    check(b.place_at(here) and GameState.money == 95, "caminho de terra: R$ 5 (pode pisar em cima)")
+    await frames(1)
+    check(_player.on_path(), "em cima do caminho anda mais rápido")
+    # requisito de habilidade
+    GameState.add_item(&"pedra", 40)
+    GameState.add_item(&"madeira", 10)
+    GameState.money = 1000
+    b.selected = &"poco"
+    check(not b.place_at(spot), "sem Mineração 3 não faz poço")
+    GameState.skill_xp[&"mineracao"] = 99999
+    await get_tree().physics_frame
+    await get_tree().physics_frame
+    check(b.why_not_at(spot) == "", "quadrado da cerca recolhida ficou livre (%s)" % b.why_not_at(spot))
+    check(b.place_at(spot) and get_tree().get_nodes_in_group("water_source").any(func(n: Node) -> bool: return n is Construcao),
+        "com Mineração: poço vira fonte de água")
+    # save
+    var data := (_main.get_node("Placement") as Placement).get_save_data()
+    (_main.get_node("Placement") as Placement).load_save_data(data)
+    await frames(2)
+    check(get_tree().get_nodes_in_group("construcao_poco").size() == 1 and get_tree().get_nodes_in_group("piso").size() == 1,
+        "construções voltam ao carregar")
+    b.close()
+    check(not get_tree().paused and b.mode == BuildUI.Mode.CLOSED, "sai do modo construção")
+    # totem ajuda a defender a criação
+    var ranch := get_tree().get_first_node_in_group("ranch") as Ranch
+    var before := ranch.defense_of(&"galinheiro")
+    var t := (load("res://scenes/building/construcao.tscn") as PackedScene).instantiate() as Construcao
+    t.setup(&"totem_protecao")
+    t.global_position = ranch.pen_rect(&"galinheiro").get_center() + ranch.global_position
+    _main.level.get_entities_root().add_child(t)
+    check(ranch.defense_of(&"galinheiro") == before + 2, "totem de proteção: +2 de defesa no cercado")
+    t.free()
+    for n in get_tree().get_nodes_in_group("construcao"):
+        n.free()
+    GameState.skill_xp[&"mineracao"] = 0

@@ -291,6 +291,9 @@ func is_free(cell: Vector2i, field: FarmField = null) -> bool:
     var world := ground.to_global(ground.map_to_local(cell))
     if not level.is_walkable(world):
         return false
+    for p in get_tree().get_nodes_in_group("piso"):
+        if (p as Node2D).global_position.distance_to(world + Vector2(0, 7)) < 6.0:
+            return false
     for p: Vector2 in _safe_points:
         if p.distance_to(world) < SAFE_RADIUS * 16:
             return false

@@ -24,8 +24,15 @@ func _ready() -> void:
 
 
 func get_save_data() -> Dictionary:
-    return {"inventory": inventory.to_data()}
+    var d := {"inventory": inventory.to_data()}
+    if has_meta("build_id"):
+        d["build_id"] = String(get_meta("build_id"))  # baú feito no modo construção
+    return d
 
 
 func load_save_data(data: Dictionary) -> void:
     inventory.from_data(data.get("inventory", []))
+    if data.has("build_id"):
+        set_meta("build_id", data.build_id)
+        add_to_group("construcao")
+        add_to_group("construcao_" + String(data.build_id))

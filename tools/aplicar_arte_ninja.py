@@ -837,6 +837,57 @@ def fauna():
     sheet(32, 40, eco, "assets/enemies/eco_silencio_placeholder.png")
 
 
+def construcoes():
+    """Peças do modo construção: caminhos (16x16), cerca de espinhos e totem de proteção."""
+    tiles = Image.open(out("assets/tilesets/farm_tiles_placeholder.png")).convert("RGBA")
+
+    def from_tile(col):
+        return tiles.crop((col * 16, 0, col * 16 + 16, 16))
+
+    def borda(t, dark):
+        d = ImageDraw.Draw(t)
+        for x in range(16):
+            for y in (0, 15):
+                if (x + y) % 3:
+                    d.point((x, y), fill=dark)
+        for y in range(16):
+            for x in (0, 15):
+                if (x + y) % 3:
+                    d.point((x, y), fill=dark)
+        return t
+
+    borda(from_tile(3), (120, 66, 40, 255)).save(out("assets/environments/caminho_terra_placeholder.png"))
+    borda(from_tile(8), (110, 100, 86, 255)).save(out("assets/environments/caminho_pedra_placeholder.png"))
+    from_tile(9).save(out("assets/environments/caminho_madeira_placeholder.png"))
+
+    WOOD, WOOD_D = (150, 96, 56, 255), (100, 62, 38, 255)
+    SIL, GLOW = (128, 112, 170, 255), (170, 245, 255, 255)
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rectangle([1, 4, 3, 15], fill=WOOD, outline=OL)
+    d.rectangle([12, 4, 14, 15], fill=WOOD, outline=OL)
+    d.line([(3, 8), (12, 8)], fill=OL, width=3)
+    d.line([(3, 8), (12, 8)], fill=WOOD_D)
+    for x in range(4, 12, 2):
+        d.line([(x, 7), (x + 1, 4)], fill=SIL)
+        d.point((x + 1, 4), fill=GLOW)
+        d.line([(x, 9), (x + 1, 12)], fill=SIL)
+    im.save(out("assets/environments/cerca_espinhos_placeholder.png"))
+
+    STONE, STONE_D, STONE_L = (150, 148, 140, 255), (100, 98, 94, 255), (190, 188, 180, 255)
+    CR, CRL = (150, 230, 255, 255), (235, 252, 255, 255)
+    im = Image.new("RGBA", (16, 28), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.ellipse([1, 24, 15, 27], fill=(0, 0, 0, 60))
+    d.rectangle([2, 18, 13, 25], fill=STONE, outline=OL)
+    d.line([(3, 19), (12, 19)], fill=STONE_L)
+    d.rectangle([4, 10, 11, 18], fill=STONE_D, outline=OL)
+    d.polygon([(8, 0), (12, 6), (8, 11), (4, 6)], fill=CR, outline=OL)
+    d.line([(8, 2), (6, 6)], fill=CRL)
+    d.point((7, 14), fill=GLOW); d.point((8, 14), fill=GLOW)
+    im.save(out("assets/environments/totem_protecao_placeholder.png"))
+
+
 if __name__ == "__main__":
     fauna()
     inimigos()
@@ -846,4 +897,5 @@ if __name__ == "__main__":
     player()
     npcs()
     trees()
+    construcoes()
     print("Arte Ninja Adventure (etapa 1) aplicada.")
