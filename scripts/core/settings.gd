@@ -27,11 +27,10 @@ const FONT_DISPLAY := preload("res://assets/fonts/Upheaval.ttf")
 const DISPLAY_GRID := 20
 
 
-## Texto de destaque menor (botões do menu, nome do chefe, cabeçalho): a fonte
-## do jogo no dobro do tamanho (16), sempre nítida.
+## Texto de destaque (nome do chefe, cabeçalho do mapa): mesma fonte e tamanho
+## do texto, segue a escolha das Opções.
 func big_font(c: Control) -> void:
-    c.add_theme_font_override("font", preload("res://assets/ui/fonte_texto.tres"))
-    c.add_theme_font_size_override("font_size", 16)
+    c.add_theme_font_size_override("font_size", text_size)
 
 
 ## Põe a fonte de destaque num controle, no múltiplo de 20 mais perto de `size`.

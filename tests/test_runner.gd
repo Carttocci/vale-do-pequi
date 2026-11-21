@@ -24,6 +24,7 @@ func _ready() -> void:
     SaveManager.save_path = TEST_SAVE
     Quests.skip_tutorial = true  # o tutorial tem teste próprio
     Dog.active = false
+    Clock.fixed_seed = 4242  # jogo novo sempre com a mesma fazenda nos testes
     Quests.reset()
     Settings.path = "user://teste_opcoes.cfg"
     SaveManager.delete_save()

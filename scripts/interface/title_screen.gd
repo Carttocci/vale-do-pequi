@@ -27,7 +27,7 @@ func _ready() -> void:
     add_child(bg)
     var title := Label.new()
     title.text = "Vale do Pequi"
-    Settings.display_font(title, 60)
+    Settings.display_font(title, 40)
     title.add_theme_color_override("font_color", Color(0.98, 0.8, 0.2))
     title.add_theme_color_override("font_outline_color", Color(0.25, 0.14, 0.08))
     title.add_theme_constant_override("outline_size", 8)
@@ -36,8 +36,8 @@ func _ready() -> void:
     title.add_theme_constant_override("shadow_offset_y", 4)
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.set_anchors_preset(Control.PRESET_CENTER_TOP)
-    title.position = Vector2(-300, 18)
-    title.size = Vector2(600, 64)
+    title.position = Vector2(-300, 30)
+    title.size = Vector2(600, 48)
     add_child(title)
     sub = Label.new()
     sub.text = "Uma fazenda no Cerrado goiano"
@@ -47,14 +47,20 @@ func _ready() -> void:
     sub.add_theme_constant_override("outline_size", 4)
     sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     sub.set_anchors_preset(Control.PRESET_CENTER_TOP)
-    sub.position = Vector2(-200, 84)
+    sub.position = Vector2(-200, 80)
     sub.size = Vector2(400, 20)
     add_child(sub)
     _buttons = VBoxContainer.new()
-    _buttons.add_theme_constant_override("separation", 6)
-    _buttons.set_anchors_preset(Control.PRESET_CENTER)
-    _buttons.position = Vector2(-90, -30)
-    _buttons.custom_minimum_size = Vector2(180, 0)
+    _buttons.add_theme_constant_override("separation", 5)
+    # centrado de verdade: cresce pros dois lados quando o texto é comprido
+    _buttons.anchor_left = 0.5
+    _buttons.anchor_right = 0.5
+    _buttons.anchor_top = 0.5
+    _buttons.anchor_bottom = 0.5
+    _buttons.offset_left = -110
+    _buttons.offset_right = 110
+    _buttons.offset_top = -40
+    _buttons.grow_horizontal = Control.GROW_DIRECTION_BOTH
     add_child(_buttons)
     continue_button = _button("Continuar", continue_game)
     new_button = _button("Novo jogo", _on_new_pressed)
@@ -100,8 +106,8 @@ func _ready() -> void:
 func _button(text: String, cb: Callable) -> Button:
     var b := Button.new()
     b.text = text
-    Settings.big_font(b)
-    b.custom_minimum_size = Vector2(200, 30)
+    b.add_theme_font_size_override("font_size", 8)
+    b.custom_minimum_size = Vector2(220, 22)
     b.pressed.connect(func() -> void:
         Audio.play(&"clique", 0.0)
         cb.call())

@@ -51,8 +51,12 @@ func _process(delta: float) -> void:
         advance_minutes(STEP_MINUTES)
 
 
+## Testes fixam a semente pra todo jogo novo sair igual (-1 = sorteia).
+static var fixed_seed := -1
+
+
 func reset(seed: int = -1) -> void:
-    world_seed = seed if seed >= 0 else randi()
+    world_seed = seed if seed >= 0 else (fixed_seed if fixed_seed >= 0 else randi())
     minutes = DAY_START
     weather = Weather.ENSOLARADO  # primeiro dia sempre bonito
     _acc = 0.0

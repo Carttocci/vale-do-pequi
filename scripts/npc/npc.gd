@@ -59,8 +59,9 @@ func _ready() -> void:
     quest_mark.add_theme_color_override("font_color", Color(1, 0.88, 0.2))
     quest_mark.add_theme_color_override("font_outline_color", Color(0.1, 0.07, 0.05))
     quest_mark.add_theme_constant_override("outline_size", 4)
-    quest_mark.add_theme_font_size_override("font_size", 22)
-    quest_mark.position = Vector2(-4, -50)
+    quest_mark.add_theme_font_override("font", preload("res://assets/ui/fonte_texto.tres"))
+    quest_mark.add_theme_font_size_override("font_size", 16)
+    quest_mark.position = Vector2(-7, -48)
     quest_mark.visible = false
     add_child(quest_mark)
     for sig in [Quests.quest_updated, Quests.quest_started]:
@@ -78,7 +79,7 @@ func _process(delta: float) -> void:
         _mark_check = 0.4
         quest_mark.visible = has_quest_hint()
     if quest_mark.visible:
-        quest_mark.position.y = -50 + sin(Time.get_ticks_msec() / 220.0) * 2.0
+        quest_mark.position.y = -48 + sin(Time.get_ticks_msec() / 220.0) * 2.0
     if _path.is_empty():
         _anim = 0.0
         _update_frame()

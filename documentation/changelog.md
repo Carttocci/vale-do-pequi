@@ -1,5 +1,10 @@
 # Changelog — Vale do Pequi
 
+## 1.4.9 — Menu centralizado e letras menores (21/11/2026)
+- Corrigido: botões da tela inicial saíam pra direita quando o texto era comprido ("Continuar (Sáb, 10 Nov)"). Agora ficam centralizados.
+- Letras menores: botões do menu, nome do chefe e cabeçalho do mapa no tamanho do texto (8); título "Vale do Pequi" menor (40).
+- Testes usam sempre a mesma semente de fazenda (antes alguns falhavam por sorte).
+
 ## 1.4.8 — Letras respirando e calendário de verdade (21/11/2026)
 - **Espaço entre letras e linhas**: +1 px entre as letras, +2 px nos espaços e +4 px entre as linhas (a Press Start 2P vem colada).
 - **Meses com os dias oficiais**: outubro 31, novembro 30, fevereiro 28... o ano tem 365 dias (antes cada mês tinha 10). Os períodos ficam mais longos: chuvas de outubro a abril, seca de maio a setembro.
