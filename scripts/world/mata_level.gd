@@ -70,7 +70,7 @@ func respawn() -> void:
                 if sp == &"javali":
                     _add_tracks(pos)
     # Criaturas corrompidas saem à noite (19h às 2h)
-    for k in [&"raiz_torta", &"raiz_torta", &"javali_corrompido", &"lodo_cinza"]:
+    for k in [&"raiz_torta", &"raiz_torta", &"javali_corrompido", &"lodo_cinza", &"lobo_sombra", &"coruja_sombra", &"sapo_lodo"]:
         var pos := _random_spot(zones["mata"])
         if pos != Vector2.INF:
             var e := Enemy.new().setup(k, pos, self)

@@ -46,8 +46,8 @@ const GATE_POS := {&"galinheiro": Vector2(600, 140), &"curral": Vector2(756, 138
 const GATE_HP := 40
 const RAID_SIZES := {
     &"pequeno": {"strength": 2, "enemies": [&"raiz_torta", &"lodo_cinza"]},
-    &"medio": {"strength": 4, "enemies": [&"raiz_torta", &"lodo_cinza", &"morcego"]},
-    &"grande": {"strength": 6, "enemies": [&"raiz_torta", &"lodo_cinza", &"morcego", &"javali_corrompido"]},
+    &"medio": {"strength": 4, "enemies": [&"raiz_torta", &"lobo_sombra", &"coruja_sombra"]},
+    &"grande": {"strength": 6, "enemies": [&"lobo_sombra", &"javali_corrompido", &"raiz_torta", &"coruja_sombra"]},
 }
 
 @export var chicken_pen := Rect2(572, 96, 120, 28)

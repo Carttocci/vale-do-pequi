@@ -130,8 +130,40 @@ def tiles():
             d.point((x0 + 3, 0), fill=(150, 142, 150, 255))
         return t
 
-    pieces = [grass, flores(), cell(floor, 2, 5), dirt, arada(), agua(), dark, margem(),
-              cell(inner, 1, 13), ponte(), cave, rocha(), cell(inner, 12, 8)]
+    def capim():
+        # capim dourado do Cerrado: tufos amarelados sobre fundo seco, alguns verdes
+        r = random.Random(7)
+        base, dk, lt, gr = (186, 164, 86), (148, 124, 58), (224, 202, 120), (128, 150, 70)
+        t = Image.new("RGBA", (16, 16), base + (255,))
+        d = ImageDraw.Draw(t)
+        for _ in range(16):
+            x, y = r.randrange(16), r.randrange(2, 16)
+            c = gr if r.random() < 0.18 else lt
+            d.point((x, y), fill=dk + (255,))
+            d.point((x, y - 1), fill=c + (255,))
+            if r.random() < 0.5:
+                d.point(((x + 1) % 16, y - 2), fill=c + (255,))
+        return t
+
+    def ruina():
+        # lajes de pedra velha com rejunte, rachadura e musgo
+        r = random.Random(5)
+        s1, s2, s3, gt, mo = (150, 148, 138), (128, 126, 118), (176, 174, 164), (88, 86, 84), (96, 128, 72)
+        t = Image.new("RGBA", (16, 16), s1 + (255,))
+        d = ImageDraw.Draw(t)
+        for (x0, y0, x1, y1) in [(0, 0, 8, 7), (9, 0, 15, 7), (0, 8, 5, 15), (6, 8, 15, 15)]:
+            d.rectangle([x0, y0, x1, y1], fill=r.choice([s1, s2]) + (255,))
+            d.line([(x0, y0), (x1, y0)], fill=s3 + (255,))
+        d.line([(0, 7), (15, 7)], fill=gt + (255,))
+        d.line([(8, 0), (8, 7)], fill=gt + (255,))
+        d.line([(5, 8), (5, 15)], fill=gt + (255,))
+        d.line([(11, 10), (13, 13)], fill=gt + (255,))
+        for (x, y) in [(8, 7), (7, 7), (5, 15), (0, 7)]:
+            d.point((x, y), fill=mo + (255,))
+        return t
+
+    pieces = [grass, flores(), capim(), dirt, arada(), agua(), dark, margem(),
+              cell(inner, 1, 13), ponte(), cave, rocha(), ruina()]
     sheet = Image.new("RGBA", (16 * len(pieces), 16))
     for i, p in enumerate(pieces):
         sheet.alpha_composite(p.convert("RGBA"), (i * 16, 0))
@@ -465,7 +497,349 @@ def livestock():
     porteira(False, True).save(out("assets/environments/porteira_quebrada_placeholder.png"))
 
 
+def inimigos():
+    """Criaturas do Silêncio no traço novo (contorno escuro, 3 tons de lilás, olho que brilha)
+    e ícones das armas novas. 4 quadros por folha, viradas pra direita."""
+    L, M, D = (186, 172, 220, 255), (128, 112, 170, 255), (78, 64, 112, 255)
+    GLOW = (170, 245, 255, 255)
+    SH = (0, 0, 0, 60)
+    WOOD, WOOD_D = (150, 96, 56, 255), (100, 62, 38, 255)
+    MET, MET_L = (196, 202, 214, 255), (240, 244, 250, 255)
+
+    def sheet(w, h, draw, path):
+        im = Image.new("RGBA", (w * 4, h), (0, 0, 0, 0))
+        for f in range(4):
+            fr = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            draw(ImageDraw.Draw(fr), f)
+            im.alpha_composite(fr, (f * w, 0))
+        im.save(out(path))
+
+    def raiz(d, f):  # 20x24: toco andante com galhos
+        st = [0, 1, 0, -1][f]
+        d.ellipse([3, 21, 17, 23], fill=SH)
+        d.line([(7, 22), (6 + st, 16)], fill=OL, width=3)
+        d.line([(7, 21), (6 + st, 17)], fill=WOOD_D)
+        d.line([(13, 22), (14 - st, 16)], fill=OL, width=3)
+        d.line([(13, 21), (14 - st, 17)], fill=WOOD_D)
+        d.polygon([(4, 17), (6, 5), (14, 4), (16, 17)], fill=M, outline=OL)
+        d.line([(6, 7), (7, 16)], fill=L)
+        d.line([(13, 6), (14, 16)], fill=D)
+        d.line([(7, 6), (2, 1 - (f % 2))], fill=OL, width=2)
+        d.line([(13, 5), (18, 0 + (f % 2))], fill=OL, width=2)
+        d.point((3, 3), fill=D); d.point((17, 2), fill=D)
+        d.rectangle([7, 8, 8, 9], fill=GLOW)
+        d.rectangle([11, 8, 12, 9], fill=GLOW)
+        d.line([(7, 13), (12, 13)], fill=OL)
+        d.point((9, 14), fill=OL)
+
+    def lodo(d, f):  # 16x12: gosma que pula
+        h = [0, 2, 3, 1][f]
+        sq = 1 if h == 0 else 0
+        d.ellipse([2, 9, 14, 11], fill=SH)
+        d.ellipse([1 - sq, 3 - h + sq, 15 + sq, 11 - h // 2], fill=M, outline=OL)
+        d.ellipse([3, 4 - h + sq, 8, 6 - h + sq], fill=L)
+        d.line([(3, 9 - h // 2), (12, 9 - h // 2)], fill=D)
+        d.point((6, 6 - h + sq), fill=GLOW)
+        d.point((10, 6 - h + sq), fill=GLOW)
+
+    def morcego(d, f):  # 16x12
+        up = f % 2 == 0
+        if up:
+            d.polygon([(6, 6), (0, 1), (1, 6), (3, 5), (4, 8)], fill=M, outline=OL)
+            d.polygon([(10, 6), (16, 1), (15, 6), (13, 5), (12, 8)], fill=M, outline=OL)
+        else:
+            d.polygon([(6, 5), (0, 10), (3, 9), (5, 10)], fill=M, outline=OL)
+            d.polygon([(10, 5), (16, 10), (13, 9), (11, 10)], fill=M, outline=OL)
+        d.ellipse([5, 3, 11, 10], fill=D, outline=OL)
+        d.point((6, 2), fill=OL); d.point((10, 2), fill=OL)
+        d.point((7, 6), fill=GLOW); d.point((9, 6), fill=GLOW)
+
+    def javali(d, f):  # 24x16
+        st = [0, 1, 0, -1][f]
+        d.ellipse([3, 13, 21, 15], fill=SH)
+        for i, lx in enumerate((6, 9, 15, 18)):
+            k = st if i % 2 == 0 else -st
+            d.rectangle([lx, 10, lx + 1, 14 - max(0, k)], fill=D, outline=OL)
+        d.ellipse([2, 3, 19, 12], fill=M, outline=OL)
+        for x in range(5, 15, 3):
+            d.line([(x, 3), (x + 1, 1)], fill=OL)
+        d.line([(5, 9), (16, 9)], fill=D)
+        d.ellipse([15, 5, 23, 11], fill=M, outline=OL)
+        d.rectangle([21, 8, 23, 10], fill=L, outline=OL)
+        d.line([(20, 10), (22, 12)], fill=MET_L)
+        d.point((18, 7), fill=GLOW)
+        d.point((16, 4), fill=OL)
+
+    def lobo(d, f):  # 24x18: lobo-guará sombrio, pernas compridas
+        st = [0, 2, 0, -2][f]
+        d.ellipse([4, 15, 20, 17], fill=SH)
+        for i, lx in enumerate((6, 9, 15, 18)):
+            k = st if i % 2 == 0 else -st
+            d.line([(lx, 10), (lx + k // 2, 16)], fill=OL, width=2)
+            d.point((lx + k // 2, 15), fill=D)
+        d.polygon([(1, 6), (5, 8), (2, 10)], fill=D, outline=OL)
+        d.rounded_rectangle([4, 6, 19, 12], 2, fill=M, outline=OL)
+        d.line([(6, 7), (17, 7)], fill=L)
+        d.line([(8, 6), (14, 6)], fill=D)
+        d.polygon([(16, 7), (18, 2), (21, 3), (23, 7), (20, 10)], fill=M, outline=OL)
+        d.polygon([(17, 3), (17, 0), (19, 2)], fill=D, outline=OL)
+        d.point((21, 5), fill=GLOW)
+        d.point((23, 7), fill=OL)
+
+    def coruja(d, f):  # 16x14: coruja-buraqueira sombria, bate asa
+        up = f % 2 == 0
+        d.ellipse([4, 3, 12, 13], fill=M, outline=OL)
+        d.ellipse([5, 7, 11, 12], fill=L)
+        if up:
+            d.polygon([(4, 7), (0, 2), (1, 9)], fill=D, outline=OL)
+            d.polygon([(12, 7), (16, 2), (15, 9)], fill=D, outline=OL)
+        else:
+            d.polygon([(4, 8), (0, 13), (3, 11)], fill=D, outline=OL)
+            d.polygon([(12, 8), (16, 13), (13, 11)], fill=D, outline=OL)
+        d.ellipse([5, 4, 8, 7], fill=GLOW, outline=OL)
+        d.ellipse([8, 4, 11, 7], fill=GLOW, outline=OL)
+        d.point((6, 5), fill=OL); d.point((9, 5), fill=OL)
+        d.point((8, 7), fill=(230, 180, 60, 255))
+        d.point((4, 2), fill=OL); d.point((11, 2), fill=OL)
+
+    def sapo(d, f):  # 18x14: cururu do lodo, pula
+        h = [0, 2, 3, 1][f]
+        d.ellipse([3, 11, 15, 13], fill=SH)
+        d.polygon([(2, 12 - h), (5, 8 - h), (6, 12 - h)], fill=D, outline=OL)
+        d.ellipse([3, 4 - h, 15, 12 - h], fill=M, outline=OL)
+        d.ellipse([5, 8 - h, 13, 12 - h], fill=L)
+        for (x, y) in [(6, 6), (9, 5), (11, 7)]:
+            d.point((x, y - h), fill=D)
+        d.ellipse([11, 2 - h, 15, 6 - h], fill=M, outline=OL)
+        d.point((13, 4 - h), fill=GLOW)
+        d.line([(12, 8 - h), (16, 8 - h)], fill=OL)
+        d.polygon([(13, 12 - h), (16, 11 - h), (17, 13 - h)], fill=D, outline=OL)
+
+    sheet(20, 24, raiz, "assets/enemies/raiz_torta_placeholder.png")
+    sheet(16, 12, lodo, "assets/enemies/lodo_cinza_placeholder.png")
+    sheet(16, 12, morcego, "assets/enemies/morcego_placeholder.png")
+    sheet(24, 16, javali, "assets/enemies/javali_corrompido_placeholder.png")
+    sheet(24, 18, lobo, "assets/enemies/lobo_sombra_placeholder.png")
+    sheet(16, 14, coruja, "assets/enemies/coruja_sombra_placeholder.png")
+    sheet(18, 14, sapo, "assets/enemies/sapo_lodo_placeholder.png")
+
+    def icon(name, draw):
+        im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        draw(ImageDraw.Draw(im))
+        im.save(out("assets/items/%s_placeholder.png" % name))
+
+    def foice(d):
+        d.line([(3, 15), (9, 4)], fill=OL, width=3)
+        d.line([(3, 14), (9, 5)], fill=WOOD)
+        d.arc([5, 0, 16, 11], 180, 300, fill=OL, width=3)
+        d.arc([6, 1, 15, 10], 185, 295, fill=MET)
+        d.point((6, 4), fill=MET_L)
+
+    def estilingue(d):
+        d.line([(8, 15), (8, 9)], fill=OL, width=3)
+        d.line([(8, 14), (8, 9)], fill=WOOD)
+        d.line([(8, 9), (4, 3)], fill=OL, width=3)
+        d.line([(8, 9), (12, 3)], fill=OL, width=3)
+        d.line([(8, 9), (5, 4)], fill=WOOD)
+        d.line([(8, 9), (11, 4)], fill=WOOD)
+        d.line([(4, 3), (8, 6), (12, 3)], fill=(150, 70, 50, 255))
+
+    def espada_cristal(d):
+        d.line([(2, 14), (5, 11)], fill=OL, width=3)
+        d.line([(2, 14), (5, 11)], fill=WOOD_D)
+        d.line([(3, 9), (7, 13)], fill=OL, width=2)
+        d.polygon([(5, 10), (13, 2), (15, 1), (14, 3), (6, 11)], fill=(150, 230, 255, 255), outline=OL)
+        d.line([(7, 9), (13, 3)], fill=(235, 252, 255, 255))
+
+    icon("foice", foice)
+    icon("estilingue", estilingue)
+    icon("espada_cristal", espada_cristal)
+
+
+def fauna():
+    """Bichos do Cerrado e os dois chefes no traço novo. Mesmos tamanhos das provisórias."""
+    SH = (0, 0, 0, 60)
+
+    def sheet(w, h, draw, path):
+        im = Image.new("RGBA", (w * 4, h), (0, 0, 0, 0))
+        for f in range(4):
+            fr = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            draw(ImageDraw.Draw(fr), f)
+            im.alpha_composite(fr, (f * w, 0))
+        im.save(out(path))
+
+    def quad(body, light, dark, belly=None, legs=None, w=24, h=16, head=None):
+        """Quadrúpede de perfil: corpo oval, 4 pernas que alternam, cabeça à direita."""
+        legs = legs or dark
+        def draw(d, f):
+            st = [0, 1, 0, -1][f]
+            by = h - 7
+            d.ellipse([3, h - 3, w - 3, h - 1], fill=SH)
+            for i, lx in enumerate((5, 8, w - 9, w - 6)):
+                k = st if i % 2 == 0 else -st
+                d.rectangle([lx, by + 2, lx + 1, h - 2 - max(0, k)], fill=legs, outline=OL)
+            d.ellipse([2, by - 6, w - 6, by + 4], fill=body, outline=OL)
+            d.line([(6, by - 5), (w - 10, by - 5)], fill=light)
+            if belly:
+                d.line([(6, by + 2), (w - 10, by + 2)], fill=belly)
+            else:
+                d.line([(6, by + 2), (w - 10, by + 2)], fill=dark)
+            head(d, by) if head else None
+        return draw
+
+    # capivara 24x16: corpo de barril, focinho quadrado
+    CB, CL, CD = (158, 104, 64, 255), (190, 136, 90, 255), (114, 74, 46, 255)
+    def cap_head(d, by):
+        d.rounded_rectangle([15, by - 7, 23, by], 2, fill=CB, outline=OL)
+        d.line([(16, by - 6), (21, by - 6)], fill=CL)
+        d.point((19, by - 5), fill=OL)
+        d.point((17, by - 8), fill=OL)
+        d.point((23, by - 3), fill=OL)
+    sheet(24, 16, quad(CB, CL, CD, head=cap_head), "assets/animals/capivara_placeholder.png")
+
+    # javali 24x16: escuro, crina, presa branca
+    JB, JL, JD = (88, 70, 60, 255), (122, 100, 86, 255), (58, 46, 40, 255)
+    def jav_head(d, by):
+        d.polygon([(15, by - 6), (22, by - 3), (23, by), (16, by + 1)], fill=JB, outline=OL)
+        d.rectangle([21, by - 2, 23, by], fill=(190, 150, 140, 255), outline=OL)
+        d.point((18, by - 4), fill=OL)
+        d.line([(20, by + 1), (21, by - 1)], fill=(244, 240, 230, 255))
+        for x in range(5, 15, 3):
+            d.line([(x, by - 6), (x + 1, by - 8)], fill=OL)
+    sheet(24, 16, quad(JB, JL, JD, head=jav_head), "assets/animals/javali_placeholder.png")
+
+    # veado-campeiro 24x24: pernas finas compridas, chifrinho
+    VB, VL, VD, VW = (196, 130, 66, 255), (226, 166, 96, 255), (150, 94, 44, 255), (246, 232, 206, 255)
+    def veado(d, f):
+        st = [0, 2, 0, -2][f]
+        d.ellipse([4, 21, 20, 23], fill=SH)
+        for i, lx in enumerate((6, 9, 15, 18)):
+            k = st if i % 2 == 0 else -st
+            d.line([(lx, 13), (lx + k // 2, 22)], fill=OL, width=2)
+            d.point((lx + k // 2, 21), fill=VD)
+        d.ellipse([3, 7, 19, 15], fill=VB, outline=OL)
+        d.line([(6, 8), (15, 8)], fill=VL)
+        d.line([(6, 14), (14, 14)], fill=VW)
+        d.polygon([(16, 9), (18, 3), (21, 3), (23, 7), (20, 9)], fill=VB, outline=OL)
+        d.line([(18, 3), (17, 0)], fill=OL)
+        d.line([(19, 2), (20, 0)], fill=OL)
+        d.point((20, 5), fill=OL)
+        d.point((2, 8), fill=VW)
+    sheet(24, 24, veado, "assets/animals/veado_placeholder.png")
+
+    # cutia 16x12: pequena, laranja, perninhas
+    UB, UL, UD = (204, 128, 56, 255), (232, 164, 86, 255), (150, 88, 36, 255)
+    def cutia(d, f):
+        hop = 1 if f in (1, 3) else 0
+        d.ellipse([3, 9, 13, 11], fill=SH)
+        d.line([(5, 9 - hop), (5, 11)], fill=OL)
+        d.line([(10, 9 - hop), (10, 11)], fill=OL)
+        d.ellipse([2, 3 - hop, 12, 10 - hop], fill=UB, outline=OL)
+        d.line([(4, 4 - hop), (9, 4 - hop)], fill=UL)
+        d.ellipse([9, 2 - hop, 15, 8 - hop], fill=UB, outline=OL)
+        d.point((12, 4 - hop), fill=OL)
+        d.point((11, 1 - hop), fill=OL)
+        d.point((15, 6 - hop), fill=OL)
+        d.line([(3, 9 - hop), (9, 9 - hop)], fill=UD)
+    sheet(16, 12, cutia, "assets/animals/cutia_placeholder.png")
+
+    # quati 20x14: rabo listrado em pé, focinho comprido
+    QB, QL, QD = (150, 104, 66, 255), (184, 138, 96, 255), (96, 64, 42, 255)
+    def quati(d, f):
+        st = [0, 1, 0, -1][f]
+        d.ellipse([3, 11, 17, 13], fill=SH)
+        for i, lx in enumerate((6, 9, 12, 14)):
+            k = st if i % 2 == 0 else -st
+            d.line([(lx, 9), (lx, 12 - max(0, k))], fill=OL, width=2)
+        for i, (x, y) in enumerate([(4, 7), (3, 5), (2, 3), (2, 1)]):
+            d.rectangle([x - 1, y - 1, x + 1, y], fill=QL if i % 2 == 0 else QD, outline=OL)
+        d.ellipse([4, 4, 15, 11], fill=QB, outline=OL)
+        d.line([(7, 5), (12, 5)], fill=QL)
+        d.polygon([(13, 5), (16, 4), (20, 8), (15, 9)], fill=QB, outline=OL)
+        d.point((16, 6), fill=OL)
+        d.line([(15, 7), (17, 7)], fill=(240, 226, 200, 255))
+    sheet(20, 14, quati, "assets/animals/quati_placeholder.png")
+
+    # seriema 16x24: ave alta cinza, topete, bico e pernas vermelhas
+    SB, SL, SD, SR = (176, 170, 156, 255), (214, 208, 196, 255), (128, 122, 112, 255), (214, 66, 52, 255)
+    def seriema(d, f):
+        st = [0, 2, 0, -2][f]
+        d.ellipse([3, 21, 13, 23], fill=SH)
+        d.line([(7, 15), (7 + st // 2, 22)], fill=SR)
+        d.line([(9, 15), (9 - st // 2, 22)], fill=SR)
+        d.polygon([(1, 10), (4, 9), (3, 13)], fill=SD, outline=OL)
+        d.ellipse([3, 8, 12, 16], fill=SB, outline=OL)
+        d.line([(5, 9), (10, 9)], fill=SL)
+        d.line([(10, 9), (11, 4)], fill=OL, width=3)
+        d.line([(10, 9), (11, 4)], fill=SB)
+        d.ellipse([9, 1, 14, 6], fill=SB, outline=OL)
+        d.line([(10, 1), (9, -1)], fill=OL)
+        d.point((12, 3), fill=SR)
+        d.line([(14, 4), (16, 5)], fill=SR)
+    sheet(16, 24, seriema, "assets/animals/seriema_placeholder.png")
+
+    # ema 24x32: grande, corpo de penas, pescoço longo
+    EB, EL, ED = (132, 122, 108, 255), (168, 158, 142, 255), (96, 88, 78, 255)
+    def ema(d, f):
+        st = [0, 3, 0, -3][f]
+        d.ellipse([5, 29, 19, 31], fill=SH)
+        for lx, k in ((9, st), (13, -st)):
+            d.line([(lx, 19), (lx + k // 2, 30)], fill=OL, width=2)
+            d.point((lx + k // 2, 29), fill=(200, 170, 90, 255))
+        d.ellipse([2, 10, 20, 21], fill=EB, outline=OL)
+        for x in range(4, 18, 3):
+            d.line([(x, 12), (x + 1, 19)], fill=ED)
+        d.line([(5, 11), (15, 11)], fill=EL)
+        d.line([(17, 13), (19, 3)], fill=OL, width=3)
+        d.line([(17, 13), (19, 3)], fill=EL)
+        d.ellipse([17, 0, 22, 5], fill=EB, outline=OL)
+        d.point((20, 2), fill=OL)
+        d.line([(22, 3), (23, 3)], fill=(60, 50, 44, 255))
+    sheet(24, 32, ema, "assets/animals/ema_placeholder.png")
+
+    # --- chefes ---
+    L, M, D = (186, 172, 220, 255), (128, 112, 170, 255), (78, 64, 112, 255)
+    CR, CRL = (150, 230, 255, 255), (235, 252, 255, 255)
+    GLOW = (170, 245, 255, 255)
+
+    def guardiao(d, f):  # 40x40: golem de pedra com cristais
+        b = [0, 1, 0, 1][f]
+        d.ellipse([4, 35, 36, 39], fill=SH)
+        d.rectangle([9, 28, 15, 37], fill=D, outline=OL)
+        d.rectangle([25, 28, 31, 37], fill=D, outline=OL)
+        d.polygon([(4, 12 + b), (8, 6 + b), (32, 6 + b), (36, 12 + b), (34, 30 + b), (6, 30 + b)], fill=M, outline=OL)
+        d.line([(9, 8 + b), (31, 8 + b)], fill=L)
+        d.line([(7, 28 + b), (33, 28 + b)], fill=D)
+        d.rectangle([0, 14 + b, 5, 26 + b], fill=M, outline=OL)
+        d.rectangle([35, 14 + b, 40, 26 + b], fill=M, outline=OL)
+        for (x, y, h) in [(12, 6, 6), (20, 5, 8), (28, 6, 5)]:
+            d.polygon([(x - 2, y + b), (x, y - h + b), (x + 2, y + b)], fill=CR, outline=OL)
+            d.line([(x, y - h + 2 + b), (x, y - 1 + b)], fill=CRL)
+        d.rectangle([13, 14 + b, 16, 16 + b], fill=GLOW)
+        d.rectangle([24, 14 + b, 27, 16 + b], fill=GLOW)
+        d.line([(15, 22 + b), (25, 22 + b)], fill=OL)
+        d.polygon([(18, 24 + b), (20, 21 + b), (22, 24 + b), (20, 27 + b)], fill=CR if f % 2 == 0 else CRL, outline=OL)
+
+    def eco(d, f):  # 32x40: vulto de manto que ondula, sem rosto
+        w = [0, 1, 2, 1][f]
+        d.ellipse([4, 36, 28, 39], fill=SH)
+        d.polygon([(16, 2), (24, 10), (27, 36 - w), (22, 33 + w), (16, 36 - w), (10, 33 + w), (5, 36 - w), (8, 10)],
+                  fill=(64, 56, 84, 255), outline=OL)
+        d.line([(11, 12), (9, 32)], fill=(96, 86, 122, 255))
+        d.line([(21, 12), (23, 32)], fill=(44, 38, 60, 255))
+        d.ellipse([10, 7, 22, 18], fill=(30, 26, 40, 255), outline=OL)
+        d.point((13, 12), fill=GLOW)
+        d.point((19, 12), fill=GLOW)
+        for i in range(3):
+            y = 20 + i * 4
+            d.arc([4 - w, y - 3, 28 + w, y + 3], 200, 340, fill=(170, 160, 210, 140))
+    sheet(40, 40, guardiao, "assets/enemies/guardiao_cristal_placeholder.png")
+    sheet(32, 40, eco, "assets/enemies/eco_silencio_placeholder.png")
+
+
 if __name__ == "__main__":
+    fauna()
+    inimigos()
     livestock()
     debris()
     tiles()

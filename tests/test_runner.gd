@@ -121,6 +121,7 @@ func _run_all() -> void:
     await _test_tutorial()
     await _test_hit_juice()
     await _test_world_polish()
+    await _test_upgrades_and_arsenal()
     _test_font_symbols()
 
 
@@ -1535,6 +1536,7 @@ func _test_ranch_life(ranch: Ranch, shop: ShopUI) -> void:
         "ataque varia: morre, foge, fere, assusta %s" % str(outcomes))
     check(ranch.report.contains("Atacaram"), "relatório da manhã conta o ataque")
     # bicho fugido aparece na mata e dá pra resgatar
+    ranch.load_save_data({})
     while ranch.lost.is_empty():
         ranch.load_save_data({"animals": [{"kind": "galinha", "name": "Fujona"}]})
         ranch._harm(ranch.animals[0], true)
@@ -2412,10 +2414,14 @@ func _test_data_integrity() -> void:
         npc_ids[String(n.data.id)] = true
         for list in [n.data.gifts_love, n.data.gifts_like, n.data.gifts_hate, n.data.shop_sells]:
             for it in list:
+                if it.begins_with("melhoria:"):
+                    if not StringName(it.trim_prefix("melhoria:")) in ToolUpgrades.TOOLS:
+                        bad.append("%s: melhoria %s" % [n.data.id, it])
+                    continue
                 if not it.begins_with("animal:") and ItemDB.get_item(StringName(it)) == null:
                     bad.append("%s: item %s" % [n.data.id, it])
         for it in n.data.shop_sells:
-            if not it.begins_with("animal:") and ItemDB.get_item(StringName(it)).buy_price <= 0:
+            if not it.begins_with("animal:") and not it.begins_with("melhoria:") and ItemDB.get_item(StringName(it)).buy_price <= 0:
                 bad.append("%s vende %s sem preço" % [n.data.id, it])
     for q in Quests.defs.values():
         for st in q.steps:
@@ -2993,3 +2999,95 @@ func _test_world_polish() -> void:
     Input.action_release("move_right")
     check(_player.footsteps > steps, "andar faz som de passo (%d)" % (_player.footsteps - steps))
     check(_player.footstep_sound() in [&"passo_grama", &"passo_terra", &"passo_pedra", &"passo_madeira"], "som do passo pelo chão")
+
+
+func _test_upgrades_and_arsenal() -> void:
+    print("[forja do Toninho: melhorias, armas e criaturas novas]")
+    GameState.new_game()
+    _main.change_region_now(&"farm")
+    for f in get_tree().get_nodes_in_group("debris_field"):
+        f.clear_all()
+    check(ToolUpgrades.level(&"enxada") == 0 and ToolUpgrades.display_name(&"enxada") == "Enxada", "enxada comum no começo")
+    var shop := _main.get_node("ShopUI") as ShopUI
+    shop.open_shop({"title": "Forja", "sells": PackedStringArray(["melhoria:enxada", "melhoria:regador", "melhoria:picareta", "foice"]),
+        "buys": PackedInt32Array(), "tab": 0})
+    GameState.money = 100
+    check(not shop.buy_upgrade(&"enxada") and shop._info.text == "Dinheiro não dá.", "melhoria sem dinheiro: não")
+    GameState.money = 3000
+    check(not shop.buy_upgrade(&"enxada") and shop._info.text.begins_with("Falta material"), "melhoria sem minério: não")
+    GameState.add_item(&"minerio_ferro", 10)
+    check(shop.buy_upgrade(&"enxada") and ToolUpgrades.level(&"enxada") == 1 and GameState.money == 2500
+        and GameState.get_item_count(&"minerio_ferro") == 5, "enxada de ferro: R$ 500 + 5 minérios")
+    check(ToolUpgrades.display_name(&"enxada") == "Enxada de ferro", "nome: Enxada de ferro")
+    check(shop.buy_upgrade(&"regador") and GameState.water_max() == GameState.WATER_MAX + 5 and GameState.water == GameState.water_max(),
+        "regador de ferro: +5 de água e enche")
+    shop.close()
+    # enxada de ferro capina 3 em linha
+    select_item(&"enxada")
+    await face_right_in_roca(Vector2(150, 210))
+    var target := field().cell_at(_player.get_target_position())
+    for c in [target, target + Vector2i(1, 0), target + Vector2i(2, 0)]:
+        field().cells.erase(c)
+    use_at_front()
+    var tilled := [target, target + Vector2i(1, 0), target + Vector2i(2, 0)].filter(func(c: Vector2i) -> bool: return field().cells.has(c))
+    check(tilled.size() == 3, "enxada de ferro capina 3 em linha (%d)" % tilled.size())
+    # regador de ferro rega os 3
+    select_item(&"regador")
+    GameState.refill_water()
+    use_at_front()
+    check(tilled.all(func(c: Vector2i) -> bool: return field().is_watered(c)), "regador de ferro rega 3 em linha")
+    # ouro: 3x3
+    GameState.set_flag(&"nivel_enxada", 2)
+    check(ToolUpgrades.area(&"enxada", Vector2i(5, 5), Vector2.RIGHT).size() == 9, "enxada de ouro: 3×3")
+    # picareta melhorada quebra pedra grande mais rápido
+    GameState.set_flag(&"nivel_picareta", 2)
+    check(ToolUpgrades.power(&"picareta") == 3, "picareta de ouro: força 3")
+    var debris := get_tree().get_first_node_in_group("debris_field") as DebrisField
+    var cell := debris.cell_at(_player.get_target_position())
+    field().cells.erase(cell)
+    debris._add(cell, &"pedra_grande")
+    GameState.add_item(&"picareta", 1)
+    select_item(&"picareta")
+    await frames(2)
+    use_at_front()
+    use_at_front()
+    check(debris.kind_at(cell) == &"", "pedra grande (4) cai em 2 picaretadas de ouro")
+    # machado melhorado bate mais
+    GameState.set_flag(&"nivel_machado", 1)
+    check(ToolUpgrades.weapon_bonus(&"machado") == 5 and ToolUpgrades.weapon_bonus(&"espada") == 0, "machado de ferro: +5 de dano")
+    for k in [&"enxada", &"regador", &"picareta", &"machado"]:
+        GameState.set_flag(StringName("nivel_" + String(k)), 0)
+    # armas novas
+    for id in [&"foice", &"estilingue", &"espada_cristal"]:
+        var it := ItemDB.get_item(id)
+        check(it != null and it.is_weapon() and it.icon != null, "arma nova: %s" % id)
+    check(ItemDB.get_item(&"estilingue").ammo_item == &"pedra", "estilingue atira pedra")
+    GameState.add_item(&"estilingue", 1)
+    GameState.add_item(&"pedra", 3)
+    select_item(&"estilingue")
+    await place_player(Vector2(600, 300))
+    var combat := _player.get_node("Combat") as CombatComponent
+    combat.cooldown = 0.0
+    check(combat.attack() and GameState.get_item_count(&"pedra") == 2, "estilingue gasta uma pedra")
+    # foice pega dois de uma vez (golpe largo)
+    GameState.add_item(&"foice", 1)
+    select_item(&"foice")
+    _player.face(2)
+    var e1 := spawn_enemy(&"lobo_sombra", _player.global_position + Vector2(14, -14))
+    var e2 := spawn_enemy(&"sapo_lodo", _player.global_position + Vector2(14, 12))
+    for e in [e1, e2]:
+        e.set_process(false)
+    await frames(2)
+    combat.cooldown = 0.0
+    combat.attack()
+    check(e1.hp < e1.max_hp and e2.hp < e2.max_hp, "foice acerta os dois do lado")
+    e1.queue_free()
+    e2.queue_free()
+    # criaturas novas
+    for k in [&"lobo_sombra", &"coruja_sombra", &"sapo_lodo"]:
+        var e := Enemy.new().setup(k, Vector2.ZERO, null)
+        check(e.sprite.texture != null and e.sprite.texture.get_width() % 4 == 0, "criatura nova com sprite: %s" % k)
+        e.free()
+    mata().respawn()
+    var kinds := mata().enemies().map(func(e: Enemy) -> StringName: return e.kind)
+    check(&"lobo_sombra" in kinds and &"coruja_sombra" in kinds and &"sapo_lodo" in kinds, "mata tem lobo-sombra, coruja-sombra e cururu")

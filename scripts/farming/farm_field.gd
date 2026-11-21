@@ -209,6 +209,12 @@ func get_item_action(item: ItemData, target_pos: Vector2, _actor: Node) -> Dicti
     return {}
 
 
+func _facing(actor: Node) -> Vector2:
+    if actor is Player:
+        return Player.DIRECTIONS[(actor as Player).facing_index]
+    return Vector2.DOWN
+
+
 ## Grupo "item_target": usa o item selecionado na célula à frente do jogador.
 func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
     if item == null or not _here():
@@ -219,6 +225,10 @@ func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
             match item.tool_type:
                 ItemData.ToolType.HOE:
                     if can_till(cell) and GameState.use_energy(2) and till(cell):
+                        # enxada melhorada capina mais de uma de uma vez
+                        for c in ToolUpgrades.area(&"enxada", cell, _facing(_actor)):
+                            if c != cell and can_till(c):
+                                till(c)
                         return true
                     if not cells.has(cell):
                         EventBus.show_message("Aqui não dá pra capinar.", 1.5)
@@ -239,7 +249,12 @@ func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
                     if not GameState.use_energy(1):
                         return false
                     GameState.use_water()
-                    return water(cell)
+                    var ok := water(cell)
+                    for c in ToolUpgrades.area(&"regador", cell, _facing(_actor)):
+                        if c != cell and cells.has(c) and not is_watered(c) and GameState.water > 0:
+                            GameState.use_water()
+                            water(c)
+                    return ok
         ItemData.Category.SEED:
             if not cells.has(cell):
                 EventBus.show_message("Capine a terra antes de plantar.", 1.5)

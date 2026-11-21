@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/foice_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"foice"
+display_name = "Foice"
+description = "Golpe largo: pega vários bichos de uma vez e limpa o mato em volta."
+icon = ExtResource("2")
+category = 7
+max_stack = 1
+sell_price = 60
+buy_price = 240
+damage = 12
+attack_cooldown = 0.45
+reach = 18.0
+arc_width = 40.0
+knockback = 90.0

@@ -114,10 +114,16 @@ func _ore_for_depth() -> StringName:
 
 func _enemy_for_depth() -> StringName:
     var pool: Array[StringName] = [&"morcego", &"lodo_cinza"]
+    if floor_number >= 3:
+        pool.append(&"coruja_sombra")
     if floor_number >= 4:
         pool.append(&"raiz_torta")
+    if floor_number >= 5:
+        pool.append(&"sapo_lodo")
     if floor_number >= 7:
         pool.append(&"javali_corrompido")
+    if floor_number >= 9:
+        pool.append(&"lobo_sombra")
     return pool[_rng.randi() % pool.size()]
 
 

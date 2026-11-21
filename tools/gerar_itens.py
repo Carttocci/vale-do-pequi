@@ -58,6 +58,12 @@ ITEMS = [
     ("arco", "Arco", "Ataque de longe. Gasta flechas.", 7, 1, 90, 360,
      {"damage": 12, "attack_cooldown": 0.55, "reach": 160.0, "ranged": True, "ammo_item": "flecha"}),
     ("flecha", "Flecha", "Munição para o arco.", 4, 99, 1, 5, {}),
+    ("foice", "Foice", "Golpe largo: pega vários bichos de uma vez e limpa o mato em volta.", 7, 1, 60, 240,
+     {"damage": 12, "attack_cooldown": 0.45, "reach": 18.0, "arc_width": 40.0, "knockback": 90.0}),
+    ("estilingue", "Estilingue", "De longe e baratinho: atira pedra.", 7, 1, 30, 120,
+     {"damage": 7, "attack_cooldown": 0.35, "reach": 120.0, "ranged": True, "ammo_item": "pedra"}),
+    ("espada_cristal", "Espada de cristal", "Forjada com cristal do vale. Corta o Silêncio como manteiga.", 7, 1, 600, 2400,
+     {"damage": 28, "attack_cooldown": 0.38, "reach": 20.0, "arc_width": 26.0, "knockback": 140.0, "stun": 0.2}),
     ("galho", "Galho", "Galho seco catado no chão. Com pedra vira machado.", 4, 99, 1, 0, {}),
     ("madeira", "Madeira", "Pedaço de madeira. Serve para artesanato e obras.", 4, 99, 3, 8, {}),
     # Fase 7 — mineração e aventura

@@ -284,7 +284,7 @@ func consume_selected(count: int = 1) -> bool:
 
 ## Caixa d'água (obra da fazenda) dobra a capacidade do regador.
 func water_max() -> int:
-    return WATER_MAX * 2 if has_flag(&"obra_caixa_dagua") else WATER_MAX
+    return (WATER_MAX * 2 if has_flag(&"obra_caixa_dagua") else WATER_MAX) + ToolUpgrades.water_bonus()
 
 
 func use_water() -> bool:

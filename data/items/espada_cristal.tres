@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/espada_cristal_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"espada_cristal"
+display_name = "Espada de cristal"
+description = "Forjada com cristal do vale. Corta o Silêncio como manteiga."
+icon = ExtResource("2")
+category = 7
+max_stack = 1
+sell_price = 600
+buy_price = 2400
+damage = 28
+attack_cooldown = 0.38
+reach = 20.0
+arc_width = 26.0
+knockback = 140.0
+stun = 0.2

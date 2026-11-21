@@ -121,6 +121,31 @@ func _add_animal_row(kind: StringName) -> void:
     _add_row(proxy, "R$ %d" % info.price, "", buy_animal.bind(kind), "", Callable())
 
 
+## Melhoria de ferramenta (forja do Toninho).
+func buy_upgrade(tool: StringName) -> bool:
+    var before := ToolUpgrades.display_name(tool)
+    var err := ToolUpgrades.upgrade(tool)
+    if err != "":
+        _info.text = err
+        return false
+    Audio.play(&"picareta")
+    _info.text = "%s virou %s!" % [before, ToolUpgrades.display_name(tool).to_lower()]
+    _refresh()
+    return true
+
+
+func _add_upgrade_row(tool: StringName) -> void:
+    var c := ToolUpgrades.cost(tool)
+    var item := ItemDB.get_item(tool)
+    if c.is_empty() or item == null:
+        return
+    var proxy := ItemData.new()
+    var lv := ToolUpgrades.level(tool) + 1
+    proxy.display_name = "%s → %s" % [ToolUpgrades.display_name(tool), ToolUpgrades.NAMES[lv]]
+    proxy.icon = item.icon
+    _add_row(proxy, "R$ %d" % int(c.money), "  (+ %s)" % ToolUpgrades.cost_text(c), buy_upgrade.bind(tool), "", Callable())
+
+
 func buys(item: ItemData) -> bool:
     return item.sell_price > 0 and int(item.category) in Array(shop.get("buys", PackedInt32Array()))
 
@@ -143,6 +168,9 @@ func _refresh() -> void:
     if tab == Tab.BUY:
         var period := Calendar.period(GameState.day)
         for id in shop.get("sells", PackedStringArray()):
+            if String(id).begins_with("melhoria:"):
+                _add_upgrade_row(StringName(String(id).trim_prefix("melhoria:")))
+                continue
             if String(id).begins_with("animal:"):
                 _add_animal_row(StringName(String(id).trim_prefix("animal:")))
                 continue

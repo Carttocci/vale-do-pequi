@@ -36,5 +36,5 @@ func use_item(item: ItemData, target_pos: Vector2, _actor: Node) -> bool:
         return false
     if not GameState.use_energy(ENERGY):
         return false
-    rock_at(target_pos).hit(1 + GameState.skill_level(&"mineracao") / 4)
+    rock_at(target_pos).hit(ToolUpgrades.power(&"picareta") + GameState.skill_level(&"mineracao") / 4)
     return true

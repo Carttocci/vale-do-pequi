@@ -91,7 +91,7 @@ func attack() -> bool:
     cooldown = w.attack_cooldown * (0.85 if combo == 3 else 1.0)
     var mult := GameState.melee_multiplier() * (1.6 if combo == 3 else 1.0)
     Audio.play(&"golpe")
-    _hit(w, int(round(w.damage * mult)), w.knockback * (1.5 if combo == 3 else 1.0), false)
+    _hit(w, int(round((w.damage + ToolUpgrades.weapon_bonus(w.id)) * mult)), w.knockback * (1.5 if combo == 3 else 1.0), false)
     attacked.emit(w, combo, false)
     return true
 
@@ -155,7 +155,8 @@ func _hit(w: ItemData, dmg: int, kb: float, spin: bool) -> void:
 
 func _shoot(w: ItemData) -> bool:
     if GameState.get_item_count(w.ammo_item) <= 0:
-        EventBus.show_message("Sem flechas! O Toninho vende.", 2.0)
+        EventBus.show_message("Sem flechas! O Toninho vende." if w.ammo_item == &"flecha"
+            else "Sem munição: precisa de %s." % ItemDB.get_item(w.ammo_item).display_name.to_lower(), 2.0)
         return false
     GameState.inventory.remove(w.ammo_item, 1)
     cooldown = w.attack_cooldown
@@ -163,6 +164,9 @@ func _shoot(w: ItemData) -> bool:
     var main := get_tree().get_first_node_in_group("save_root")
     var level: Level = main.level if main else null
     var arrow := Arrow.new().setup(dir, int(round(w.damage * GameState.ranged_multiplier())), level)
+    if w.ammo_item == &"pedra":
+        arrow.get_child(0).texture = load("res://assets/items/pedra_placeholder.png")
+        arrow.get_child(0).scale = Vector2(0.5, 0.5)
     arrow.global_position = player.global_position + Vector2(0, -8) + dir * 8.0
     (level.get_entities_root() if level else player.get_parent()).add_child(arrow)
     attacked.emit(w, 1, false)

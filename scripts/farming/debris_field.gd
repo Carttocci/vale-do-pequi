@@ -147,7 +147,7 @@ func use_item(item: ItemData, pos: Vector2, _actor: Node) -> bool:
     if k in [&"arvore", &"toco", &"pedra_grande"]:
         if not GameState.use_energy(2):
             return false
-        hit(cell, 1)
+        hit(cell, ToolUpgrades.power(&"picareta" if k == &"pedra_grande" else &"machado"))
         return true
     if not GameState.use_energy(1):
         return false
@@ -171,7 +171,7 @@ func slash(center: Vector2, facing: Vector2, reach: float, width: float, weapon:
             _clear(cell, true)
             hits += 1
         elif k in [&"arvore", &"toco"] and weapon and weapon.id == &"machado":
-            hit(cell, 1)
+            hit(cell, ToolUpgrades.power(&"machado"))
             hits += 1
     return hits
 

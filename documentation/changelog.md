@@ -1,5 +1,28 @@
 # Changelog — Vale do Pequi
 
+## 1.4.0 — Criação de verdade, mapa, estações e a forja do Toninho (21/11/2026)
+- **Criação aos poucos**: a Mariana vende **pintinho** (R$ 60), **bezerro** (R$ 300) e **touro** (R$ 900). Filhote cresce (pintinho 5 dias, bezerro 10) e só adulto produz. Todo bicho tem nome.
+- **Cuidados**: cada cercado tem comedouro e **bebedouro** (o regador enche, a chuva também). Sem água o bicho fica triste e não produz. Galinha feliz choca pintinho; vaca feliz com touro no curral tem bezerro.
+- **Porteiras**: abrem e fecham (de manhã abrem sozinhas). Quebradas, consertam com 2 madeiras.
+- **Ataques à criação**: algumas noites as criaturas do Silêncio vêm atrás do rebanho. A chance sobe com rebanho grande, tempestade, lua nova e depois do Ato 1; o tamanho varia (pequeno, médio, grande).
+  - Na fazenda: o Pipoca late antes e as criaturas atacam a porteira e os bichos; derrotar todas defende a criação.
+  - Longe ou dormindo: conta a defesa (porteira fechada, lampiões perto do cercado, o cachorro).
+  - O que acontece com o bicho varia: só susto, ferido (sara sozinho), foge ferido pra Mata dos Ipês (3 dias pra buscar) ou morre. De manhã sai o relatório da noite.
+- **Pipoca**, o vira-lata caramelo do vovô: segue você pela fazenda, morde as criaturas e aceita carinho uma vez por dia.
+- **Estações no visual**: o capim amarela na seca (pior em agosto/setembro), folha seca voando, pétalas de ipê no fim da seca e vaga-lumes nas noites das chuvas.
+- **Mapa (M ou botão do mapa)**: a região onde você está com você, moradores, "!", saídas e cercados; e o vale inteiro com as regiões que você já conheceu.
+- **"!" em cima** de quem tem conversa de missão esperando.
+- **Barras de vida**: barrinha em cima das criaturas depois do primeiro golpe e barra grande com o nome do chefe no topo da tela.
+- **Passos com som** conforme o chão (grama, terra, pedra, madeira) e **luzes à noite**: janelas das casas, lampiões e uma lanterninha com você.
+- **Forja do Toninho**: melhorias de ferramenta (de ferro: R$ 500 + 5 minérios de ferro; de ouro: R$ 1.500 + 3 ouros + 2 quartzos).
+  - Enxada: 3 em linha, depois 3×3.
+  - Regador: mais água e rega como a enxada.
+  - Picareta e machado: quebram e cortam mais rápido; o machado bate mais na briga.
+- **Armas novas**: foice (golpe largo), estilingue (atira pedra) e espada de cristal.
+- **Criaturas novas**: lobo-sombra, coruja-sombra e cururu-do-lodo (na mata à noite, na mina e nos ataques maiores).
+- **Arte nova** nas criaturas, nos chefes, nos bichos do Cerrado, no capim seco e no chão das ruínas.
+- 65 testes novos (732 no total).
+
 ## 1.3.0 — Começo guiado, impacto no combate e símbolos (20/11/2026)
 - **Tutorial "Primeiros passos"** (missão que aparece primeiro no jogo novo): pegar 5 galhos → 3 pedrinhas → fazer o machado na bancada → derrubar uma árvore → capinar e plantar → regar. Cada passo ensina o botão e, no fim, dá R$ 100, 10 sementes de milho e 2 pamonhas. Depois a história segue com o Seu Benedito.
 - **Impacto no combate**: número de dano subindo em cima de quem apanha (vermelho quando é você), faíscas no golpe, tremidinha de tela (mais forte ao matar e ao apanhar).

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/inventory/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/estilingue_placeholder.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"estilingue"
+display_name = "Estilingue"
+description = "De longe e baratinho: atira pedra."
+icon = ExtResource("2")
+category = 7
+max_stack = 1
+sell_price = 30
+buy_price = 120
+damage = 7
+attack_cooldown = 0.35
+reach = 120.0
+ranged = true
+ammo_item = &"pedra"
