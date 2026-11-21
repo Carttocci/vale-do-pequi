@@ -50,6 +50,12 @@ func _ready() -> void:
     full.pressed.connect(func() -> void:
         Settings.toggle_fullscreen())
     v.add_child(full)
+    if OS.has_feature("web"):
+        var upd := Button.new()
+        upd.text = "Recarregar versão mais nova"
+        upd.add_theme_font_size_override("font_size", 10)
+        upd.pressed.connect(Settings.update_now)
+        v.add_child(upd)
     var back := Button.new()
     back.text = "Voltar"
     back.add_theme_font_size_override("font_size", 11)

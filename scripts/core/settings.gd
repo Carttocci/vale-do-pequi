@@ -165,3 +165,56 @@ func has_glyph(ch: String) -> bool:
         if fb.has_char(ch.unicode_at(0)):
             return true
     return false
+
+
+# --- versão nova (navegador) ---------------------------------------------------
+# O jogo é um app instalável (PWA): o navegador guarda os arquivos e às vezes
+# segura a versão velha. Ao abrir, o jogo lê versao.json (sem cache) e, se tiver
+# versão nova no site, oferece atualizar: apaga o cache e recarrega a página.
+
+signal update_available(version: String)
+
+var latest_version := ""
+
+
+func current_version() -> String:
+    return str(ProjectSettings.get_setting("application/config/version", ""))
+
+
+func check_for_update() -> void:
+    if not OS.has_feature("web"):
+        return
+    JavaScriptBridge.eval("""
+        window.__valeVersao = '';
+        fetch('versao.json?t=' + Date.now(), {cache: 'no-store'})
+            .then(r => r.ok ? r.json() : {})
+            .then(j => { window.__valeVersao = (j && j.versao) ? String(j.versao) : '-'; })
+            .catch(() => { window.__valeVersao = '-'; });
+    """, true)
+    for i in 100:
+        await get_tree().create_timer(0.1).timeout
+        var v = JavaScriptBridge.eval("window.__valeVersao", true)
+        if v is String and v != "":
+            if v != "-" and v != current_version():
+                latest_version = v
+                update_available.emit(v)
+            return
+
+
+## Apaga o cache do app e recarrega a página com a versão nova.
+func update_now() -> void:
+    if not OS.has_feature("web"):
+        return
+    JavaScriptBridge.eval("""
+        (async () => {
+            try {
+                if ('serviceWorker' in navigator) {
+                    for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+                }
+                if (window.caches) {
+                    for (const k of await caches.keys()) await caches.delete(k);
+                }
+            } catch (e) {}
+            location.replace(location.pathname + '?v=' + Date.now());
+        })();
+    """, true)

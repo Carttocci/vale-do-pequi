@@ -12,6 +12,10 @@ var _buttons: VBoxContainer
 var sub: Label
 
 
+## Aparece quando o site tem versão mais nova que a guardada no navegador.
+var update_button: Button
+
+
 func _ready() -> void:
     set_anchors_preset(Control.PRESET_FULL_RECT)
     var bg := TextureRect.new()
@@ -59,6 +63,16 @@ func _ready() -> void:
         sub.hide()
         options.open())
     _button("Créditos", func() -> void: credits.visible = not credits.visible)
+    update_button = _button("Atualizar jogo", Settings.update_now)
+    update_button.hide()
+    Settings.update_available.connect(func(v: String) -> void:
+        update_button.text = "Atualizar (v%s)" % v
+        update_button.show()
+        update_button.modulate = Color(1.3, 1.2, 0.7))
+    if Settings.latest_version != "":
+        Settings.update_available.emit(Settings.latest_version)
+    else:
+        Settings.check_for_update()
     if not OS.has_feature("web"):
         _button("Sair", func() -> void: get_tree().quit())
     var version := Label.new()

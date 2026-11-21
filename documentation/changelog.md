@@ -1,5 +1,9 @@
 # Changelog — Vale do Pequi
 
+## 1.4.3 — Atualizar sem Ctrl+F5 (21/11/2026)
+- O navegador guarda o jogo (é um app instalável) e às vezes segura a versão velha. Agora, ao abrir, o jogo confere a versão no site e, se tiver nova, aparece o botão **Atualizar** na tela inicial: limpa o cache e recarrega.
+- Opções → **Recarregar versão mais nova** faz o mesmo a qualquer hora.
+
 ## 1.4.2 — Fonte Upheaval nos destaques (21/11/2026)
 - Título, botões da tela inicial, nome do chefe e cabeçalho do mapa agora usam a **Upheaval** (Brian Kent), sempre no tamanho da grade dela (20/40/60) pra ficar nítida.
 - O texto corrido continua na Micro 5: a Upheaval só tem maiúsculas e é cerca de 3 vezes mais larga, então as falas e o HUD não caberiam na tela.

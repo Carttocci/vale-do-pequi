@@ -65,6 +65,9 @@ jobs:
           mkdir -p build/web
           godot --headless --path . --export-release "Web" build/web/index.html
           test -f build/web/index.wasm
+          VER=$(sed -n 's/^config\/version="\(.*\)"/\1/p' project.godot)
+          echo "{\"versao\": \"$VER\"}" > build/web/versao.json
+          cat build/web/versao.json
 
       - uses: actions/upload-pages-artifact@v3
         with:
