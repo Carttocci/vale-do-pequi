@@ -155,6 +155,12 @@ func _unhandled_input(event: InputEvent) -> void:
     elif event.is_action_pressed("eat"):
         eat_best()
         get_viewport().set_input_as_handled()
+    elif event is InputEventMouseButton and event.pressed and event.ctrl_pressed \
+            and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+        # Ctrl + rodinha do mouse = zoom (a rodinha sozinha troca o item da barra)
+        var d := Settings.ZOOM_STEP if event.button_index == MOUSE_BUTTON_WHEEL_UP else -Settings.ZOOM_STEP
+        Settings.set_camera_zoom(Settings.camera_zoom + d)
+        get_viewport().set_input_as_handled()
     elif event.is_action_pressed("zoom_in"):
         Settings.set_camera_zoom(Settings.camera_zoom + Settings.ZOOM_STEP)
         get_viewport().set_input_as_handled()

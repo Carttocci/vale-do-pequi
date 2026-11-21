@@ -39,7 +39,40 @@ func _process(_delta: float) -> void:
     _layout()
 
 
+## Pinça com dois dedos no meio da tela = zoom. Toques que começam no
+## analógico (canto esquerdo de baixo) ou nos botões (direito de baixo) ficam de fora.
+var _pinch_touches := {}   # índice -> posição
+var _pinch_start := 0.0
+var _pinch_zoom := 1.0
+
+
+func _pinch_zone(pos: Vector2) -> bool:
+    var size := get_viewport().get_visible_rect().size
+    var bottom := pos.y > size.y * 0.55
+    return not (bottom and (pos.x < size.x * 0.4 or pos.x > size.x - 150.0)) and pos.y > 40.0
+
+
+func _handle_pinch(event: InputEvent) -> void:
+    if event is InputEventScreenTouch:
+        if event.pressed and _pinch_zone(event.position):
+            _pinch_touches[event.index] = event.position
+        else:
+            _pinch_touches.erase(event.index)
+        _pinch_start = 0.0
+        if _pinch_touches.size() == 2:
+            var p: Array = _pinch_touches.values()
+            _pinch_start = (p[0] as Vector2).distance_to(p[1])
+            _pinch_zoom = Settings.camera_zoom
+    elif event is InputEventScreenDrag and _pinch_touches.has(event.index):
+        _pinch_touches[event.index] = event.position
+        if _pinch_touches.size() == 2 and _pinch_start > 20.0:
+            var p: Array = _pinch_touches.values()
+            var ratio := (p[0] as Vector2).distance_to(p[1]) / _pinch_start
+            Settings.set_camera_zoom(_pinch_zoom * ratio, false)
+
+
 func _input(event: InputEvent) -> void:
+    _handle_pinch(event)
     if event is InputEventScreenTouch and not touch_mode:
         set_touch_mode(true)
     elif touch_mode and event.is_pressed() and (event is InputEventKey or event is InputEventJoypadButton):
@@ -49,6 +82,10 @@ func _input(event: InputEvent) -> void:
 func set_touch_mode(enabled: bool) -> void:
     touch_mode = enabled
     visible = enabled
+    # primeira vez no celular e nunca mexeu no zoom: chega mais perto do personagem
+    if enabled and not Settings.zoom_touched and Settings.camera_zoom < 1.75:
+        Settings.camera_zoom = 1.75
+        Settings.apply()
     if not enabled:
         joystick.release()
     EventBus.touch_mode_changed.emit(enabled)

@@ -10,9 +10,11 @@ var sfx_volume: float = 0.8
 var show_quest_hint: bool = true
 ## Zoom da câmera (1 = visão normal). No celular começa mais perto do personagem.
 const ZOOM_MIN := 1.0
-const ZOOM_MAX := 2.5
+const ZOOM_MAX := 3.0
 const ZOOM_STEP := 0.25
 var camera_zoom: float = 1.75 if DisplayServer.is_touchscreen_available() else 1.0
+## Já mexeu no zoom alguma vez? Se não, o celular começa perto do personagem.
+var zoom_touched := false
 
 
 
@@ -81,6 +83,7 @@ func load_settings() -> void:
         sfx_volume = clampf(float(cfg.get_value("audio", "efeitos", sfx_volume)), 0.0, 1.0)
         show_quest_hint = bool(cfg.get_value("jogo", "dica_missao", show_quest_hint))
         camera_zoom = clampf(float(cfg.get_value("jogo", "zoom", camera_zoom)), ZOOM_MIN, ZOOM_MAX)
+        zoom_touched = bool(cfg.get_value("jogo", "zoom_mexido", false))
     apply()
 
 
@@ -90,6 +93,7 @@ func save_settings() -> void:
     cfg.set_value("audio", "efeitos", sfx_volume)
     cfg.set_value("jogo", "dica_missao", show_quest_hint)
     cfg.set_value("jogo", "zoom", camera_zoom)
+    cfg.set_value("jogo", "zoom_mexido", zoom_touched)
     cfg.save(path)
 
 
@@ -111,8 +115,9 @@ func set_show_quest_hint(v: bool) -> void:
     save_settings()
 
 
-func set_camera_zoom(v: float) -> void:
-    camera_zoom = clampf(snappedf(v, ZOOM_STEP), ZOOM_MIN, ZOOM_MAX)
+func set_camera_zoom(v: float, snap := true) -> void:
+    zoom_touched = true
+    camera_zoom = clampf(snappedf(v, ZOOM_STEP) if snap else v, ZOOM_MIN, ZOOM_MAX)
     apply()
     save_settings()
 

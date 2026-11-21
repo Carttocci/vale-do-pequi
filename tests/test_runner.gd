@@ -3091,3 +3091,70 @@ func _test_upgrades_and_arsenal() -> void:
     mata().respawn()
     var kinds := mata().enemies().map(func(e: Enemy) -> StringName: return e.kind)
     check(&"lobo_sombra" in kinds and &"coruja_sombra" in kinds and &"sapo_lodo" in kinds, "mata tem lobo-sombra, coruja-sombra e cururu")
+    await _test_pinch_zoom()
+
+
+func _test_pinch_zoom() -> void:
+    print("[zoom: pinça e Ctrl+rodinha]")
+    var tc := _main.get_node("TouchControls") as TouchControls
+    Settings.set_camera_zoom(1.5)
+    var size := get_viewport().get_visible_rect().size
+    var c := size / 2.0 + Vector2(0, -40)
+    for i in 2:
+        var t := InputEventScreenTouch.new()
+        t.index = i
+        t.pressed = true
+        t.position = c + Vector2(-30 if i == 0 else 30, 0)
+        Input.parse_input_event(t)
+    await frames(2)
+    var d := InputEventScreenDrag.new()
+    d.index = 1
+    d.position = c + Vector2(90, 0)
+    Input.parse_input_event(d)
+    await frames(2)
+    check(Settings.camera_zoom > 2.5, "abrir os dedos aproxima (%.2f)" % Settings.camera_zoom)
+    d = InputEventScreenDrag.new()
+    d.index = 1
+    d.position = c + Vector2(-10, 0)
+    Input.parse_input_event(d)
+    await frames(2)
+    check(Settings.camera_zoom < 1.5, "fechar os dedos afasta (%.2f)" % Settings.camera_zoom)
+    for i in 2:
+        var t := InputEventScreenTouch.new()
+        t.index = i
+        t.pressed = false
+        Input.parse_input_event(t)
+    await frames(2)
+    check(is_equal_approx(_player.camera.zoom.x, Settings.camera_zoom), "câmera segue o zoom")
+    # dois dedos no analógico + botão não dão zoom
+    Settings.set_camera_zoom(1.5)
+    var a := InputEventScreenTouch.new()
+    a.index = 0
+    a.pressed = true
+    a.position = Vector2(60, size.y - 60)
+    Input.parse_input_event(a)
+    var b := InputEventScreenTouch.new()
+    b.index = 1
+    b.pressed = true
+    b.position = Vector2(size.x - 60, size.y - 60)
+    Input.parse_input_event(b)
+    var dd := InputEventScreenDrag.new()
+    dd.index = 1
+    dd.position = Vector2(size.x - 200, size.y - 60)
+    Input.parse_input_event(dd)
+    await frames(2)
+    check(is_equal_approx(Settings.camera_zoom, 1.5), "analógico + botão não mexem no zoom")
+    for i in 2:
+        var t := InputEventScreenTouch.new()
+        t.index = i
+        t.pressed = false
+        Input.parse_input_event(t)
+    tc.set_touch_mode(false)
+    var w := InputEventMouseButton.new()
+    w.button_index = MOUSE_BUTTON_WHEEL_UP
+    w.pressed = true
+    w.ctrl_pressed = true
+    Input.parse_input_event(w)
+    await frames(2)
+    check(is_equal_approx(Settings.camera_zoom, 1.75), "Ctrl + rodinha aproxima")
+    Settings.set_camera_zoom(1.0)

@@ -1,5 +1,12 @@
 # Changelog — Vale do Pequi
 
+## 1.4.1 — Zoom com os dedos (21/11/2026)
+- **Pinça no celular**: dois dedos no meio da tela aproximam ou afastam a câmera, sem degraus. Toques no analógico e nos botões não contam.
+- **Ctrl + rodinha do mouse** no PC (a rodinha sozinha continua trocando o item da barra).
+- Zoom vai até 3× (antes 2,5×).
+- No celular, quem nunca mexeu no zoom começa perto do personagem mesmo se o navegador não avisar logo que é tela de toque.
+- 5 testes novos (737 no total).
+
 ## 1.4.0 — Criação de verdade, mapa, estações e a forja do Toninho (21/11/2026)
 - **Criação aos poucos**: a Mariana vende **pintinho** (R$ 60), **bezerro** (R$ 300) e **touro** (R$ 900). Filhote cresce (pintinho 5 dias, bezerro 10) e só adulto produz. Todo bicho tem nome.
 - **Cuidados**: cada cercado tem comedouro e **bebedouro** (o regador enche, a chuva também). Sem água o bicho fica triste e não produz. Galinha feliz choca pintinho; vaca feliz com touro no curral tem bezerro.
