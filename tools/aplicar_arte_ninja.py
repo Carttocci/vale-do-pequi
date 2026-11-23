@@ -19,7 +19,18 @@ def src(name):
     return Image.open(os.path.join(SRC, name)).convert("RGBA")
 
 
+def _manual():
+    """Arquivos desenhados à mão (Aseprite): listados em assets/arte_manual.txt, nunca sobrescritos."""
+    f = os.path.join(ROOT, "assets", "arte_manual.txt")
+    if not os.path.exists(f):
+        return set()
+    return {l.strip() for l in open(f, encoding="utf-8") if l.strip() and not l.startswith("#")}
+
+
 def out(path):
+    if path.replace("\\", "/") in _manual():
+        import tempfile
+        return os.path.join(tempfile.gettempdir(), "arte_manual_ignorada_" + os.path.basename(path))
     p = os.path.join(ROOT, path)
     os.makedirs(os.path.dirname(p), exist_ok=True)
     return p
@@ -839,7 +850,7 @@ def fauna():
 
 def construcoes():
     """Peças do modo construção: caminhos (16x16), cerca de espinhos e totem de proteção."""
-    tiles = Image.open(out("assets/tilesets/farm_tiles_placeholder.png")).convert("RGBA")
+    tiles = Image.open(os.path.join(ROOT, "assets/tilesets/farm_tiles_placeholder.png")).convert("RGBA")
 
     def from_tile(col):
         return tiles.crop((col * 16, 0, col * 16 + 16, 16))

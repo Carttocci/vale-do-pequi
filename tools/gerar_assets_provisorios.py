@@ -60,7 +60,18 @@ C = {
 }
 
 
+def _manual():
+    """Arquivos desenhados à mão (Aseprite): listados em assets/arte_manual.txt, nunca sobrescritos."""
+    f = os.path.join(ROOT, "assets", "arte_manual.txt")
+    if not os.path.exists(f):
+        return set()
+    return {l.strip() for l in open(f, encoding="utf-8") if l.strip() and not l.startswith("#")}
+
+
 def out(path):
+    if path.replace("\\", "/") in _manual():
+        import tempfile
+        return os.path.join(tempfile.gettempdir(), "arte_manual_ignorada_" + os.path.basename(path))
     full = os.path.join(ROOT, path)
     os.makedirs(os.path.dirname(full), exist_ok=True)
     return full
