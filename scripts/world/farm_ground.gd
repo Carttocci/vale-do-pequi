@@ -41,9 +41,10 @@ const LEGEND := {
     "o": 25, # lajota de barro (cozinha)
     "q": 26, # ladrilho hidráulico
     "h": 27, # cimento queimado vermelho
+    "X": 28, # vazio (fora da casa; sólido, não desenha nada)
 }
 ## Colunas do atlas que bloqueiam passagem.
-const SOLID_TILES := [5, 7, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+const SOLID_TILES := [5, 7, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 28]
 ## Colunas de dentro de casa: desenhadas direto, sem a camada de transição.
 const INDOOR_FIRST := 13
 

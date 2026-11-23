@@ -39,13 +39,16 @@ func _ready() -> void:
         player.camera.reset_smoothing()
         await _frames(12)
         _shot(s[2])
+    Settings.camera_zoom = 1.0
+    player.apply_camera_zoom()
     for id in ["casa", "casa_helena", "casa_alzira", "casa_toninho", "casa_mariana"]:
         if only != "" and not id.begins_with(only):
             continue
         if main.get_region(StringName(id)) == null:
             continue
         main.change_region_now(StringName(id))
-        player.face(4)
+        player.global_position = main.level.get_world_rect().get_center()
+        player.face(0)
         player.camera.reset_smoothing()
         await _frames(12)
         _shot("interior_" + id)

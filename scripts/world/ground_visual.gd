@@ -21,11 +21,14 @@ const DECO_FLOWERS := [1, 2, 3, 4]
 const DECO_TUFT := [5, 6, 7]
 const DECO_PEBBLE := [8, 9, 10]
 const DECO_TALL_GRASS := [11, 12, 13]
+## Linha do topo de parede das casas (16 variações pelos vizinhos: N=1, L=2, S=4, O=8).
+const WALL_ROW := 11
 
 static var _tile_set: TileSet
 
 var _layers: Array[TileMapLayer] = []
 var _deco: TileMapLayer
+var _walls: TileMapLayer
 
 
 ## Bits de terreno de um caractere do mapa (bit i = TERRAINS[i]).
@@ -64,6 +67,7 @@ func build(ground: TileMapLayer, lines: PackedStringArray) -> void:
     for l in _layers:
         l.clear()
     _deco.clear()
+    _walls.clear()
     var h := lines.size()
     var w := 0
     for line in lines:
@@ -129,6 +133,20 @@ func build(ground: TileMapLayer, lines: PackedStringArray) -> void:
                         col = DECO_PEBBLE[_hash(x, y, 8) % 3]
             if col >= 0:
                 _deco.set_cell(Vector2i(x, y), 0, Vector2i(col, EXTRA_ROW))
+    # topo das paredes de dentro de casa: bloco grosso com beirada nos lados abertos
+    for y in h:
+        for x in w:
+            if chars[y * w + x] != "T":
+                continue
+            var m := 0
+            for k in 4:
+                var d: Vector2i = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)][k]
+                var nx := x + d.x
+                var ny := y + d.y
+                var ch := "X" if nx < 0 or ny < 0 or nx >= w or ny >= h else chars[ny * w + nx]
+                if ch == "T":
+                    m |= 1 << k
+            _walls.set_cell(Vector2i(x, y), 0, Vector2i(m, WALL_ROW))
 
 
 ## Número "aleatório" fixo por posição (o chão sai igual toda vez).
@@ -153,6 +171,11 @@ func _make_layers() -> void:
     _deco.tile_set = ts
     _deco.collision_enabled = false
     add_child(_deco)
+    _walls = TileMapLayer.new()
+    _walls.name = "TopoParedes"
+    _walls.tile_set = ts
+    _walls.collision_enabled = false
+    add_child(_walls)
 
 
 static func shared_tile_set() -> TileSet:
@@ -175,5 +198,7 @@ static func shared_tile_set() -> TileSet:
             src.create_tile(Vector2i(col, row))
     for col in range(0, 14):
         src.create_tile(Vector2i(col, EXTRA_ROW))
+    for col in 16:
+        src.create_tile(Vector2i(col, WALL_ROW))
     _tile_set = ts
     return ts

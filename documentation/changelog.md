@@ -1,5 +1,16 @@
 # Changelog — Vale do Pequi
 
+## 1.6.1 — Personagens chibi e casas com planta própria (23/11/2026)
+- **Personagens no estilo chibi**: cabeção, corpinho curto, olhão e bochecha rosada (mais perto do boneco antigo). Na caminhada o corpo sobe e desce, os braços balançam e os pés alternam, nas 8 direções. Moradores no mesmo estilo.
+- **Paredes grossas** dentro das casas: o topo da parede agora é um bloco com beirada, e entre um cômodo e outro a parede tem 2 tiles.
+- **Cada casa com um formato diferente** por dentro:
+  - Sua casa: em **L** (quarto e sala à esquerda, cozinha de taipa no alto).
+  - Helena: em **T** (quarto e cozinha lado a lado, sala estreita embaixo).
+  - Dona Alzira: em **U** (um quarto em cada ala, cozinha grande de tijolo embaixo).
+  - Toninho: oficina larga e o quartinho de tábua mais alto, nos fundos.
+  - Mariana: em **cruz** (recepção no meio, cozinha em cima, consultório e quarto nos lados).
+- Plantas e móveis gerados por `tools/arte/interiores.py` (`data/maps/interior_*.txt` e `data/interiores.json`).
+
 ## 1.6.0 — Arte nova e casas por dentro (23/11/2026)
 - **Personagem e moradores redesenhados** em pixel art 2D chapada, com caminhada de verdade nas **8 direções** (antes as diagonais repetiam as retas). Cada morador tem a sua cara: chapéu de palha do jogador, chapéu de couro e barba branca do Seu Benedito, lenço da Dona Alzira, boné do João Pedro, jaleco da Mariana, avental de couro do Toninho, rabo de cavalo e avental da Helena.
 - **Chão novo com transições suaves** entre grama, capim seco, mata, terra, água, calçamento e rocha (sistema "dual-grid", `scripts/world/ground_visual.gd`). Água animada, beira de lagoa com barranco, flores, tufos de capim e pedrinhas espalhados.

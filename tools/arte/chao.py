@@ -333,8 +333,35 @@ def tile_capim(seed):
 EXTRA = {"ponte": 0, "flores": (1, 4), "tufo": (5, 3), "pedrinha": (8, 3), "capim": (11, 3)}
 
 
+def tile_parede_topo(mask):
+    """Topo de parede grossa visto de cima. mask: bit ligado = vizinho também é parede
+    (N=1, L=2, S=4, O=8). Lado aberto ganha beirada clara + contorno escuro."""
+    img = np.zeros((T, T, 4), dtype=np.uint8)
+    img[:] = hexc("4a3a30")
+    rng = np.random.default_rng(mask)
+    for _ in range(6):
+        x, y = int(rng.integers(0, T)), int(rng.integers(0, T))
+        img[y, x] = hexc("54433a")
+    aberto = {"N": not mask & 1, "L": not mask & 2, "S": not mask & 4, "O": not mask & 8}
+    beira, linha = hexc("8c735c"), hexc("221813")
+    if aberto["N"]:
+        img[0:3, :] = beira
+        img[0, :] = linha
+    if aberto["S"]:
+        img[T - 3:T, :] = beira
+        img[T - 1, :] = linha
+    if aberto["O"]:
+        img[:, 0:3] = beira
+        img[:, 0] = linha
+    if aberto["L"]:
+        img[:, T - 3:T] = beira
+        img[:, T - 1] = linha
+    # quinas internas: pontinho de beirada onde dois lados fechados se encontram
+    return img
+
+
 def gerar():
-    linhas = len(TERRENOS) + 1
+    linhas = len(TERRENOS) + 2
     atlas = np.zeros((linhas * T, COLS * T, 4), dtype=np.uint8)
     # água: 4 quadros de animação na linha 0
     for fr in range(4):
@@ -357,6 +384,9 @@ def gerar():
         atlas[r:r + T, c * T:(c + 1) * T] = tile_pedrinha(700 + k)
         c = EXTRA["capim"][0] + k
         atlas[r:r + T, c * T:(c + 1) * T] = tile_capim(800 + k)
+    r = (LINHA_EXTRA + 1) * T
+    for m in range(16):
+        atlas[r:r + T, m * T:(m + 1) * T] = tile_parede_topo(m)
     return Image.fromarray(atlas, "RGBA")
 
 

@@ -6,6 +6,7 @@ Arte nova do Vale do Pequi (pixel art 2D chapada), toda gerada por código:
   - pequizeiro, ipê, árvore do cerrado, arbusto — tools/arte/arvores.py
   - casas e prédios, cada um diferente — tools/arte/casas.py
   - móveis dos interiores — tools/arte/moveis.py
+  - plantas das casas por dentro (data/maps/interior_*.txt, data/interiores.json) — tools/arte/interiores.py
 
 Uso: python3 tools/gerar_arte_cerrado.py   (rodar DEPOIS dos outros geradores)
 Arquivos listados em assets/arte_manual.txt não são sobrescritos.
@@ -20,6 +21,7 @@ import arvores  # noqa: E402
 import casas  # noqa: E402
 import chao  # noqa: E402
 import interior  # noqa: E402
+import interiores  # noqa: E402
 import moveis  # noqa: E402
 import personagens  # noqa: E402
 
@@ -46,6 +48,7 @@ def main():
     salvar(os.path.join(ROOT, "assets", "tilesets", "chao_cerrado.png"), chao.gerar(), pular)
     if "assets/tilesets/farm_tiles_placeholder.png" not in pular:
         interior.aplicar(ROOT)
+    interiores.gerar()   # plantas das casas + data/interiores.json
     for mod in (personagens, arvores, casas, moveis):
         for caminho, img in mod.gerar(ROOT):
             salvar(caminho, img, pular)

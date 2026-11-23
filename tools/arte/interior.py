@@ -129,7 +129,7 @@ def colunas_interior():
     tiles += parede(hexc("b5603b"), hexc("8f4a2d"), hexc("4d2b17"), None, "tijolo", seed=3)
     tiles += parede(hexc("94653d"), hexc("6b4527"), hexc("4a2f1a"), None, "tabua", seed=4)
     tiles += parede(hexc("f3f1ea"), hexc("d5d3cb"), hexc("2f5c3b"), (hexc("5a9566"), hexc("3f7550")), seed=6)
-    tiles += [assoalho(), lajota(), ladrilho(), cimento()]
+    tiles += [assoalho(), lajota(), ladrilho(), cimento(), Image.new("RGBA", (T, T))]
     return tiles
 
 
