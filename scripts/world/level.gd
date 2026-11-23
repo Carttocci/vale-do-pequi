@@ -18,6 +18,8 @@ extends Node2D
 ## Regiões "de passagem" (mina, ruínas) salvam o jogador do lado de fora.
 @export var save_as_region: StringName = &""
 @export var save_as_spawn: StringName = &""
+## Dentro de casa: sem chuva, sem folha caindo, luz de lamparina à noite.
+@export var indoor: bool = false
 
 @onready var ground: FarmGround = $Ground
 @onready var entities: Node2D = $Entities

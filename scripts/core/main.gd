@@ -74,7 +74,7 @@ func change_region_now(id: StringName, spawn: StringName = &"") -> void:
         level.set_active(true)
     player.global_position = level.get_spawn_position(spawn)
     player.velocity = Vector2.ZERO
-    player.set_camera_limits(level.get_world_rect())
+    player.set_camera_limits(level.get_world_rect(), level.indoor)
     EventBus.show_message(level.display_name, 2.0)
     EventBus.region_entered.emit(level.region_id)
 
@@ -97,7 +97,7 @@ func _unhandled_input(event: InputEvent) -> void:
 ## 02:00: o jogador apaga de cansaço e acorda em casa no dia seguinte.
 func _on_passed_out() -> void:
     GameState.sleep()
-    change_region_now(&"farm")
+    _wake_at_home()
     SaveManager.save_game()
     EventBus.show_message("Você apagou de cansaço e acordou em casa. %s." % Calendar.format_date(GameState.day), 4.0)
 
@@ -108,9 +108,17 @@ func _on_fainted() -> void:
     GameState.money -= lost
     GameState.money_changed.emit(GameState.money)
     GameState.sleep()
-    change_region_now(&"farm")
+    _wake_at_home()
     SaveManager.save_game()
     EventBus.show_message("Você desmaiou... Alguém te levou pra casa. (-R$ %d)" % lost, 4.0)
+
+
+## Acorda na cama, dentro de casa (ou na porta da fazenda, se não tiver casa).
+func _wake_at_home() -> void:
+    if regions.has(&"casa"):
+        change_region_now(&"casa", &"cama")
+    else:
+        change_region_now(&"farm")
 
 
 func _build_fade() -> void:

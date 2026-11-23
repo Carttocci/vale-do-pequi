@@ -33,7 +33,7 @@ Feito em Godot 4.3 (GDScript), exportado para Web (WebGL 2).
 
 **Vida no vale:** cozinhe no fogão a lenha (ao lado da casa) e coma com a comida na mão (E). Dê presentes aos moradores (item na mão + E): com 2 corações eles ensinam receitas de família. Na bancada você faz decoração e obras da fazenda. Fique de olho nas festas da praça: Festa do Pequi (5/dez), Folia de Reis (6/jan), Cavalhadas (8/mai) e Festa Junina (9/jun).
 
-**Como jogar:** pegue a enxada (atalho 1) e aperte **E** na roça para capinar; com a semente na mão o E planta, com o regador o E rega (e enche no poço). A dica na tela mostra o que o E vai fazer. Durma na porta de casa para passar o dia. Mais sementes no baú do avô, ao lado da casa. O jogo salva ao dormir e pelo menu de pausa.
+**Como jogar:** pegue a enxada (atalho 1) e aperte **E** na roça para capinar; com a semente na mão o E planta, com o regador o E rega (e enche no poço). A dica na tela mostra o que o E vai fazer. Entre em casa (E na porta) e durma na cama para passar o dia. Mais sementes no baú do avô, ao lado da casa. O jogo salva ao dormir e pelo menu de pausa.
 
 No celular o jogo é na horizontal. Dica: no Android, "Adicionar à tela inicial" abre o jogo em tela cheia, como um app.
 
@@ -49,4 +49,4 @@ A cada `push` na `main`, o workflow `.github/workflows/publicar-web.yml` roda os
   (Abrir o `index.html` direto do disco não funciona — o navegador bloqueia.)
 
 Documentação em `documentation/`: arquitetura, mecânicas, changelog e assets provisórios.
-A arte do chão, dos personagens e das árvores vem do pacote **Ninja Adventure** (pixel-boy e AAA, CC0), repintado por `tools/aplicar_arte_ninja.py`. Fontes: Micro 5 e Jersey 15 (SIL OFL, `assets/fonts/`). Os PNGs provisórios restantes são gerados por `tools/gerar_assets_provisorios.py` (Python + Pillow) e os sons e músicas por `tools/gerar_audio.py` (Python + numpy). Itens: `tools/gerar_itens.py`; peixes: `tools/gerar_peixes.py`.
+O chão (com transições suaves), os personagens, as árvores, as casas e os móveis de dentro das casas são gerados por `tools/gerar_arte_cerrado.py` (rodar depois dos outros geradores). Parte da arte restante vem do pacote **Ninja Adventure** (pixel-boy e AAA, CC0), repintado por `tools/aplicar_arte_ninja.py`. Fontes: Micro 5 e Jersey 15 (SIL OFL, `assets/fonts/`). Os PNGs provisórios restantes são gerados por `tools/gerar_assets_provisorios.py` (Python + Pillow) e os sons e músicas por `tools/gerar_audio.py` (Python + numpy). Itens: `tools/gerar_itens.py`; peixes: `tools/gerar_peixes.py`.

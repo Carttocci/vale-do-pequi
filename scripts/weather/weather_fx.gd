@@ -103,7 +103,11 @@ func _process(delta: float) -> void:
 
 
 func refresh() -> void:
+    var inside := _is_indoor()
     daylight.color = Clock.daylight_color(Clock.minutes, Clock.weather)
+    if inside:
+        # dentro de casa: luz amarelada de lamparina, nunca breu
+        daylight.color = Color(1.0, 0.96, 0.9).lerp(Color(0.78, 0.66, 0.54), 1.0 - daylight.color.v)
     var raining := Clock.is_raining()
     # Mexer em `amount` ou religar `emitting` reinicia as partículas (a chuva
     # "pisca" e recomeça do topo). Então só mexe quando o tempo muda de verdade.
@@ -115,12 +119,12 @@ func refresh() -> void:
         rain.emitting = raining
         if raining:
             rain_restarts += 1
-    rain.visible = raining
+    rain.visible = raining and not inside
     # Neblina de manhã: forte às 6h, some até as 10h.
     var fog_alpha := 0.0
     if Clock.weather == Clock.Weather.NEBLINA:
         fog_alpha = clampf(1.0 - (Clock.minutes - Clock.DAY_START) / 240.0, 0.0, 1.0) * 0.45
-    fog.color.a = fog_alpha
+    fog.color.a = 0.0 if inside else fog_alpha
     if Clock.weather != Clock.Weather.TEMPESTADE:
         flash.color.a = 0.0
     apply_season()
@@ -152,6 +156,11 @@ func _make_drift(node_name: String, amount: int, life: float) -> CPUParticles2D:
     p.emitting = false
     overlay.add_child(p)
     return p
+
+
+func _is_indoor() -> bool:
+    var main := get_tree().get_first_node_in_group("save_root")
+    return main != null and "level" in main and main.level != null and main.level.indoor
 
 
 func _current_region() -> StringName:

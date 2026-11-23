@@ -11,6 +11,7 @@ const TILE_SIZE := 16
 const TILESET_TEXTURE: Texture2D = preload("res://assets/tilesets/farm_tiles_placeholder.png")
 
 ## Caractere -> coluna no atlas (farm_tiles_placeholder.png).
+## Colunas 13+ são de dentro das casas (paredes e pisos, sem transição).
 const LEGEND := {
     ".": 0,  # grama
     ",": 1,  # grama com flores
@@ -25,17 +26,38 @@ const LEGEND := {
     "c": 10, # chão de caverna
     "r": 11, # parede de rocha (sólida)
     "u": 12, # piso de ruína
+    "T": 13, # teto / topo da parede (sólido)
+    "A": 14, # parede caiada, parte de cima (sólida)
+    "a": 15, # parede caiada com barrado azul (sólida)
+    "E": 16, # parede de taipa ocre, cima
+    "e": 17, # parede de taipa ocre, baixo
+    "K": 18, # tijolinho aparente, cima
+    "k": 19, # tijolinho aparente, baixo
+    "V": 20, # parede de tábua, cima
+    "v": 21, # parede de tábua, baixo
+    "G": 22, # parede branca, cima
+    "g": 23, # parede branca com barrado verde
+    "w": 24, # assoalho de madeira
+    "o": 25, # lajota de barro (cozinha)
+    "q": 26, # ladrilho hidráulico
+    "h": 27, # cimento queimado vermelho
 }
 ## Colunas do atlas que bloqueiam passagem.
-const SOLID_TILES := [5, 7, 11]
+const SOLID_TILES := [5, 7, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+## Colunas de dentro de casa: desenhadas direto, sem a camada de transição.
+const INDOOR_FIRST := 13
 
 @export_file("*.txt") var map_path: String = "res://data/maps/fazenda_pequi.txt"
 
 var map_size := Vector2i.ZERO
+## Chão bonito por cima (transições suaves entre os terrenos).
+var _visual := GroundVisual.new()
 
 
 func _ready() -> void:
     tile_set = _build_tile_set()
+    _visual.name = "Visual"
+    add_child(_visual)
     load_map(map_path)
 
 
@@ -61,6 +83,7 @@ func load_from_text(text: String) -> void:
                 push_warning("FarmGround: caractere desconhecido '%s' em (%d, %d); usando grama." % [ch, x, y])
                 ch = "."
             set_cell(Vector2i(x, y), 0, Vector2i(LEGEND[ch], 0))
+    _visual.build(self, lines)
 
 
 ## Retângulo do mundo em pixels (usado para limites da câmera e bordas).

@@ -32,6 +32,8 @@ var facing_index: int = 0
 var input_enabled: bool = true
 
 var _anim_time: float = 0.0
+var _world_rect := Rect2()
+var _center_small := false
 var _current_target: Interactable = null
 var _current_prompt: String = ""
 var _use_cooldown: float = 0.0
@@ -258,12 +260,26 @@ func get_interaction_target() -> Interactable:
     return _current_target
 
 
-func set_camera_limits(world_rect: Rect2) -> void:
-    camera.limit_left = int(world_rect.position.x)
-    camera.limit_top = int(world_rect.position.y)
-    camera.limit_right = int(world_rect.end.x)
-    camera.limit_bottom = int(world_rect.end.y)
+func set_camera_limits(world_rect: Rect2, center_small := false) -> void:
+    _world_rect = world_rect
+    _center_small = center_small
+    _apply_camera_limits()
     camera.reset_smoothing()
+
+
+## Cômodo menor que a tela (dentro de casa): alarga os limites por igual dos
+## dois lados, assim a casa fica centralizada em vez de grudada no canto.
+func _apply_camera_limits() -> void:
+    var r := _world_rect
+    var view := (get_viewport_rect().size / camera.zoom) if is_inside_tree() and _center_small else Vector2.ZERO
+    if r.size.x < view.x:
+        r = r.grow_individual((view.x - r.size.x) / 2.0, 0, (view.x - r.size.x) / 2.0, 0)
+    if r.size.y < view.y:
+        r = r.grow_individual(0, (view.y - r.size.y) / 2.0, 0, (view.y - r.size.y) / 2.0)
+    camera.limit_left = floori(r.position.x)
+    camera.limit_top = floori(r.position.y)
+    camera.limit_right = ceili(r.end.x)
+    camera.limit_bottom = ceili(r.end.y)
 
 
 func face(direction_index: int) -> void:
@@ -416,3 +432,5 @@ func best_food() -> ItemData:
 
 func apply_camera_zoom() -> void:
     camera.zoom = Vector2.ONE * Settings.camera_zoom
+    if _world_rect.has_area():
+        _apply_camera_limits()

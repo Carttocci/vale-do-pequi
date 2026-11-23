@@ -1,5 +1,21 @@
 # Changelog — Vale do Pequi
 
+## 1.6.0 — Arte nova e casas por dentro (23/11/2026)
+- **Personagem e moradores redesenhados** em pixel art 2D chapada, com caminhada de verdade nas **8 direções** (antes as diagonais repetiam as retas). Cada morador tem a sua cara: chapéu de palha do jogador, chapéu de couro e barba branca do Seu Benedito, lenço da Dona Alzira, boné do João Pedro, jaleco da Mariana, avental de couro do Toninho, rabo de cavalo e avental da Helena.
+- **Chão novo com transições suaves** entre grama, capim seco, mata, terra, água, calçamento e rocha (sistema "dual-grid", `scripts/world/ground_visual.gd`). Água animada, beira de lagoa com barranco, flores, tufos de capim e pedrinhas espalhados.
+- **Árvores novas**: pequizeiro com pequi no pé, ipê-amarelo florido, árvore torta do cerrado e arbusto.
+- **Casas rústicas, cada uma diferente**: casa da fazenda de taipa com alpendre e rede, casa colonial caiada da Helena (azul), casa amarela da Dona Alzira com sótão, mercearia com toldo, ferraria de tijolo com a forja acesa, bar, clínica veterinária e a igreja com torre do sino.
+- **Casas por dentro** (E na porta): quarto, cozinha e cama em todas, cada uma com o seu jeito:
+  - **Sua casa**: paredes de tábua, cama de colcha de retalho, oratório, fogão a lenha (cozinha as receitas), pia, filtro de barro e mesa com toalha xadrez. **Agora se dorme na cama** (passa o dia e salva).
+  - **Helena** (casa azul): ladrilho hidráulico na cozinha, cama de casal de crochê.
+  - **Dona Alzira e João Pedro** (casa amarela): dois quartos e cozinha grande com fogão a lenha; varas de pescar do João na parede.
+  - **Toninho** (ferraria): oficina com bigorna e ferramentas, quartinho nos fundos.
+  - **Mariana** (clínica): consultório com maca e armário de remédio, quarto com estante.
+  - As casas da vila abrem das 07:00 às 20:00; de noite a porta fica trancada. Salvar dentro da casa de um morador volta pra rua.
+  - Dentro de casa não chove na tela e a luz à noite é de lamparina.
+- Apagar às 02:00 ou desmaiar: acorda **na cama**, dentro de casa.
+- Arte gerada por `tools/gerar_arte_cerrado.py` (módulos em `tools/arte/`).
+
 ## 1.5.0 — Modo construção (21/11/2026)
 - **B (ou botão do martelo no celular)** abre o menu de construção da fazenda: cada peça mostra custo, o que falta e o requisito.
 - Escolheu, aparece a **prévia** no quadrado (verde pode, vermelho não pode). No PC segue o mouse; no celular, o quadrado à frente. E/clique constrói e dá pra ir colocando vários seguidos; B volta ao menu; Esc sai.

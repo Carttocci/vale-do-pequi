@@ -123,6 +123,7 @@ func _run_all() -> void:
     await _test_hit_juice()
     await _test_world_polish()
     await _test_upgrades_and_arsenal()
+    await _test_interiors()
     _test_font_symbols()
 
 
@@ -797,16 +798,26 @@ func _test_contextual_e() -> void:
     check(GameState.water == GameState.WATER_MAX, "E enche o regador no poço")
     await frames(2)
     check(_prompts[-1] == "Olhar o poço", "regador cheio: E volta a olhar o poço")
-    # Porta: segurando a enxada, E dorme (não tenta capinar)
+    # Porta: segurando a enxada, E entra em casa (não tenta capinar); lá dentro, a cama dorme
     var house := node("Farm/Entities/CasaPrincipal")
     select_item(&"enxada")
     await place_player(house.global_position + Vector2(0, 14))
     _player.face(4)
     await frames(2)
     var day := GameState.day
-    check(_prompts[-1].begins_with("Dormir"), "na porta com a enxada a dica é Dormir")
+    check(_prompts[-1] == "Entrar em casa", "na porta com a enxada a dica é Entrar em casa")
     await press_e()
-    check(GameState.day == day + 1, "E dorme mesmo segurando a enxada")
+    await frames(40)
+    check(_main.level.region_id == &"casa", "E entra em casa mesmo segurando a enxada")
+    var casa := _main.get_region(&"casa") as InteriorLevel
+    await place_player(casa.get_marker(&"cama").global_position)
+    _player.face(4)
+    await frames(2)
+    check(_prompts[-1].begins_with("Dormir"), "na beira da cama a dica é Dormir")
+    await press_e()
+    check(GameState.day == day + 1, "E na cama dorme e passa o dia")
+    _main.change_region_now(&"farm")
+    await frames(2)
     # Colher tem prioridade sobre a ferramenta
     await face_right_in_roca(Vector2(150, 160))
     f.cells[cell].age = 99
@@ -906,9 +917,10 @@ func _test_clock() -> void:
     Clock.advance_minutes(Clock.DAY_END - Clock.minutes)
     await frames(2)
     check(GameState.day == day + 1 and Clock.minutes == Clock.DAY_START, "às 02:00 apaga e acorda no dia seguinte às 06:00")
-    var spawn: Vector2 = _main.level.get_spawn_position()
-    check(_player.global_position.distance_to(spawn) < 2.0, "acorda na porta de casa")
+    var spawn: Vector2 = _main.level.get_spawn_position(&"cama")
+    check(_main.level.region_id == &"casa" and _player.global_position.distance_to(spawn) < 2.0, "acorda na cama, dentro de casa")
     check(_messages.size() > 0 and _messages[-1].contains("apagou"), "mensagem de que apagou")
+    _main.change_region_now(&"farm")
     var hud := _main.get_node("HUD")
     check(hud.day_label.text.begins_with(Calendar.format_date(GameState.day) + "  06:00"), "HUD mostra data e hora")
 
@@ -1104,7 +1116,8 @@ func _test_regions() -> void:
     _main.change_region_now(&"vila")
     Clock.advance_minutes(Clock.DAY_END - Clock.minutes)  # apaga às 2h na vila
     await frames(2)
-    check(_main.level == farm, "apagar na vila acorda na fazenda")
+    check(_main.level.region_id == &"casa", "apagar na vila acorda em casa, na fazenda")
+    _main.change_region_now(&"farm")
     check(f.cells[cell].age == 1, "plantação cresceu enquanto estava fora")
 
 
@@ -1752,7 +1765,8 @@ func _test_enemies_and_damage() -> void:
     GameState.health = 5
     _player.take_damage(50, Vector2.LEFT)
     await frames(2)
-    check(GameState.day == day + 1 and _main.level.region_id == &"farm", "vida zero: desmaia e acorda em casa no dia seguinte")
+    check(GameState.day == day + 1 and _main.level.region_id == &"casa", "vida zero: desmaia e acorda em casa no dia seguinte")
+    _main.change_region_now(&"farm")
     check(GameState.health == GameState.MAX_HEALTH and GameState.money == 450, "volta com vida cheia e perde 10% do dinheiro")
     # inimigos noturnos da mata
     _main.change_region_now(&"mata")
@@ -3299,3 +3313,48 @@ func _test_build_mode() -> void:
     for n in get_tree().get_nodes_in_group("construcao"):
         n.free()
     GameState.skill_xp[&"mineracao"] = 0
+
+
+func _test_interiors() -> void:
+    print("[casas por dentro]")
+    for id in [&"casa", &"casa_helena", &"casa_alzira", &"casa_toninho", &"casa_mariana"]:
+        var lvl := _main.get_region(id) as InteriorLevel
+        check(lvl != null and lvl.indoor, "%s existe e é ambiente interno" % id)
+        var beds := lvl.get_node("Entities").get_children().filter(func(n: Node) -> bool:
+            return n is Prop and (n as Prop).sprite.texture.resource_path.get_file().begins_with("cama_"))
+        check(beds.size() >= 1, "%s tem cama" % id)
+    # entra na casa da Helena de dia, sai pela porta
+    Clock.minutes = 10 * 60
+    _main.change_region_now(&"vila")
+    var casa_azul := node("Vila/Entities/CasaAzul")
+    await place_player(casa_azul.global_position + Vector2(0, 14))
+    _player.face(4)
+    await frames(2)
+    check(_prompts[-1] == "Entrar na casa da Helena", "dica 'Entrar na casa da Helena'")
+    await press_e()
+    await frames(40)
+    check(_main.level.region_id == &"casa_helena", "entrou na casa da Helena")
+    var wfx := _main.get_node("WeatherFX") as WeatherFX
+    Clock.forced_weather = Clock.Weather.CHUVA
+    Clock.weather = Clock.Weather.CHUVA
+    wfx.refresh()
+    check(not wfx.rain.visible, "dentro de casa não chove na tela")
+    Clock.forced_weather = Clock.Weather.ENSOLARADO
+    Clock.weather = Clock.Weather.ENSOLARADO
+    wfx.refresh()
+    var data := SaveManager._collect()
+    check(data.player.region == "vila", "salvar dentro da casa de um morador volta pra rua")
+    await hold(["move_down"], 40)
+    await frames(30)
+    check(_main.level.region_id == &"vila", "saiu pela porta de volta pra vila")
+    # de noite a porta tá trancada
+    Clock.minutes = 22 * 60
+    await place_player(casa_azul.global_position + Vector2(0, 14))
+    _player.face(4)
+    await frames(2)
+    await press_e()
+    await frames(20)
+    check(_main.level.region_id == &"vila" and _messages[-1].contains("trancada"), "de noite a porta fica trancada")
+    Clock.minutes = 10 * 60
+    _main.change_region_now(&"farm")
+    await frames(2)

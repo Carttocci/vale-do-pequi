@@ -117,6 +117,22 @@ metadata/facing = 6
 position = Vector2(232, 456)
 metadata/facing = 4
 
+[node name="porta_casa_azul" type="Marker2D" parent="Markers"]
+position = Vector2(624, 180)
+metadata/facing = 0
+
+[node name="porta_casa_amarela" type="Marker2D" parent="Markers"]
+position = Vector2(232, 468)
+metadata/facing = 0
+
+[node name="porta_ferreiro" type="Marker2D" parent="Markers"]
+position = Vector2(168, 324)
+metadata/facing = 0
+
+[node name="porta_clinica" type="Marker2D" parent="Markers"]
+position = Vector2(200, 212)
+metadata/facing = 0
+
 [node name="da_mata" type="Marker2D" parent="Markers"]
 position = Vector2(760, 328)
 metadata/facing = 6

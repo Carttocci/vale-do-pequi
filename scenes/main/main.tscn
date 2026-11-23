@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/main.gd" id="scr"]
 [ext_resource type="PackedScene" path="res://scenes/farm/farm.tscn" id="farm"]
@@ -23,6 +23,7 @@
 [ext_resource type="Script" path="res://scripts/interface/recipe_ui.gd" id="recipe"]
 [ext_resource type="Script" path="res://scripts/player/eating.gd" id="eating"]
 [ext_resource type="Script" path="res://scripts/npc/gifting.gd" id="gifting"]
+[ext_resource type="PackedScene" path="res://scenes/interior/interior.tscn" id="interior"]
 
 [node name="Main" type="Node2D" groups=["save_root"]]
 script = ExtResource("scr")
@@ -38,6 +39,21 @@ script = ExtResource("scr")
 [node name="Mina" parent="." instance=ExtResource("mina")]
 
 [node name="Ruinas" parent="." instance=ExtResource("ruinas")]
+
+[node name="Casa" parent="." instance=ExtResource("interior")]
+layout = &"casa"
+
+[node name="CasaHelena" parent="." instance=ExtResource("interior")]
+layout = &"casa_helena"
+
+[node name="CasaAlzira" parent="." instance=ExtResource("interior")]
+layout = &"casa_alzira"
+
+[node name="CasaToninho" parent="." instance=ExtResource("interior")]
+layout = &"casa_toninho"
+
+[node name="CasaMariana" parent="." instance=ExtResource("interior")]
+layout = &"casa_mariana"
 
 [node name="Mining" type="Node" parent="."]
 script = ExtResource("mining")
